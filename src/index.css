@@ -1,0 +1,26 @@
+/* Reset by Antigravity to avoid conflicts with MUI */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col transition-all duration-300;
+  }
+
+  .card-header {
+    @apply px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-lg;
+  }
+
+  .card-footer {
+    @apply px-4 py-2 border-t border-gray-100 bg-gray-50 text-gray-400 text-xxs rounded-b-lg;
+  }
+
+  .card-title {
+    @apply font-bold text-gray-800 text-sm flex items-center gap-2;
+  }
+
+  .btn-icon {
+    @apply p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600;
+  }
+}

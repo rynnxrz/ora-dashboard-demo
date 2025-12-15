@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OraNutrition - 内部流程诊断看板 (Demo)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ora: {
+                            primary: '#2A9D8F',
+                            dark: '#264653',
+                            light: '#E9F5F5',
+                            warning: '#E9C46A',
+                            danger: '#E76F51',
+                            grey: '#CFD8DC'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        .card-shadow { box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .scroller::-webkit-scrollbar { width: 6px; }
+        .scroller::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+
+    <!-- Sidebar (Visual Placeholder) -->
+    <aside class="w-16 lg:w-64 bg-ora-dark text-white flex-shrink-0 flex flex-col">
+        <div class="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-gray-700">
+            <i class="fa-solid fa-leaf text-2xl text-ora-primary"></i>
+            <span class="ml-2 text-xl font-bold hidden lg:block">OraNutrition</span>
+        </div>
+        <nav class="p-4 space-y-2">
+            <div class="text-gray-400 text-xs uppercase font-bold mb-2 hidden lg:block">Menu</div>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 bg-ora-primary/20 text-white rounded border-l-4 border-ora-primary">
+                <i class="fa-solid fa-chart-line"></i> <span class="hidden lg:block">内部流程优化 (IPO)</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm z-20">
+            <div class="flex items-center gap-3">
+                <h1 class="text-lg font-bold text-gray-800">内部流程诊断看板 <span class="text-gray-400 font-normal">| 演示版 (Demo)</span></h1>
+                <span class="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded border border-gray-200">当前为演示数据，用于展示分析维度</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <div class="text-xs text-gray-500">数据更新于</div>
+                    <div class="text-sm font-bold text-gray-700">2024-11-30 · 18:00</div>
+                </div>
+                <div class="w-8 h-8 bg-ora-primary text-white rounded-full flex items-center justify-center font-bold">JD</div>
+            </div>
+        </header>
+
+        <!-- Scrollable Area -->
+        <div class="flex-1 overflow-y-auto p-6 scroller">
+            
+            <!-- GLOBAL FILTERS -->
+            <div class="bg-white p-4 rounded-lg card-shadow mb-6 border border-gray-100">
+                <div class="flex flex-wrap gap-4 items-end">
+                    <!-- Date Range -->
+                    <div class="w-full sm:w-auto min-w-[240px]">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">签约日期区间 (Signing Date)</label>
+                        <select class="w-full border border-gray-300 rounded text-sm px-3 py-2 focus:ring-ora-primary focus:border-ora-primary font-medium text-gray-700">
+                            <option selected>2024-09-01 至 2024-11-30 (本期)</option>
+                            <option>2024-07-01 至 2024-08-31 (上期)</option>
+                        </select>
+                    </div>
+
+                    <!-- Brand -->
+                    <div class="w-full sm:w-auto">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">品牌 (Brand)</label>
+                        <select class="w-full border border-gray-300 rounded text-sm px-3 py-2">
+                            <option>全部品牌</option>
+                            <option>Little Umbrella</option>
+                        </select>
+                    </div>
+
+                    <!-- Production Line Category -->
+                    <div class="w-full sm:w-auto">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">产线类别 (Line Category)</label>
+                        <select class="w-full border border-gray-300 rounded text-sm px-3 py-2 bg-yellow-50 border-yellow-200 text-gray-700">
+                            <option>全部类别</option>
+                            <option>软糖 (Gummies)</option>
+                            <option>粉剂 (Powder)</option>
+                            <option>液体 (Liquids)</option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="w-full sm:w-auto">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">合同状态</label>
+                        <select class="w-full border border-gray-300 rounded text-sm px-3 py-2">
+                            <option>仅已发货 (用于计算总周期)</option>
+                            <option>全部 (包含进行中)</option>
+                        </select>
+                    </div>
+
+                    <div class="ml-auto">
+                        <button class="bg-ora-dark hover:bg-gray-800 text-white px-4 py-2 rounded text-sm font-medium shadow transition">
+                            刷新数据
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- P0: DATA LATENCY ALERT -->
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r mb-6 flex justify-between items-center shadow-sm">
+                <div>
+                    <h3 class="text-sm font-bold text-red-800 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation"></i> 
+                        需要关注：合同录入普遍滞后 (Data Entry Latency)
+                    </h3>
+                    <p class="text-xs text-red-700 mt-1">
+                        有 <span class="font-bold">12%</span> 的合同在签约 7 天以后才录入系统，可能影响后续报表准确性。
+                    </p>
+                </div>
+                <div class="text-xs text-red-600 font-medium">
+                    本期统计：42 份合同 · 0 份排除
+                </div>
+            </div>
+
+            <!-- P1: LEAD TIME WATERFALL -->
+            <div class="bg-white rounded-lg card-shadow mb-6 p-5 border border-gray-100">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800">P1. 从签约到发货的总周期拆分 (Lead Time Waterfall)</h2>
+                        <p class="text-xs text-gray-400 mt-1">统计区间：2024-09-01 至 2024-11-30 的合同</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-3xl font-bold text-ora-primary">42 <span class="text-sm font-normal text-gray-500">天</span></div>
+                        <div class="text-xs text-gray-400 font-bold tracking-wide">总周期中位数</div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="h-64 w-full relative">
+                    <canvas id="p1Chart"></canvas>
+                </div>
+
+                <!-- Data Quality Footer -->
+                <div class="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
+                    <span>
+                        <i class="fa-solid fa-database mr-1"></i> 
+                        本图基于 <span class="font-bold text-gray-700">35 份已发货合同</span> 计算
+                    </span>
+                    <span>
+                        <i class="fa-solid fa-circle-info mr-1 text-ora-warning"></i>
+                        有 7 份合同因关键日期缺失，没有纳入统计
+                    </span>
+                </div>
+            </div>
+
+            <!-- GRID: P2 & P3 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                
+                <!-- P2: SLA BREACHES -->
+                <div class="bg-white rounded-lg card-shadow p-5 border border-gray-100 flex flex-col">
+                    <div class="mb-4">
+                        <h3 class="font-bold text-gray-800">P2. 各阶段超时率 (Stage SLA Breaches)</h3>
+                        <p class="text-xs text-gray-400 mt-1">超过内部设定目标的比例</p>
+                    </div>
+                    
+                    <div class="flex-1 min-h-[200px]">
+                        <canvas id="p2Chart"></canvas>
+                    </div>
+
+                    <!-- Bottlenecks List -->
+                    <div class="mt-4 bg-red-50 rounded p-3 border border-red-100">
+                        <p class="text-xs font-bold text-red-800 uppercase mb-2">目前最严重的两个卡点 (Top Bottlenecks)</p>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-700 font-medium">1. 阶段 C (物料) - 软糖线</span>
+                                <div class="text-right">
+                                    <span class="block text-red-600 font-bold">68% 订单在这一阶段超时</span>
+                                    <span class="block text-xs text-gray-500">平均超出目标 12 天</span>
+                                </div>
+                            </div>
+                            <div class="border-t border-red-200"></div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-700 font-medium">2. 阶段 A (定金) - Brand X</span>
+                                <div class="text-right">
+                                    <span class="block text-orange-600 font-bold">45% 订单在这一阶段超时</span>
+                                    <span class="block text-xs text-gray-500">平均超出目标 5 天</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Quality Footer -->
+                    <div class="mt-3 pt-2 border-t border-gray-100 text-xs text-gray-400 flex justify-between">
+                        <span>基于 143 条有效的阶段记录</span>
+                        <span>有 24 条因数据缺失被排除</span>
+                    </div>
+                </div>
+
+                <!-- P3: PLAN ADHERENCE (Dual Axis) -->
+                <div class="bg-white rounded-lg card-shadow p-5 border border-gray-100 flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-gray-800">P3. 各产线计划达成率 (Plan Adherence)</h3>
+                            <p class="text-xs text-gray-400 mt-1">按计划完成的比例 vs 平均延误天数</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-ora-danger">55%</div>
+                            <div class="text-xs text-gray-500">总体达成率</div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Container -->
+                    <div class="flex-1 min-h-[200px]">
+                        <canvas id="p3Chart"></canvas>
+                    </div>
+
+                    <!-- Data Quality Footer -->
+                    <div class="mt-3 pt-2 border-t border-gray-100 text-xs text-gray-400 flex justify-between">
+                        <span>基于 32 份有排产记录的合同</span>
+                        <span>有 15 份因无完工日期被排除</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- P4: MATERIAL LAG -->
+            <div class="bg-white rounded-lg card-shadow mb-6 p-5 border border-gray-100">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+                    <div>
+                        <h3 class="font-bold text-gray-800">P4. 物料到货与生产开工关系</h3>
+                        <p class="text-xs text-gray-400 mt-1">统计区间：2024-09-01 至 2024-11-30 活跃的产品</p>
+                    </div>
+                    <!-- Legend -->
+                    <div class="flex gap-4 text-xs">
+                        <div class="flex items-center gap-1.5" title="Lag ≥ 2 Days">
+                            <span class="w-3 h-3 rounded bg-emerald-400"></span>
+                            <span class="text-gray-600">物料已到 (健康)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5" title="-1 ≤ Lag ≤ 1">
+                            <span class="w-3 h-3 rounded bg-blue-300"></span>
+                            <span class="text-gray-600">准时到货 (JIT)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5" title="Lag < -1 Days">
+                            <span class="w-3 h-3 rounded bg-red-400"></span>
+                            <span class="text-gray-600">提前开工 (有风险)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-8 items-center">
+                    <!-- Chart -->
+                    <div class="w-full lg:w-1/3 h-48">
+                        <canvas id="p4Chart"></canvas>
+                    </div>
+                    
+                    <!-- Top Risky Table -->
+                    <div class="w-full lg:w-2/3 overflow-hidden rounded border border-gray-200">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-xs uppercase text-gray-500 font-semibold">
+                                <tr>
+                                    <th class="px-4 py-2">产品名称</th>
+                                    <th class="px-4 py-2">物料齐套日</th>
+                                    <th class="px-4 py-2">生产开工日</th>
+                                    <th class="px-4 py-2 text-right">时间差 (天)</th>
+                                    <th class="px-4 py-2">状态</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Little Umbrella VC 10ml</td>
+                                    <td class="px-4 py-2 text-gray-500">11-10</td>
+                                    <td class="px-4 py-2 text-gray-500">11-08</td>
+                                    <td class="px-4 py-2 text-right font-bold text-red-600">-2</td>
+                                    <td class="px-4 py-2"><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">提前开工</span></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2 font-medium">Protein Tub 1kg</td>
+                                    <td class="px-4 py-2 text-gray-500">11-15</td>
+                                    <td class="px-4 py-2 text-gray-500">11-15</td>
+                                    <td class="px-4 py-2 text-right font-bold text-blue-600">0</td>
+                                    <td class="px-4 py-2"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">准时 (JIT)</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Data Quality Footer -->
+                <div class="mt-4 pt-2 border-t border-gray-100 text-xs text-gray-400 flex justify-between">
+                    <span>基于 200 个产品的生产记录</span>
+                    <span>有 40 个因缺少到货或排产日期被排除</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- CHART LOGIC -->
+    <script>
+        const colors = {
+            teal: '#2A9D8F',
+            yellow: '#E9C46A',
+            orange: '#F4A261',
+            red: '#E76F51',
+            darkRed: '#D64045',
+            blue: '#457B9D',
+            grey: '#E0E0E0',
+            green: '#10B981'
+        };
+
+        // --- P1: LEAD TIME WATERFALL ---
+        const p1Data = [7, 5, 20, 3, 7];
+        const p1Total = p1Data.reduce((a, b) => a + b, 0);
+
+        new Chart(document.getElementById('p1Chart'), {
+            type: 'bar',
+            data: {
+                labels: ['阶段A: 定金', '阶段B: 预付款', '阶段C: 物料', '阶段D: 等待排产', '阶段E: 生产发货'],
+                datasets: [{
+                    label: '平均天数',
+                    data: p1Data,
+                    backgroundColor: [colors.blue, colors.blue, colors.teal, colors.yellow, colors.orange],
+                    borderRadius: 4,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                let val = context.raw;
+                                let percentage = ((val / p1Total) * 100).toFixed(1);
+                                return `占总周期: ${percentage}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, title: {display: true, text: '天数 (Days)'} },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+
+        // --- P2: SLA BREACHES ---
+        const p2BreachRates = [20, 10, 68, 45, 15];
+        const p2Colors = p2BreachRates.map(rate => {
+            if (rate >= 50) return colors.red;
+            if (rate >= 20) return colors.orange;
+            return colors.grey;
+        });
+
+        new Chart(document.getElementById('p2Chart'), {
+            type: 'bar',
+            data: {
+                labels: ['阶段 A', '阶段 B', '阶段 C', '阶段 D', '阶段 E'],
+                datasets: [{
+                    label: '超时率 (%)',
+                    data: p2BreachRates,
+                    backgroundColor: p2Colors,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, max: 100, title: {display: true, text: '超时率 %'} },
+                    x: { grid: { display: false } }
+                },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `超时率: ${context.raw}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- P3: PLAN ADHERENCE (MIXED CHART) ---
+        new Chart(document.getElementById('p3Chart'), {
+            type: 'bar',
+            data: {
+                labels: ['软糖 (Gummies)', '液体 (Liquids)', '粉剂 (Powder)', '胶囊 (Capsules)'],
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: '按计划完成比例 (%)',
+                        data: [45, 80, 50, 95],
+                        backgroundColor: function(ctx) {
+                            const val = ctx.raw;
+                            return val < 60 ? colors.red : (val < 80 ? colors.yellow : colors.teal);
+                        },
+                        yAxisID: 'y',
+                        order: 2,
+                        borderRadius: 4
+                    },
+                    {
+                        type: 'line',
+                        label: '平均延误 (天)',
+                        data: [12, 2, 8, 0],
+                        borderColor: colors.darkRed,
+                        borderWidth: 2,
+                        pointBackgroundColor: colors.darkRed,
+                        yAxisID: 'y1',
+                        order: 1,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: '按计划完成 %' },
+                        max: 100,
+                        grid: { borderDash: [2, 2] }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: '平均延误 (天)' },
+                        grid: { display: false },
+                        min: 0
+                    }
+                }
+            }
+        });
+
+        // --- P4: MATERIAL LAG ---
+        new Chart(document.getElementById('p4Chart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['物料已到 (健康)', '准时 (JIT)', '提前开工 (风险)'],
+                datasets: [{
+                    data: [60, 15, 25],
+                    backgroundColor: [colors.green, colors.blue, colors.red],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
