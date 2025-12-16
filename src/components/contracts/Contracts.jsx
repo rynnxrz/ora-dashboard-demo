@@ -107,7 +107,7 @@ const Contracts = () => {
                 <div className="p-4 border-b border-gray-100 flex flex-col gap-4">
                     <div className="flex justify-between items-center">
 
-                        {/* Left: Filters & Tabs */}
+                        {/* Left: Filters & Search */}
                         <div className="flex items-center gap-4">
                             {/* Status Filters */}
                             <div className="flex items-center bg-gray-50 rounded-lg p-1 border border-gray-100">
@@ -157,8 +157,23 @@ const Contracts = () => {
                             {/* Divider */}
                             <div className="w-px h-6 bg-gray-200"></div>
 
+                            {/* Search Input */}
+                            <div className="relative">
+                                <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                                <input
+                                    type="text"
+                                    placeholder={t.ct_search}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-9 pr-4 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[#066070] w-56 shadow-sm transition-all hover:border-gray-400"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Right: Tabs & Import */}
+                        <div className="flex gap-3 items-center">
                             {/* Role Tabs */}
-                            <div className="flex gap-1">
+                            <div className="flex gap-1 mr-2">
                                 {[
                                     { id: 'reqs', label: t.ct_role_reqs },
                                     { id: 'fin', label: t.ct_role_fin },
@@ -174,20 +189,7 @@ const Contracts = () => {
                                     </button>
                                 ))}
                             </div>
-                        </div>
 
-                        {/* Right: Search & Import */}
-                        <div className="flex gap-3">
-                            <div className="relative">
-                                <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
-                                <input
-                                    type="text"
-                                    placeholder={t.ct_search}
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9 pr-4 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[#066070] w-56 shadow-sm transition-all hover:border-gray-400"
-                                />
-                            </div>
                             <button className="flex items-center gap-2 bg-[#066070] text-white px-4 py-1.5 rounded-md text-sm font-bold hover:bg-[#05505c] transition-colors shadow-sm active:scale-95">
                                 <i className="fa-solid fa-plus"></i>
                                 <span data-i18n="ct_import">{t.ct_import || 'Import New'}</span>
