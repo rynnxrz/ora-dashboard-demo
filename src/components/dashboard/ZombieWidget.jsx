@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const ZombieWidget = () => {
+    const { t } = useLanguage();
     const [view, setView] = useState('contracts'); // 'contracts' | 'inventory'
 
     return (
@@ -8,22 +10,20 @@ const ZombieWidget = () => {
             <div className="card-header">
                 <h3 className="card-title">
                     <i className="fa-solid fa-skull text-gray-500"></i>
-                    <span data-i18n="p1c_title">P1-C. 僵尸合同与库存</span>
+                    <span>{t('p1c_title') || "P1-C. Zombie Contracts & Inventory"}</span>
                 </h3>
                 <div className="flex bg-gray-100 rounded p-0.5 space-x-1">
                     <button
                         onClick={() => setView('contracts')}
                         className={`px-3 py-1 text-xs rounded shadow-sm font-bold border transition-all ${view === 'contracts' ? 'bg-white text-gray-800 border-gray-200' : 'text-gray-500 border-transparent hover:text-gray-800'}`}
-                        data-i18n="btn_zombie_contracts"
                     >
-                        停滞中的合同
+                        {t('btn_zombie_contracts') || "Inactive Contracts"}
                     </button>
                     <button
                         onClick={() => setView('inventory')}
                         className={`px-3 py-1 text-xs rounded shadow-sm font-bold border transition-all ${view === 'inventory' ? 'bg-white text-gray-800 border-gray-200' : 'text-gray-500 border-transparent hover:text-gray-800'}`}
-                        data-i18n="btn_zombie_inventory"
                     >
-                        滞留成品/半成品
+                        {t('btn_zombie_inventory') || "Stuck Inventory"}
                     </button>
                 </div>
             </div>
@@ -31,7 +31,7 @@ const ZombieWidget = () => {
                 {/* View: Contracts */}
                 {view === 'contracts' && (
                     <div id="view-zombie-contracts" className="space-y-3">
-                        <div className="text-xs text-gray-400 mb-2">超过 45 天无更新 (Inactive &gt; 45d)</div>
+                        <div className="text-xs text-gray-400 mb-2">{t('zombie_c_sub') || "Inactive > 45d"}</div>
                         <div className="space-y-2">
                             <div>
                                 <div className="flex justify-between text-xs mb-1">
@@ -58,7 +58,7 @@ const ZombieWidget = () => {
                 {/* View: Inventory */}
                 {view === 'inventory' && (
                     <div id="view-zombie-inventory" className="space-y-3">
-                        <div className="text-xs text-gray-400 mb-2">发货逾期超过 7 天 (Overdue &gt; 7d)</div>
+                        <div className="text-xs text-gray-400 mb-2">{t('zombie_i_sub') || "Overdue > 7d"}</div>
                         <ul className="space-y-2">
                             <li className="flex justify-between items-center p-2 bg-red-50 rounded border border-red-100" title="Produced: 5000, Shipped: 0, Stuck: 5000">
                                 <div>

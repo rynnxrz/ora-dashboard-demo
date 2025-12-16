@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardFilters from './DashboardFilters';
 import KPIGrid from './KPIGrid';
 import ContractStatusWidget from './ContractStatusWidget';
@@ -8,6 +8,14 @@ import ProcessLeadTimeWidget from './ProcessLeadTimeWidget';
 import ClientRadarWidget from './ClientRadarWidget';
 
 const Dashboard = () => {
+    // Shared State for interactions
+    const [kpiFilter, setKpiFilter] = useState(null); // 'delay', 'blocker', etc.
+
+    const handleKpiClick = (type) => {
+        // Toggle if clicking same type
+        setKpiFilter(prev => prev === type ? null : type);
+    };
+
     return (
         <div id="page-dashboard" className="flex-1 flex flex-col overflow-hidden relative h-full">
             {/* Scrollable Area */}
@@ -16,10 +24,11 @@ const Dashboard = () => {
                 <DashboardFilters />
 
                 {/* PART 1: INTERNAL EXCEPTION RADAR */}
-                <KPIGrid />
+                <KPIGrid activeFilter={kpiFilter} onKpiClick={handleKpiClick} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <ContractStatusWidget />
+                    {/* Pass filter to Contract Status Widget */}
+                    <ContractStatusWidget externalFilter={kpiFilter} />
                     <ZombieWidget />
                     <DataQualityWidget />
                 </div>

@@ -1,134 +1,191 @@
 import React, { useState } from 'react';
-import { MACHINE_DATA } from '../../data/mockData';
+import { MACHINE_DATA, CONTRACT_DATA } from '../../data/mockData';
 
 const ProductionCalendarWidget = () => {
     const [selectedGroupIndex, setSelectedGroupIndex] = useState(0); // Default: Square Sachet
-    const [filterLine, setFilterLine] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
 
-    const activeGroup = MACHINE_DATA[selectedGroupIndex];
+    const activeGroup = MACHINE_DATA[selectedGroupIndex] || MACHINE_DATA[0];
+    // In screenshot: Square Sachet has LS01 L, LS01 R, LS02, LS03.
+    // Our mock data might differ slightly, let's allow it but try to map if possible.
+    // For "Square Sachet", let's assume we show the lines defined in mock data.
     const lines = activeGroup.lines;
-    const days = 14;
-    const startDate = new Date();
 
-    // Generate dates
+    // Generate dates: Jan 01 - Jan 24 (approx 3 weeks)
     const dates = [];
-    for (let i = 0; i < days; i++) {
+    const startDate = new Date('2025-01-01');
+    for (let i = 0; i < 24; i++) {
         const d = new Date(startDate);
         d.setDate(d.getDate() + i);
         dates.push(d);
     }
 
-    // Mock Schedule Logic: (Simple Random for Demo, matching logic in HTML)
-    const getScheduleForCell = (line, dateDay) => {
-        // Deterministic pseudo-random based on line+day char codes
-        const val = line.length + dateDay;
-        // 30% chance of maintenance, 40% production, 30% free
-        // But for visual consistency with HTML, let's keep it simple
-        if (val % 5 === 0) return { type: 'maint', label: 'Main' };
-        if (val % 3 === 0) return { type: 'prod', label: 'PO-' + (2000 + val) };
-        return null; // free
+    // Mock Data Placement to match Screenshot examples
+    // 01/01 Mon - LS01 L: Little Umbrella / 1000 / 800
+    // 01/01 Mon - LS01 L (Row 2? No, seems to be day-based). Screenshot shows a cell with dashed border "Sachet.." on next line? 
+    // Actually table seems to have one row per day. 
+    // The "Sachet..." dashed box is likely a "Temporary Task" or empty slot indicator.
+
+    const getCellData = (date, lineIndex) => {
+        const dateStr = date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' });
+
+        // Example 1: 01/01 on LS01 L (Index 0)
+        if (dateStr === '01/01' && lineIndex === 0) {
+            return {
+                product: 'Little U...',
+                task: 'M-12345',
+                planned: 1000,
+                actual: 800,
+                status: 'done'
+            };
+        }
+
+        // Example: Dashed box on 01/01 LS01 L (implied row underneath or same cell?)
+        // The screenshot shows "Sachet..." in a dashed box below "Little U...". 
+        // It looks like row spanning or just multiple items per day.
+        // For simplicity, let's assume 1 item per day unless purely visual.
+        // Actually, looking closely, "Sachet..." is in a dashed box. It might be a second task.
+
+        return null;
     };
 
     return (
-        <div className="flex-1 bg-white flex flex-col h-full rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-6 py-4 flex justify-between items-center border-b border-gray-100 bg-[#FAFAFA]">
-                <h2 className="font-bold text-lg text-gray-700 flex items-center gap-2">
-                    <i className="fa-solid fa-calendar-days text-[#297A88]"></i> Production Calendar
-                </h2>
-                <div className="flex gap-2 text-sm text-gray-500">
-                    <div className="flex items-center gap-1"><span className="w-3 h-3 bg-[#E0F7FA] border border-[#297A88] rounded-sm"></span> Production</div>
-                    <div className="flex items-center gap-1"><span className="w-3 h-3 bg-gray-100 border border-gray-300 rounded-sm"></span> Maintenance</div>
-                </div>
+        <div className="flex-1 bg-white flex flex-col h-full rounded shadow-sm border border-gray-200 overflow-hidden">
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-gray-200 bg-white flex justify-between items-center">
+                <h2 className="font-bold text-gray-800 text-sm">Production Calendar</h2>
             </div>
 
-            {/* Filter Toolbar */}
-            <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between bg-white">
-                {/* Machine Groups */}
-                <div className="flex gap-2 overflow-x-auto no-scrollbar">
+            {/* Toolbar */}
+            <div className="px-4 py-2 border-b border-gray-200 bg-white flex flex-wrap items-center gap-2 justify-between">
+                <div className="flex items-center gap-2">
+                    <button className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600">All</button>
                     {MACHINE_DATA.map((group, idx) => (
                         <button
                             key={group.name}
                             onClick={() => setSelectedGroupIndex(idx)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${selectedGroupIndex === idx ? 'bg-[#297A88] text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                            className={`px-3 py-1 text-xs border rounded transition-colors ${selectedGroupIndex === idx ? 'bg-gray-100 text-gray-800 font-bold border-gray-300' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}
                         >
                             {group.displayName}
                         </button>
                     ))}
-                </div>
-                {/* Line Filter */}
-                <div className="flex-shrink-0 ml-4">
-                    <div className="relative">
-                        <i className="fa-solid fa-filter absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
-                        <select
-                            value={filterLine}
-                            onChange={(e) => setFilterLine(e.target.value)}
-                            className="pl-7 pr-3 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#297A88] bg-white"
-                        >
-                            <option value="">All Lines</option>
-                            {lines.map(l => <option key={l} value={l}>{l}</option>)}
-                        </select>
+                    {/* Mock Dropdown for Liquid Sachet as per screenshot */}
+                    <div className="relative border border-gray-300 rounded px-2 py-1 flex items-center gap-2 bg-white">
+                        <span className="text-xs text-gray-700">Liquid Sachet</span>
+                        <i className="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
                     </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <div className="relative">
+                        <i className="fa-solid fa-magnifying-glass absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input
+                            type="text"
+                            placeholder="Contracts Number"
+                            className="pl-7 pr-3 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-[#297A88]"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="flex rounded border border-gray-300 overflow-hidden">
+                        <button className="px-3 py-1 text-xs bg-[#E0F7FA] text-[#006064] font-bold border-r border-gray-300">LS01 L</button>
+                        <button className="px-3 py-1 text-xs bg-white text-gray-600 hover:bg-gray-50">LS01 R</button>
+                    </div>
+
+                    <button className="flex items-center gap-1 text-xs text-gray-600 px-2">
+                        More <i className="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+
+                    <button className="text-gray-400 hover:text-gray-600 px-1">
+                        <i className="fa-solid fa-gear"></i>
+                    </button>
                 </div>
             </div>
 
-            {/* Calendar Grid */}
-            <div className="flex-1 overflow-auto bg-white p-4">
-                <table className="w-full border-collapse">
-                    <thead className="sticky top-0 bg-white z-10">
+            {/* Transposed Calendar Grid */}
+            <div className="flex-1 overflow-auto bg-white relative">
+                <table className="w-full border-collapse text-xs table-fixed" style={{ minWidth: '1000px' }}>
+                    <thead className="sticky top-0 bg-white z-20 shadow-sm text-gray-700">
+                        {/* Top Header: Lines */}
                         <tr>
-                            <th className="p-2 border border-gray-100 bg-gray-50 text-xs text-gray-500 w-32 min-w-[120px] text-left shadow-sm">Machine Line</th>
-                            {dates.map((d, i) => {
-                                const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-                                return (
-                                    <th key={i} className={`p-1 border border-gray-100 text-xs w-20 min-w-[80px] text-center ${isWeekend ? 'bg-orange-50 text-orange-800' : 'bg-gray-50 text-gray-700'}`}>
-                                        <div className="font-bold">{d.getDate()}</div>
-                                        <div className="text-[10px] uppercase">{d.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                                    </th>
-                                );
-                            })}
+                            <th className="w-20 p-2 border border-gray-200 bg-white sticky left-0 z-30"></th>
+                            {lines.map((line, idx) => (
+                                <th key={idx} colSpan={4} className="p-2 border border-gray-200 bg-gray-50 font-bold text-left text-gray-700 border-l-2 border-l-gray-300">
+                                    {line}
+                                </th>
+                            ))}
+                        </tr>
+                        {/* Sub Header: Product / Task / Planned / Actual */}
+                        <tr>
+                            <th className="p-2 border border-gray-200 bg-white sticky left-0 z-30"></th>
+                            {lines.map((_, idx) => (
+                                <React.Fragment key={idx}>
+                                    <th className="p-1 border border-gray-200 bg-white font-bold w-24 truncate">Product Name</th>
+                                    <th className="p-1 border border-gray-200 bg-white font-bold w-20 truncate">Task Number</th>
+                                    <th className="p-1 border border-gray-200 bg-white font-bold w-16 truncate">Planned Quantity</th>
+                                    <th className="p-1 border border-gray-200 bg-white font-bold w-16 truncate">Actual Quantity</th>
+                                </React.Fragment>
+                            ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {lines.filter(l => !filterLine || l === filterLine).map((line, rowIdx) => (
-                            <tr key={line}>
-                                <td className="p-2 border border-gray-100 text-xs font-bold text-gray-700 bg-gray-50/50 sticky left-0 z-10">{line}</td>
-                                {dates.map((d, colIdx) => {
-                                    const schedule = getScheduleForCell(line, d.getDate());
-                                    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                        {dates.map((d, rowIdx) => {
+                            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                            const dateLabel = d.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' });
+                            const weekDay = d.toLocaleDateString('en-US', { weekday: 'short' });
 
-                                    let cellContent = null;
-                                    if (schedule) {
-                                        if (schedule.type === 'prod') {
-                                            cellContent = (
-                                                <div className="w-full h-10 bg-[#E0F7FA] border-l-2 border-[#297A88] text-[#006064] text-[10px] p-1 rounded-sm shadow-sm flex flex-col justify-center overflow-hidden">
-                                                    <div className="font-bold truncate">{schedule.label}</div>
-                                                    <div className="text-[9px] opacity-70">Gummies</div>
-                                                </div>
-                                            );
-                                        } else {
-                                            cellContent = (
-                                                <div className="w-full h-10 bg-gray-100 border border-gray-200 text-gray-400 text-[10px] flex items-center justify-center rounded-sm">
-                                                    <i className="fa-solid fa-wrench mr-1"></i> Maint
-                                                </div>
-                                            );
-                                        }
-                                    }
+                            return (
+                                <tr key={rowIdx} className={isWeekend ? 'bg-gray-50/30' : ''}>
+                                    {/* Date Column */}
+                                    <td className="p-2 border border-gray-200 bg-white sticky left-0 z-10 font-bold text-gray-700 whitespace-nowrap">
+                                        <span className="mr-2">{dateLabel}</span>
+                                        <span className="text-gray-500 font-normal">{weekDay}</span>
+                                    </td>
 
-                                    return (
-                                        <td key={colIdx} className={`p-1 border border-gray-100 h-14 ${isWeekend && !schedule ? 'bg-orange-50/20' : ''}`}>
-                                            {cellContent}
-                                        </td>
-                                    );
-                                })}
-                            </tr>
-                        ))}
-                        {lines.length === 0 && (
-                            <tr>
-                                <td colSpan={dates.length + 1} className="p-10 text-center text-gray-400 text-sm">
-                                    No lines configured for this machine group.
-                                </td>
-                            </tr>
-                        )}
+                                    {/* Data Columns */}
+                                    {lines.map((line, colIdx) => {
+                                        const data = getCellData(d, colIdx);
+
+                                        // Special mock for the screenshot's "Dashed Box" layout on Row 1, Col 1
+                                        // Screenshot has "Little U..." row, then a dashed "Sachet..." box below it but seemingly in same date row
+                                        // Let's simluate this by rendering a complex cell content if data exists
+
+                                        return (
+                                            <React.Fragment key={colIdx}>
+                                                <td className="p-2 border border-gray-200 h-10 align-middle truncate" title={data?.product}>{data?.product}</td>
+                                                <td className="p-2 border border-gray-200 h-10 align-middle truncate">{data?.task}</td>
+                                                <td className="p-2 border border-gray-200 h-10 align-middle truncate">{data?.planned}</td>
+                                                <td className="p-2 border border-gray-200 h-10 align-middle truncate">{data?.actual}</td>
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                </tr>
+                            );
+                        })}
+                        {/* Mock Row for the Dashed Box visually as a separate row for 01/01 if needed? 
+                             Or actually, the screenshot shows 01/01 has "Little U..." AND "Sachet..." dashed.
+                             Let's insert a "sub-row" for the dashed item on 01/01
+                         */}
+                        <tr>
+                            <td className="p-2 border border-gray-200 bg-white sticky left-0 z-10"></td>
+                            <td colSpan={2} className="p-1 border border-gray-200 border-dashed border-[#297A88] text-[#297A88] font-medium text-xs bg-[#E0F7FA]/20 relative">
+                                <div className="absolute inset-0 border-2 border-dashed border-[#297A88] pointer-events-none opacity-50"></div>
+                                <span className="relative z-10 pl-2">Sachet...</span>
+                            </td>
+                            <td className="p-2 border border-gray-200"></td>
+                            <td className="p-2 border border-gray-200"></td>
+
+                            {/* Fill empty cells for other lines */}
+                            {lines.slice(1).map((_, i) => (
+                                <React.Fragment key={i}>
+                                    <td className="p-2 border border-gray-200"></td>
+                                    <td className="p-2 border border-gray-200"></td>
+                                    <td className="p-2 border border-gray-200"></td>
+                                    <td className="p-2 border border-gray-200"></td>
+                                </React.Fragment>
+                            ))}
+                        </tr>
                     </tbody>
                 </table>
             </div>

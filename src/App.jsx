@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from './components/layout/Layout';
 import Dashboard from './components/dashboard/Dashboard';
 import Contracts from './components/contracts/Contracts';
 import Report from './components/report/Report';
+import { LanguageProvider } from './contexts/LanguageContext';
 import './index.css';
 
 function App() {
-  const [activePage, setActivePage] = React.useState('dashboard');
+  const [activePage, setActivePage] = useState('dashboard');
 
   const renderPage = () => {
     switch (activePage) {
@@ -22,9 +23,11 @@ function App() {
   };
 
   return (
-    <Layout activePage={activePage} onSwitchPage={setActivePage}>
-      {renderPage()}
-    </Layout>
+    <LanguageProvider>
+      <Layout activePage={activePage} onSwitchPage={setActivePage}>
+        {renderPage()}
+      </Layout>
+    </LanguageProvider>
   );
 }
 

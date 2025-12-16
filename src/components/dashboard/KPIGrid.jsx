@@ -1,46 +1,42 @@
-import React, { useState } from 'react';
+import React from 'react';
 import KPICard from './KPICard';
+import { useLanguage } from '../../contexts/LanguageContext';
 
-const KPIGrid = () => {
-    const [activeKpi, setActiveKpi] = useState(null);
-
-    const handleKpiClick = (id) => {
-        setActiveKpi(activeKpi === id ? null : id);
-        // In a real app, this would trigger a filter update in context or parent
-    };
+const KPIGrid = ({ activeFilter, onKpiClick }) => {
+    const { t } = useLanguage();
 
     return (
         <section>
             <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-base font-bold text-gray-800 uppercase tracking-wide border-l-4 border-ora-primary pl-3" data-i18n="p1_title">
-                    Part 1. 内部异常雷达 (Internal Exception Radar)
+                <h2 className="text-base font-bold text-gray-800 uppercase tracking-wide border-l-4 border-ora-primary pl-3">
+                    {t('p1_title')}
                 </h2>
                 <span className="text-xs text-gray-400 italic ml-2">
                     <i className="fa-solid fa-circle-info mr-1"></i>
-                    <span data-i18n="p1_subtitle">Click cards to filter details</span>
+                    <span>{t('p1_subtitle')}</span>
                 </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <KPICard
                     id="card-lead-time"
-                    title="Lead Time Breach"
-                    subtitle="整体周期超出内部目标"
+                    title={t('kpi_lead_title') || "Lead Time Breach"}
+                    subtitle={t('kpi_lead_sub') || "Cycle > Target"}
                     value="18"
                     total="142"
                     colorClass="text-red-600"
-                    bgClass="bg-red-100" // Note: Text color passed as prop is used for icon too, need care or split props
+                    bgClass="bg-red-100"
                     borderClass="border-red-500"
                     iconClass="fa-solid fa-clock"
                     trend={<span><i className="fa-solid fa-arrow-up"></i> 5 vs last week</span>}
-                    subtext="Stage SLA > 目标"
-                    isActive={activeKpi === 'card-lead-time'}
-                    onClick={() => handleKpiClick('card-lead-time')}
+                    subtext="Stage SLA > Target"
+                    isActive={activeFilter === 'delay'} // Maps to 'delay' (Severe Delay)
+                    onClick={() => onKpiClick('delay')}
                 />
                 <KPICard
                     id="card-payment"
-                    title="Payment Blocked"
-                    subtitle="收款环节有阻塞"
+                    title={t('kpi_pay_title') || "Payment Blocked"}
+                    subtitle={t('kpi_pay_sub') || "Process Blocked"}
                     value="8"
                     unit="Contracts"
                     colorClass="text-orange-500"
@@ -48,14 +44,14 @@ const KPIGrid = () => {
                     borderClass="border-orange-400"
                     iconClass="fa-solid fa-hand-holding-dollar"
                     trend="High Priority"
-                    subtext="款项待确认 > 3 天"
-                    isActive={activeKpi === 'card-payment'}
-                    onClick={() => handleKpiClick('card-payment')}
+                    subtext="Pending > 3 Days"
+                    isActive={activeFilter === 'blocker'} // Maps to 'blocker'
+                    onClick={() => onKpiClick('blocker')}
                 />
                 <KPICard
                     id="card-material"
-                    title="Material Risk"
-                    subtitle="物料准备存在风险"
+                    title={t('kpi_mat_title') || "Material Risk"}
+                    subtitle={t('kpi_mat_sub') || "Prep Risk"}
                     value="12"
                     unit="Contracts"
                     colorClass="text-yellow-600"
@@ -63,14 +59,14 @@ const KPIGrid = () => {
                     borderClass="border-yellow-400"
                     iconClass="fa-solid fa-boxes-stacked"
                     trend="Requires Attention"
-                    subtext="物料未到+临近排产"
-                    isActive={activeKpi === 'card-material'}
-                    onClick={() => handleKpiClick('card-material')}
+                    subtext="Missing + Near Prod"
+                    isActive={activeFilter === 'material'} // Not mapped in HTML but good to have
+                    onClick={() => onKpiClick('material')}
                 />
                 <KPICard
                     id="card-data"
-                    title="Data Quality"
-                    subtitle="数据记录需补充"
+                    title={t('kpi_data_title') || "Data Issues"}
+                    subtitle={t('kpi_data_sub') || "Incomplete"}
                     value="15"
                     unit="Records"
                     colorClass="text-gray-600"
@@ -78,9 +74,9 @@ const KPIGrid = () => {
                     borderClass="border-gray-400"
                     iconClass="fa-solid fa-database"
                     trend={<span className="text-red-500">Affects Forecast</span>}
-                    subtext="字段缺失/异常"
-                    isActive={activeKpi === 'card-data'}
-                    onClick={() => handleKpiClick('card-data')}
+                    subtext="Missing Fields"
+                    isActive={activeFilter === 'data'} // Not mapped in HTML but good to have
+                    onClick={() => onKpiClick('data')}
                 />
             </div>
         </section>

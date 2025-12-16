@@ -1,8 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
-const ContractStatusWidget = () => {
+const ContractStatusWidget = ({ externalFilter }) => {
+    const { t } = useLanguage();
     const [viewMode, setViewMode] = useState('list'); // 'list' | 'graph'
     const [filter, setFilter] = useState('all'); // 'all' | 'blocker' | 'delay'
+
+    // Sync with external filters (from KPI Grid)
+    useEffect(() => {
+        if (externalFilter) {
+            setFilter(externalFilter);
+        } else {
+            // Optional: reset to all if external filter cleared? 
+            // Or keep as is. Let's reset to 'all' if external is null to show "unselect" behavior
+            setFilter('all');
+        }
+    }, [externalFilter]);
 
     const mockData = [
         { id: 'C2411-003', brand: 'Little Umbrella', stage: 'S1 款项', delay: '+45d', reason: '款项未到', time: '45d', updated: '2d ago', isBlocker: true, isLimit: false, type: 'money' },
@@ -24,31 +37,29 @@ const ContractStatusWidget = () => {
                 <div className="flex items-center gap-4">
                     <h3 className="card-title">
                         <i className="fa-solid fa-list-check text-ora-primary"></i>
-                        <span data-i18n="p1b_title">P1-B. 关键订单阶段总览 (Key Contracts)</span>
+                        <span>{t('p1b_title') || "P1-B. Key Contracts"}</span>
                     </h3>
                     <div className="flex bg-gray-100 rounded p-0.5 space-x-1">
                         <button
                             onClick={() => setViewMode('list')}
                             className={`px-2 py-0.5 text-xs rounded shadow-sm font-bold border transition-all ${viewMode === 'list' ? 'bg-white text-gray-800 border-gray-200' : 'text-gray-500 border-transparent hover:text-gray-800'}`}
-                            data-i18n="btn_list"
                         >
-                            列表
+                            {t('btn_list') || "List"}
                         </button>
                         <button
                             onClick={() => setViewMode('graph')}
                             className={`px-2 py-0.5 text-xs rounded shadow-sm font-bold border transition-all ${viewMode === 'graph' ? 'bg-white text-gray-800 border-gray-200' : 'text-gray-500 border-transparent hover:text-gray-800'}`}
-                            data-i18n="btn_graph"
                         >
-                            图表
+                            {t('btn_graph') || "Graph"}
                         </button>
                     </div>
                 </div>
                 {/* Internal Filters */}
                 <div className="flex space-x-2 text-xs">
                     <span className="text-gray-400 self-center">Filter:</span>
-                    <button onClick={() => setFilter('all')} className={`tab-btn ${filter === 'all' ? 'tab-active text-ora-primary font-bold underline underline-offset-4' : 'tab-inactive text-gray-500 hover:text-gray-900'}`}>全部</button>
-                    <button onClick={() => setFilter('blocker')} className={`tab-btn ${filter === 'blocker' ? 'tab-active text-ora-primary font-bold underline underline-offset-4' : 'tab-inactive text-gray-500 hover:text-gray-900'}`}>待解决 (Blocker)</button>
-                    <button onClick={() => setFilter('delay')} className={`tab-btn ${filter === 'delay' ? 'tab-active text-ora-primary font-bold underline underline-offset-4' : 'tab-inactive text-gray-500 hover:text-gray-900'}`}>严重超时</button>
+                    <button onClick={() => setFilter('all')} className={`tab-btn ${filter === 'all' ? 'tab-active text-ora-primary font-bold underline underline-offset-4' : 'tab-inactive text-gray-500 hover:text-gray-900'}`}>{t('Tab_all') || "All"}</button>
+                    <button onClick={() => setFilter('blocker')} className={`tab-btn ${filter === 'blocker' ? 'tab-active text-ora-primary font-bold underline underline-offset-4' : 'tab-inactive text-gray-500 hover:text-gray-900'}`}>{t('Tab_blocker') || "Blockers"}</button>
+                    <button onClick={() => setFilter('delay')} className={`tab-btn ${filter === 'delay' ? 'tab-active text-ora-primary font-bold underline underline-offset-4' : 'tab-inactive text-gray-500 hover:text-gray-900'}`}>{t('Tab_delay') || "Delay"}</button>
                 </div>
             </div>
 
@@ -58,11 +69,11 @@ const ContractStatusWidget = () => {
                     <table className="w-full text-left text-xs">
                         <thead className="bg-gray-50 text-gray-500 uppercase border-b border-gray-200">
                             <tr>
-                                <th className="px-4 py-3 font-semibold">合同 / 品牌</th>
-                                <th className="px-4 py-3 font-semibold">当前阶段</th>
-                                <th className="px-4 py-3 font-semibold">最严重阶段 (Delay)</th>
-                                <th className="px-4 py-3 font-semibold">状态 / 原因</th>
-                                <th className="px-4 py-3 font-semibold text-right">时间 (签约/更新)</th>
+                                <th className="px-4 py-3 font-semibold">{t('th_contract') || "Contract"}</th>
+                                <th className="px-4 py-3 font-semibold">{t('th_stage') || "Stage"}</th>
+                                <th className="px-4 py-3 font-semibold">{t('th_delay') || "Max Delay"}</th>
+                                <th className="px-4 py-3 font-semibold">{t('th_status') || "Status"}</th>
+                                <th className="px-4 py-3 font-semibold text-right">{t('th_time') || "Time"}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -82,8 +93,8 @@ const ContractStatusWidget = () => {
                                     </td>
                                     <td className="px-4 py-3">
                                         <span className={`px-2 py-0.5 rounded border text-[10px] ${row.type === 'money' ? 'bg-red-50 text-red-600 border-red-100' :
-                                                row.type === 'materials' ? 'bg-orange-50 text-orange-600 border-orange-100' :
-                                                    'text-gray-500 bg-transparent border-transparent'
+                                            row.type === 'materials' ? 'bg-orange-50 text-orange-600 border-orange-100' :
+                                                'text-gray-500 bg-transparent border-transparent'
                                             }`}>
                                             {row.reason}
                                         </span>
@@ -97,7 +108,7 @@ const ContractStatusWidget = () => {
                         </tbody>
                     </table>
                     <div className="p-2 text-center text-xs text-gray-400 border-t border-gray-100">
-                        列表按严重程度排序，优先显示待解决事项。仅展示前 20 份最需要关注的订单。
+                        {t('list_footer') || "Sorted by severity."}
                     </div>
                 </div>
             )}
@@ -108,12 +119,12 @@ const ContractStatusWidget = () => {
                     <div className="min-w-[500px]">
                         {/* Header */}
                         <div className="grid grid-cols-6 gap-1 mb-2 text-xs font-bold text-gray-500 text-center">
-                            <div className="text-left pl-2">合同</div>
-                            <div>S1 款项</div>
-                            <div>S2 物料</div>
-                            <div>S3 等待</div>
-                            <div>S4 生产</div>
-                            <div>S5 发货</div>
+                            <div className="text-left pl-2">Contract</div>
+                            <div>S1 Money</div>
+                            <div>S2 Mat</div>
+                            <div>S3 Wait</div>
+                            <div>S4 Prod</div>
+                            <div>S5 Ship</div>
                         </div>
 
                         {/* Rows - Hardcoded based on HTML example just for visuals as per plan */}
@@ -124,7 +135,7 @@ const ContractStatusWidget = () => {
                             </div>
                             <div className="bg-red-500 text-white flex flex-col items-center justify-center p-1 rounded">
                                 <span className="font-bold">+45</span>
-                                <span className="text-[8px]">款项未到</span>
+                                <span className="text-[8px]">Pending</span>
                             </div>
                             <div className="bg-gray-100 rounded"></div>
                             <div className="bg-gray-100 rounded"></div>
@@ -140,7 +151,7 @@ const ContractStatusWidget = () => {
                             <div className="bg-green-500 text-white flex items-center justify-center rounded font-bold">OK</div>
                             <div className="bg-orange-500 text-white flex flex-col items-center justify-center p-1 rounded">
                                 <span className="font-bold">+20</span>
-                                <span className="text-[8px]">物料未齐</span>
+                                <span className="text-[8px]">Missing</span>
                             </div>
                             <div className="bg-gray-100 rounded"></div>
                             <div className="bg-gray-100 rounded"></div>
@@ -157,14 +168,14 @@ const ContractStatusWidget = () => {
                             <div className="bg-green-500 text-white flex items-center justify-center rounded font-bold">OK</div>
                             <div className="bg-red-400 text-white flex flex-col items-center justify-center p-1 rounded">
                                 <span className="font-bold">+15</span>
-                                <span className="text-[8px]">生产延迟</span>
+                                <span className="text-[8px]">Delay</span>
                             </div>
                             <div className="bg-gray-100 rounded"></div>
                         </div>
 
                     </div>
                     <div className="mt-4 text-xs text-gray-400 text-center">
-                        彩色格子表示该阶段比内部目标多用的天数。
+                        Color indicates delay severity.
                     </div>
                 </div>
             )}
