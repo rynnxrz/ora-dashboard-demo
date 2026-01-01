@@ -68,7 +68,7 @@ export const TRANSLATIONS = {
         "p2_banner_desc": "About 15% contracts entered > 3 days after signing.",
         "p2_banner_btn": "View Details",
 
-        "p3b_title": "3B. Capacity Utilization",
+        "p3b_title": "P2-A. Capacity Utilization",
         "p3b_sub": "Avg Days",
         "p3b_footer_l": "Median Cycle: 42 Days",
         "p3b_footer_r": "Based on completed contracts",
@@ -236,7 +236,7 @@ export const TRANSLATIONS = {
         "p2_banner_desc": "约 15% 的合同在签约后 3 天才录入系统。",
         "p2_banner_btn": "查看明细",
 
-        "p3b_title": "3B. 产能利用率",
+        "p3b_title": "P2-A. 产能利用率",
         "p3b_sub": "平均天数 (Avg Days)",
         "p3b_footer_l": "整体中位周期：42 天",
         "p3b_footer_r": "基于已完成的合同",

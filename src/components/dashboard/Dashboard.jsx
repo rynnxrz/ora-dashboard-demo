@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import DashboardFilters from './DashboardFilters';
 import KPIGrid from './KPIGrid';
 import ContractStatusWidget from './ContractStatusWidget';
-import ZombieWidget from './ZombieWidget';
+
 import DataQualityWidget from './DataQualityWidget';
 import ProcessLeadTimeWidget from './ProcessLeadTimeWidget';
 import ClientRadarWidget from './ClientRadarWidget';
@@ -29,7 +29,7 @@ const Dashboard = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Pass filter to Contract Status Widget */}
                     <ContractStatusWidget externalFilter={kpiFilter} />
-                    <ZombieWidget />
+
                     <DataQualityWidget />
                 </div>
 

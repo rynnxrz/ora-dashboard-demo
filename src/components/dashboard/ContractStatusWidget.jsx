@@ -18,8 +18,8 @@ const ContractStatusWidget = ({ externalFilter }) => {
     }, [externalFilter]);
 
     const mockData = [
-        { id: 'C2411-003', brand: 'Little Umbrella', stage: 'S1 款项', delay: '+45d', reason: '款项未到', time: '45d', updated: '2d ago', isBlocker: true, isLimit: false, type: 'money' },
-        { id: 'C2411-008', brand: 'PowerGums', stage: 'S2 物料', delay: '+20d', reason: '物料未齐', time: '20d', updated: '1d ago', isBlocker: true, isLimit: false, type: 'materials' },
+        { id: 'C2411-003', brand: 'Little Umbrella', stage: 'S2 款项', delay: '+45d', reason: '款项未到', time: '45d', updated: '2d ago', isBlocker: true, isLimit: false, type: 'money' },
+        { id: 'C2411-008', brand: 'PowerGums', stage: 'S3 物料', delay: '+20d', reason: '物料未齐', time: '20d', updated: '1d ago', isBlocker: true, isLimit: false, type: 'materials' },
         { id: 'C2410-001', brand: 'Vitality', stage: 'S4 生产', delay: '+15d', reason: '超出内部目标', time: '60d', updated: 'Active', isBlocker: false, isLimit: true, type: 'leadtime' },
     ];
 
@@ -120,9 +120,9 @@ const ContractStatusWidget = ({ externalFilter }) => {
                         {/* Header */}
                         <div className="grid grid-cols-6 gap-1 mb-2 text-xs font-bold text-gray-500 text-center">
                             <div className="text-left pl-2">Contract</div>
-                            <div>S1 Money</div>
-                            <div>S2 Mat</div>
-                            <div>S3 Wait</div>
+                            <div>S1 Contract</div>
+                            <div>S2 Money</div>
+                            <div>S3 Mat</div>
                             <div>S4 Prod</div>
                             <div>S5 Ship</div>
                         </div>
@@ -133,11 +133,11 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                 <span className="font-bold">C2411-003</span>
                                 <span className="text-[10px] text-gray-400">Little Umbrella</span>
                             </div>
+                            <div className="bg-green-500 text-white flex items-center justify-center rounded font-bold">OK</div>
                             <div className="bg-red-500 text-white flex flex-col items-center justify-center p-1 rounded">
                                 <span className="font-bold">+45</span>
                                 <span className="text-[8px]">Pending</span>
                             </div>
-                            <div className="bg-gray-100 rounded"></div>
                             <div className="bg-gray-100 rounded"></div>
                             <div className="bg-gray-100 rounded"></div>
                             <div className="bg-gray-100 rounded"></div>
