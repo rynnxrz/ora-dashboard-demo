@@ -5,6 +5,7 @@ import {
 } from 'chart.js';
 import { Bar, Chart, Doughnut } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import FactoryOutputWidget from './FactoryOutputWidget';
 
 ChartJS.register(
     CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement,
@@ -608,6 +609,11 @@ const ProcessLeadTimeWidget = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* P2-C: FACTORY OUTPUT & EFFICIENCY TRENDS */}
+            <div className="mt-6">
+                <FactoryOutputWidget />
             </div>
         </div>
     );
