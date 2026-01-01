@@ -14,7 +14,19 @@ ChartJS.register(
 const ProcessLeadTimeWidget = () => {
     // --- State ---
     const chartRef = useRef(null);
-    const [selectedStageIndex, setSelectedStageIndex] = useState(null); // For interaction
+    const [selectedStageIndex, setSelectedStageIndex] = useState(null); // P2-A Stage Selection
+    const [selectedLine, setSelectedLine] = useState(null);       // P2-B Line Selection
+
+    // Helper to switch selections
+    const handleStageClick = (index) => {
+        setSelectedStageIndex(index === selectedStageIndex ? null : index);
+        // Independent states: Don't clear selectedLine
+    };
+
+    const handleLineClick = (line) => {
+        setSelectedLine(line.name === selectedLine?.name ? null : line);
+        // Independent states: Don't clear selectedStageIndex
+    };
 
     // --- 1. MOCK DATA (P2-A & Drill-down) ---
     const stages = [
@@ -23,9 +35,9 @@ const ProcessLeadTimeWidget = () => {
             target: 2, actual: 5, q3Actual: 4, breach: 75, q3Breach: 40,
             totalCount: 20, breachCount: 15,
             topContributors: [
-                { id: 'CNT-2410-092', time: 12, gap: 10 },
-                { id: 'CNT-2410-105', time: 9, gap: 7 },
-                { id: 'CNT-2410-101', time: 8, gap: 6 }
+                { id: 'CNT-2410-092', time: 10, gap: 8, days: 10 },
+                { id: 'CNT-2410-105', time: 7, gap: 5, days: 7 },
+                { id: 'CNT-2410-101', time: 5, gap: 3, days: 5 }
             ]
         },
         {
@@ -33,9 +45,9 @@ const ProcessLeadTimeWidget = () => {
             target: 4, actual: 10, q3Actual: 5, breach: 85, q3Breach: 65,
             totalCount: 20, breachCount: 17,
             topContributors: [
-                { id: 'PAY-2411-003', time: 22, gap: 18 },
-                { id: 'PAY-2411-015', time: 18, gap: 14 },
-                { id: 'PAY-2411-009', time: 15, gap: 11 }
+                { id: 'PAY-2411-003', time: 15, gap: 11, days: 15 },
+                { id: 'PAY-2411-015', time: 12, gap: 8, days: 12 },
+                { id: 'PAY-2411-009', time: 10, gap: 6, days: 10 }
             ]
         },
         {
@@ -43,38 +55,50 @@ const ProcessLeadTimeWidget = () => {
             target: 10, actual: 11, q3Actual: 11, breach: 30, q3Breach: 25,
             totalCount: 20, breachCount: 6,
             topContributors: [
-                { id: 'MAT-2411-A01', time: 15, gap: 5 },
-                { id: 'MAT-2411-B09', time: 14, gap: 4 }
+                { id: 'MAT-2411-A01', time: 15, gap: 5, days: 15 },
+                { id: 'MAT-2411-B09', time: 13, gap: 3, days: 13 }
             ]
         },
         {
             label: 'S4 Production', fullLabel: 'S4 生产排产',
-            target: 15, actual: 12, q3Actual: 16, breach: 5, q3Breach: 5,
+            target: 15, actual: 15.2, q3Actual: 16, breach: 5, q3Breach: 15, // +0.2d (Avg), 5% Breach (1/20) - Healthy but with 1 issue
             totalCount: 20, breachCount: 1,
             topContributors: [
-                { id: 'PRD-2411-X99', time: 18, gap: 3 }
+                { id: 'C2411-L05', time: 22, gap: 7, days: 15, planDate: '11-10', actDate: '12-02' } // Planned 15d, Actual 22d -> 7d Delay
             ]
         },
         {
             label: 'S5 Shipping', fullLabel: 'S5 出货排车',
             target: 5, actual: 5, q3Actual: 5.5, breach: 0, q3Breach: 4,
-            totalCount: 15, breachCount: 0,
+            totalCount: 20, breachCount: 0,
             topContributors: []
         }
     ];
 
     // --- 2. MOCK DATA (P2-B Bottlenecks) ---
-    // Only showing problematic lines
     const productionLines = [
-        { name: 'Liquids (液剂)', adherence: 60, total: 20, passed: 8, delay: 12.0, status: 'CRITICAL' },
-        { name: 'Powder (粉剂)', adherence: 82, total: 50, passed: 41, delay: 4.5, status: 'WARNING' },
-        { name: 'Capsules (胶囊)', adherence: 88, total: 50, passed: 44, delay: 2.0, status: 'STABLE' },
-        { name: 'Gummies (软糖)', adherence: 95, total: 100, passed: 95, delay: 0.5, status: 'GOOD' }
+        {
+            name: 'Liquids (液剂)',
+            adherence: 75, total: 4, passed: 3, delay: 1.7, status: 'WARNING',
+            impactDays: 7, // 1 contract * 7 days delay
+            avgTime: 18,
+            topContributors: [
+                { id: 'C2411-L05', status: 'Production', days: 15, planDate: '11-10', actDate: '12-02', gap: 7 } // Planned 15d
+            ]
+        },
+        {
+            name: 'Powder (粉剂)',
+            adherence: 100, total: 8, passed: 8, delay: 0.0, status: 'STABLE',
+            impactDays: 0,
+            avgTime: 14,
+            topContributors: []
+        },
+        { name: 'Capsules (胶囊)', adherence: 100, total: 8, passed: 8, delay: 0, status: 'GOOD', impactDays: 0 }
     ];
-    // Filter and Sort for "Ranking List"
-    const bottlenecks = productionLines
-        .filter(l => l.adherence < 90 || l.delay > 1.5)
-        .sort((a, b) => b.delay - a.delay);
+    // Filter and Sort
+    const visibleBottlenecks = productionLines
+        .filter(l => l.adherence < 100 || l.impactDays > 0)
+        .sort((a, b) => b.impactDays - a.impactDays);
 
 
     // --- 3. Color Logic ---
@@ -152,8 +176,7 @@ const ProcessLeadTimeWidget = () => {
         animation: { duration: 300 },
         onClick: (event, elements) => {
             if (elements.length > 0) {
-                const index = elements[0].index;
-                setSelectedStageIndex(index === selectedStageIndex ? null : index);
+                handleStageClick(elements[0].index);
             } else {
                 setSelectedStageIndex(null);
             }
@@ -178,8 +201,7 @@ const ProcessLeadTimeWidget = () => {
             datalabels: {
                 listeners: {
                     click: (ctx) => {
-                        const index = ctx.dataIndex;
-                        setSelectedStageIndex(index === selectedStageIndex ? null : index);
+                        handleStageClick(ctx.dataIndex);
                     }
                 }
             }
@@ -208,7 +230,7 @@ const ProcessLeadTimeWidget = () => {
                 order: 1
             },
             {
-                label: 'S3异常率',
+                label: '上季度异常率',
                 data: stages.map(s => s.q3Breach),
                 backgroundColor: '#cbd5e1',
                 borderRadius: 2,
@@ -236,6 +258,9 @@ const ProcessLeadTimeWidget = () => {
 
     // --- 6. Diagnosis Content ---
     const getDiagnosisContent = () => {
+        // [CASE A REMOVED: Line Diagnosis now handled by inline accordion]
+
+        // CASE B: Stage Diagnosis (P2-A Selection)
         if (selectedStageIndex !== null) {
             const s = stages[selectedStageIndex];
             const gap = s.actual - s.target;
@@ -250,8 +275,8 @@ const ProcessLeadTimeWidget = () => {
                             <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">Stage Diagnosis</p>
                         </div>
                         <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${s.breach > 50 ? 'bg-red-50 text-red-600 border-red-100' :
-                                s.breach > 20 ? 'bg-orange-50 text-orange-600 border-orange-100' :
-                                    'bg-emerald-50 text-emerald-600 border-emerald-100'
+                            s.breach > 20 ? 'bg-orange-50 text-orange-600 border-orange-100' :
+                                'bg-emerald-50 text-emerald-600 border-emerald-100'
                             }`}>
                             {s.breach > 50 ? 'CRITICAL' : s.breach > 20 ? 'WARNING' : 'HEALTHY'}
                         </span>
@@ -290,7 +315,10 @@ const ProcessLeadTimeWidget = () => {
                                         <div key={idx} className="flex items-center justify-between text-xs p-1.5 rounded hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors cursor-default group">
                                             <div className="flex items-center gap-2">
                                                 <span className="w-4 h-4 rounded bg-slate-100 text-[9px] text-slate-500 flex items-center justify-center font-bold">{idx + 1}</span>
-                                                <span className="font-medium text-slate-700 font-mono group-hover:text-indigo-600 transition-colors">{item.id}</span>
+                                                <div>
+                                                    <div className="font-medium text-slate-700 font-mono group-hover:text-indigo-600 transition-colors">{item.id}</div>
+                                                    {item.days && <span className="text-[9px] text-slate-400">Planned: {item.days}d</span>}
+                                                </div>
                                             </div>
                                             <div className="text-right">
                                                 <span className="text-slate-500 mr-2">{item.time}d</span>
@@ -340,7 +368,7 @@ const ProcessLeadTimeWidget = () => {
                     <i className="fa-solid fa-circle-info text-slate-300 mt-0.5"></i>
                     <p className="text-xs text-slate-500 leading-relaxed">
                         <b className="text-slate-700">操作提示：</b> <br />
-                        点击左侧柱状图中的 <span className="text-red-500 font-bold">红色异常阶段</span>，即可下钻查看导致拖期的具体合同明细。
+                        点击左侧柱状图中的 <span className="text-red-500 font-bold">红色异常阶段</span> 或下方 <span className="text-rose-500 font-bold">异常产线</span>，即可下钻查看导致拖期的具体合同明细。
                     </p>
                 </div>
             </div>
@@ -417,13 +445,13 @@ const ProcessLeadTimeWidget = () => {
 
             {/* BOTTOM GRID: P2-B & P4 */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
-                {/* P2-B: BOTTLENECKS (RANKING LIST) - NEW */}
+                {/* P2-B: BOTTLENECKS (RANKING LIST) */}
                 <div className="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
                     <div className="flex items-center gap-2 mb-4 flex-shrink-0">
                         <div className="w-2 h-6 bg-rose-500 rounded-full"></div>
                         <div>
-                            <h3 className="font-bold text-slate-700 leading-none">P2-B. 产线效能警示</h3>
-                            <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">Top Delays by Line (Bottlenecks)</p>
+                            <h3 className="font-bold text-slate-700 leading-none">P2-B. 产线效能警示 (按累计延迟排序)</h3>
+                            <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">Top Delays by Cumulative Days</p>
                         </div>
                     </div>
 
@@ -431,61 +459,123 @@ const ProcessLeadTimeWidget = () => {
                     <div className="grid grid-cols-12 gap-4 text-xs font-bold text-slate-400 border-b border-slate-100 pb-2 mb-2 px-2">
                         <div className="col-span-4">产线 (Line)</div>
                         <div className="col-span-4">准时交付率 (Adherence)</div>
-                        <div className="col-span-3 text-right">平均延迟 (Avg Delay)</div>
+                        <div className="col-span-3 text-right">累计延迟 / 平均延迟</div>
                         <div className="col-span-1 text-right">状态</div>
                     </div>
 
                     {/* Ranking List Content */}
-                    <div className="flex-1 overflow-auto custom-scrollbar space-y-1">
-                        {bottlenecks.map((line, idx) => (
-                            <div key={idx} className="grid grid-cols-12 gap-4 items-center p-2 rounded hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
-                                {/* Name */}
-                                <div className="col-span-4 font-bold text-slate-700 text-sm flex items-center gap-2">
-                                    <span className="w-5 h-5 rounded bg-slate-100 text-slate-500 text-[10px] flex items-center justify-center font-bold">
-                                        {idx + 1}
-                                    </span>
-                                    {line.name}
-                                </div>
+                    <div className="flex-1 overflow-auto custom-scrollbar space-y-2 p-1">
+                        {visibleBottlenecks.map((line, idx) => {
+                            const isSelected = selectedLine?.name === line.name;
+                            return (
+                                <div key={idx} className="transition-all duration-300">
+                                    {/* Main Row */}
+                                    <div
+                                        onClick={() => handleLineClick(line)}
+                                        className={`grid grid-cols-12 gap-4 items-center p-2 rounded-lg transition-colors border cursor-pointer relative z-10 ${isSelected
+                                            ? 'bg-indigo-50 border-indigo-200 ring-1 ring-indigo-200 shadow-sm'
+                                            : 'hover:bg-slate-50 border-transparent hover:border-slate-100 bg-white'
+                                            }`}
+                                    >
+                                        {/* Name */}
+                                        <div className="col-span-4 font-bold text-slate-700 text-sm flex items-center gap-2">
+                                            <span className={`w-5 h-5 rounded text-[10px] flex items-center justify-center font-bold transition-colors ${isSelected ? 'bg-indigo-200 text-indigo-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                {idx + 1}
+                                            </span>
+                                            {line.name}
+                                        </div>
 
-                                {/* Adherence Progess */}
-                                <div className="col-span-4">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className={`text-xs font-bold ${line.status === 'CRITICAL' ? 'text-red-600' :
-                                                line.status === 'WARNING' ? 'text-orange-500' : 'text-slate-600'
-                                            }`}>
-                                            {line.adherence}%
-                                        </span>
-                                        <span className="text-[10px] text-slate-400">
-                                            ({line.passed}/{line.total})
-                                        </span>
+                                        {/* Adherence Progess */}
+                                        <div className="col-span-4">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className={`text-xs font-bold ${line.status === 'CRITICAL' ? 'text-red-600' :
+                                                    line.status === 'WARNING' ? 'text-orange-500' : 'text-slate-600'
+                                                    }`}>
+                                                    {line.adherence}%
+                                                </span>
+                                                <span className="text-[10px] text-slate-400">
+                                                    ({line.passed}/{line.total})
+                                                </span>
+                                            </div>
+                                            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full ${line.status === 'CRITICAL' ? 'bg-red-500' :
+                                                        line.status === 'WARNING' ? 'bg-orange-400' : 'bg-emerald-400'
+                                                        }`}
+                                                    style={{ width: `${line.adherence}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        {/* Impact / Delay */}
+                                        <div className="col-span-3 text-right">
+                                            <div className="flex flex-col items-end">
+                                                <span className={`font-bold text-xs ${line.impactDays > 20 ? 'text-red-500' : 'text-orange-500'}`}>
+                                                    {line.impactDays}d <span className="text-[9px] text-slate-400 font-normal">Impact</span>
+                                                </span>
+                                                <span className="text-[10px] text-slate-400 font-mono">
+                                                    {line.delay.toFixed(1)}d Delay
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Status Badge */}
+                                        <div className="col-span-1 text-right flex justify-end items-center gap-2">
+                                            {line.status === 'CRITICAL' && <i className="fa-solid fa-triangle-exclamation text-red-500" title="Critical"></i>}
+                                            {line.status === 'WARNING' && <i className="fa-solid fa-circle-exclamation text-orange-400" title="Warning"></i>}
+                                            {line.status === 'STABLE' && <i className="fa-solid fa-check-circle text-emerald-400" title="Stable"></i>}
+                                            {line.status === 'GOOD' && <i className="fa-solid fa-face-smile text-emerald-300" title="Good"></i>}
+
+                                            <i className={`fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-300 ${isSelected ? 'rotate-180 text-indigo-500' : ''}`}></i>
+                                        </div>
                                     </div>
-                                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full ${line.status === 'CRITICAL' ? 'bg-red-500' :
-                                                    line.status === 'WARNING' ? 'bg-orange-400' : 'bg-emerald-400'
-                                                }`}
-                                            style={{ width: `${line.adherence}%` }}
-                                        ></div>
+
+                                    {/* Expanded Detail (Accordion) */}
+                                    <div
+                                        className={`grid overflow-hidden transition-all duration-300 ease-in-out ${isSelected ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0'}`}
+                                    >
+                                        <div className="min-h-0 bg-slate-50 rounded-lg border border-slate-100 p-3 ml-4">
+                                            <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200/50">
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                                                    <i className="fa-solid fa-file-circle-exclamation text-red-400"></i>
+                                                    Top Contributor (Root Cause)
+                                                </span>
+                                            </div>
+
+                                            {line.topContributors?.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {line.topContributors.map((c, i) => (
+                                                        <div key={i} className="flex items-center justify-between text-xs bg-white p-2 rounded border border-slate-100 shadow-sm">
+                                                            <div>
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <span className="font-mono font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded text-[10px]">{c.id}</span>
+                                                                    <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded border border-slate-100 max-w-[80px] truncate">{c.status || 'Pending'}</span>
+                                                                </div>
+                                                                <span className="text-[9px] font-bold text-slate-500 flex items-center gap-1">
+                                                                    <i className="fa-solid fa-clock text-slate-300"></i>
+                                                                    Planned: <span className="text-slate-700">{c.days}d</span>
+                                                                    <span className="text-slate-300 mx-1">|</span>
+                                                                    <span className="text-slate-500">
+                                                                        {c.planDate} <i className="fa-solid fa-arrow-right text-[8px] mx-0.5"></i> {c.actDate}
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-baseline gap-3 text-[10px]">
+                                                                <span className="px-1.5 py-0.5 bg-red-50 text-red-600 rounded font-bold border border-red-100">
+                                                                    Delay +{c.gap}d
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-2 text-xs text-slate-400 italic">No specific contracts identified.</div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* Avg Delay */}
-                                <div className="col-span-3 text-right">
-                                    <span className={`font-mono font-bold text-sm ${line.delay > 5 ? 'text-red-500' :
-                                            line.delay > 2 ? 'text-orange-500' : 'text-slate-600'
-                                        }`}>
-                                        {line.delay.toFixed(1)}d
-                                    </span>
-                                </div>
-
-                                {/* Status Badge */}
-                                <div className="col-span-1 text-right">
-                                    {line.status === 'CRITICAL' && <i className="fa-solid fa-triangle-exclamation text-red-500" title="Critical"></i>}
-                                    {line.status === 'WARNING' && <i className="fa-solid fa-circle-exclamation text-orange-400" title="Warning"></i>}
-                                    {line.status === 'STABLE' && <i className="fa-solid fa-check-circle text-emerald-400" title="Stable"></i>}
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 
