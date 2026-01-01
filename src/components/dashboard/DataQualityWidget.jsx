@@ -12,11 +12,11 @@ const DataQualityWidget = () => {
 
     // Mock Data for "Issue List"
     const issueData = [
-        { id: 'C2411-002', issue: t('dq_issue_missing_date') || 'Missing Shipping Date', type: 'date', updated: '2h ago' },
-        { id: 'C2411-005', issue: t('dq_issue_qty_mismatch') || 'Quantity Mismatch', type: 'qty', updated: '5h ago' },
-        { id: 'C2411-009', issue: t('dq_issue_logic_error') || 'Time Logic Error (S2>S3)', type: 'logic', updated: '1d ago' },
-        { id: 'C2410-022', issue: t('dq_issue_missing_contact') || 'Missing Contact', type: 'other', updated: '2d ago' },
-        { id: 'C2411-012', issue: t('dq_issue_missing_label') || 'Missing Label Spec', type: 'other', updated: '3d ago' }
+        { id: 'C2411-002', issue: t('dq_issue_date') || 'Missing Shipping Date', type: 'date', updated: '2h ago' },
+        { id: 'C2411-005', issue: t('dq_issue_qty') || 'Quantity Mismatch', type: 'qty', updated: '5h ago' },
+        { id: 'C2411-009', issue: t('dq_issue_logic') || 'Time Logic Error (S2>S3)', type: 'logic', updated: '1d ago' },
+        { id: 'C2410-022', issue: t('dq_issue_other') || 'Missing Contact', type: 'other', updated: '2d ago' },
+        { id: 'C2411-012', issue: t('dq_issue_other') || 'Missing Label Spec', type: 'other', updated: '3d ago' }
     ];
 
     const filteredIssues = filter === 'all' ? issueData : issueData.filter(i => i.type === filter);
@@ -52,7 +52,7 @@ const DataQualityWidget = () => {
 
 
     return (
-        <div className="card lg:col-span-1 flex flex-col">
+        <div className="card lg:col-span-1 flex flex-col h-full">
             <div className="card-header">
                 <div>
                     <h3 className="card-title"><i className="fa-solid fa-check-double text-gray-600"></i> {t('p1d_title') || "Data Quality"}</h3>
@@ -71,11 +71,11 @@ const DataQualityWidget = () => {
                 </div>
 
                 {/* List Section */}
-                <div className="flex-1 overflow-y-auto min-h-0 border-t pt-2 scroll-smooth">
+                <div className="flex-1 overflow-y-auto min-h-[150px] border-t pt-2 scroll-smooth">
                     <div className="flex justify-between items-center mb-2">
                         <h4 className="text-xs font-bold text-gray-700">{t('p1d_list_title') || "Issue List"}</h4>
                         <div className="text-[10px] text-gray-400">
-                            {t('p1d_filter_label') || "Filter:"} <span className="font-bold text-ora-primary">{filter === 'all' ? t('dq_filter_all') || 'All' : t(`dq_filter_${filter}`) || filter}</span>
+                            {t('p1d_filter_label') || "Filter:"} <span className="font-bold text-ora-primary">{filter === 'all' ? t('dq_filter_all_bad') || 'All Issues' : t(`dq_issue_${filter}`) || filter}</span>
                         </div>
                     </div>
                     <table className="w-full text-left text-xs">
