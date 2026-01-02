@@ -44,12 +44,19 @@ const ContractStatusWidget = ({ externalFilter }) => {
                 { id: 'Model-B', name: 'Vitality-Model-B', stage: 'S5 发货', delay: 'OK', overdueDays: 0, updated: 'Finished', status: 'finished' }
             ]
         },
+        // Data Issues Mock Objects (Linked to DataQualityWidget)
+        { id: 'C2411-002', brand: 'Specimen A', stage: 'S3 Material', delay: '+5d', isDataIssue: true, overdueDays: 5, signedDate: '2024-11-01', targetDate: '2024-12-01', updated: '1d ago' },
+        { id: 'C2411-005', brand: 'Specimen B', stage: 'S2 Payment', delay: '+10d', isDataIssue: true, overdueDays: 10, signedDate: '2024-11-05', targetDate: '2024-12-10', updated: '2d ago' },
+        { id: 'C2411-009', brand: 'Specimen C', stage: 'S4 Production', delay: '+8d', isDataIssue: true, overdueDays: 8, signedDate: '2024-10-25', targetDate: '2024-12-15', updated: '3d ago' },
+        { id: 'C2410-022', brand: 'Specimen D', stage: 'S3 Material', delay: '+3d', isDataIssue: true, overdueDays: 3, signedDate: '2024-11-10', targetDate: '2024-12-05', updated: '4d ago' },
+        { id: 'C2411-012', brand: 'Specimen E', stage: 'S1 Contract', delay: '+2d', isDataIssue: true, overdueDays: 2, signedDate: '2024-11-15', targetDate: '2024-12-20', updated: '5d ago' },
     ];
 
     const getFilteredData = () => {
         let data = mockData;
         if (filter === 'blocker') data = mockData.filter(d => d.isBlocker);
         if (filter === 'delay') data = mockData.filter(d => d.isLimit);
+        if (filter === 'data_issue') data = mockData.filter(d => d.isDataIssue);
 
         // Default sort by overdueDays descending (most urgent first)
         return [...data].sort((a, b) => b.overdueDays - a.overdueDays);
@@ -64,6 +71,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
             case 'blocker': return 'Payment Blocked';
             case 'material': return 'Material Risk';
             case 'data': return 'Data Issues';
+            case 'data_issue': return 'Data Issues';
             default: return '';
         }
     };
@@ -198,7 +206,8 @@ const ContractStatusWidget = ({ externalFilter }) => {
                             </tbody>
                         </table>
                         <div className="p-2 text-center text-xs text-gray-400 border-t border-gray-100">
-                            {t('list_footer') || "Sorted by severity."}
+                            {/* Dynamic Footer */}
+                            Displaying {filteredData.length} contracts {filter !== 'all' ? `with ${getFilterLabel(filter)}` : ''}.
                         </div>
                     </div>
                 )
@@ -213,7 +222,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
                             <div className="grid grid-cols-7 gap-2 mb-2 text-xs font-bold text-gray-500 text-center border-b pb-2">
                                 <div className="text-left pl-2">Contract</div>
                                 <div>S1 Contract</div>
-                                <div>S2 Money</div>
+                                <div>S2 Payment</div>
                                 <div>S3 Mat</div>
                                 <div>S4 Prod</div>
                                 <div>S5 Ship</div>
@@ -225,6 +234,13 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                 {filteredData.map(row => {
                                     const currentStageNum = parseInt(row.stage.substring(1, 2));
                                     const isExpanded = expandedRows[row.id];
+
+                                    // Helper for Data Issue Styling
+                                    const getDataIssueStyle = () => ({
+                                        backgroundColor: '#E0E0E0',
+                                        color: '#374151', // Dark grey text
+                                        border: '1px solid #9CA3AF'
+                                    });
 
                                     return (
                                         <div key={row.id} className="transition-all duration-200">
@@ -243,14 +259,22 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                                 </div>
 
                                                 {/* S1 */}
-                                                <div className="bg-green-500 text-white flex items-center justify-center rounded h-8 font-bold text-[10px]">OK</div>
+                                                <div className={`flex items-center justify-center rounded h-8 font-bold text-[10px] ${row.isDataIssue && currentStageNum === 1 ? '' : 'bg-green-500 text-white'}`} style={row.isDataIssue && currentStageNum === 1 ? getDataIssueStyle() : {}}>
+                                                    {row.isDataIssue && currentStageNum === 1 ? 'Data Error' : 'OK'}
+                                                </div>
 
                                                 {/* S2 */}
                                                 {currentStageNum === 2 ? (
-                                                    <div className="bg-red-500 text-white flex flex-col items-center justify-center h-8 rounded p-1">
-                                                        <span className="font-bold leading-tight">{row.delay}</span>
-                                                        <span className="text-[8px] leading-tight opacity-90">Pending</span>
-                                                    </div>
+                                                    row.isDataIssue ? (
+                                                        <div className="flex flex-col items-center justify-center h-8 rounded p-1" style={getDataIssueStyle()}>
+                                                            <span className="font-bold text-[8px] leading-tight">Data Error</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="bg-red-500 text-white flex flex-col items-center justify-center h-8 rounded p-1">
+                                                            <span className="font-bold leading-tight">{row.delay}</span>
+                                                            <span className="text-[8px] leading-tight opacity-90">Pending</span>
+                                                        </div>
+                                                    )
                                                 ) : (
                                                     <div className={`h-8 rounded flex items-center justify-center ${currentStageNum > 2 ? 'bg-green-500 text-white' : 'bg-gray-100'}`}>
                                                         {currentStageNum > 2 && 'OK'}
@@ -259,10 +283,16 @@ const ContractStatusWidget = ({ externalFilter }) => {
 
                                                 {/* S3 */}
                                                 {currentStageNum === 3 ? (
-                                                    <div className="bg-orange-500 text-white flex flex-col items-center justify-center h-8 rounded p-1">
-                                                        <span className="font-bold leading-tight">{row.delay}</span>
-                                                        <span className="text-[8px] leading-tight opacity-90">Missing</span>
-                                                    </div>
+                                                    row.isDataIssue ? (
+                                                        <div className="flex flex-col items-center justify-center h-8 rounded p-1" style={getDataIssueStyle()}>
+                                                            <span className="font-bold text-[8px] leading-tight">Data Error</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="bg-orange-500 text-white flex flex-col items-center justify-center h-8 rounded p-1">
+                                                            <span className="font-bold leading-tight">{row.delay}</span>
+                                                            <span className="text-[8px] leading-tight opacity-90">Missing</span>
+                                                        </div>
+                                                    )
                                                 ) : (
                                                     <div className={`h-8 rounded flex items-center justify-center ${currentStageNum > 3 ? 'bg-green-500 text-white' : 'bg-gray-100'}`}>
                                                         {currentStageNum > 3 && 'OK'}
@@ -271,10 +301,16 @@ const ContractStatusWidget = ({ externalFilter }) => {
 
                                                 {/* S4 */}
                                                 {currentStageNum === 4 ? (
-                                                    <div className="bg-red-400 text-white flex flex-col items-center justify-center h-8 rounded p-1">
-                                                        <span className="font-bold leading-tight">{row.delay}</span>
-                                                        <span className="text-[8px] leading-tight opacity-90">Delay</span>
-                                                    </div>
+                                                    row.isDataIssue ? (
+                                                        <div className="flex flex-col items-center justify-center h-8 rounded p-1" style={getDataIssueStyle()}>
+                                                            <span className="font-bold text-[8px] leading-tight">Data Error</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="bg-red-400 text-white flex flex-col items-center justify-center h-8 rounded p-1">
+                                                            <span className="font-bold leading-tight">{row.delay}</span>
+                                                            <span className="text-[8px] leading-tight opacity-90">Delay</span>
+                                                        </div>
+                                                    )
                                                 ) : (
                                                     <div className={`h-8 rounded flex items-center justify-center ${currentStageNum > 4 ? 'bg-green-500 text-white' : 'bg-gray-100'}`}>
                                                         {currentStageNum > 4 && 'OK'}

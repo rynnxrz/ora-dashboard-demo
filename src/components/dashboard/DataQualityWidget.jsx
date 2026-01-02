@@ -18,37 +18,71 @@ const DataQualityWidget = () => {
     // Mock Data Grouped by Contract
     const issueData = [
         {
-            id: 'C2411-002',
-            count: 2,
+            id: "C2411-002",
+            isDataIssue: true,
+            issueCount: 3,
             type: 'date',
-            issues: [
-                { product: 'Product A', issue: 'Missing Shipping Date' },
-                { product: 'Product B', issue: 'Shipping Date Logic Error' }
-            ]
+            summary: "Multiple (3)",
+            details: [
+                {
+                    productName: "Product A",
+                    issues: ["Missing: Shipping Date", "Missing: Price"]
+                },
+                {
+                    productName: "Product B",
+                    issues: ["Update Required"]
+                }
+            ],
+            currentStage: "S3",
+            daysDelayed: 5
         },
         {
-            id: 'C2411-005',
-            count: 1,
+            id: "C2411-005",
+            isDataIssue: true,
+            issueCount: 1,
             type: 'qty',
-            issues: [{ product: '-', issue: t('dq_issue_qty') || 'Quantity Mismatch' }]
+            summary: "Missing: Quantity",
+            details: [
+                { productName: "All Products", issues: ["Missing: Quantity"] }
+            ],
+            currentStage: "S2",
+            daysDelayed: 10
         },
         {
-            id: 'C2411-009',
-            count: 1,
+            id: "C2411-009",
+            isDataIssue: true,
+            issueCount: 1,
             type: 'logic',
-            issues: [{ product: '-', issue: t('dq_issue_logic') || 'Time Logic Error (S2>S3)' }]
+            summary: "Update Required",
+            details: [
+                { productName: "Production Slot", issues: ["Update Required"] }
+            ],
+            currentStage: "S4",
+            daysDelayed: 8
         },
         {
-            id: 'C2410-022',
-            count: 1,
+            id: "C2410-022",
+            isDataIssue: true,
+            issueCount: 1,
             type: 'other',
-            issues: [{ product: '-', issue: t('dq_issue_other') || 'Missing Contact' }]
+            summary: "Missing: Fields",
+            details: [
+                { productName: "Materials", issues: ["Missing: Fields"] }
+            ],
+            currentStage: "S3",
+            daysDelayed: 3
         },
         {
-            id: 'C2411-012',
-            count: 1,
+            id: "C2411-012",
+            isDataIssue: true,
+            issueCount: 1,
             type: 'other',
-            issues: [{ product: '-', issue: t('dq_issue_other') || 'Missing Label Spec' }]
+            summary: "Missing: Header Info",
+            details: [
+                { productName: "Contract Header", issues: ["Missing: Header Info"] }
+            ],
+            currentStage: "S1",
+            daysDelayed: 2
         }
     ];
 
@@ -58,7 +92,7 @@ const DataQualityWidget = () => {
         : issueData.filter(i => i.type === filter);
 
     // Sort by Count Descending
-    const sortedIssues = [...filteredIssues].sort((a, b) => b.count - a.count);
+    const sortedIssues = [...filteredIssues].sort((a, b) => b.issueCount - a.issueCount);
 
     // Chart Data (Unchanged visuals, just context)
     const dqData = {
@@ -79,6 +113,7 @@ const DataQualityWidget = () => {
             tooltip: { callbacks: { label: (c) => c.label + ': ' + c.raw + '%' } }
         }
     };
+
 
     return (
         <div className="card lg:col-span-1 flex flex-col h-full">
@@ -110,7 +145,7 @@ const DataQualityWidget = () => {
                     <table className="w-full text-left text-xs">
                         <thead className="text-gray-400 border-b border-gray-100">
                             <tr>
-                                <th className="py-1 font-medium">{t('p1d_th_contract') || "Contract"}</th>
+                                <th className="py-1 font-medium">Contract</th>
                                 <th className="py-1 font-medium text-right">{t('p1d_th_issue') || "Issue"}</th>
                             </tr>
                         </thead>
@@ -120,46 +155,49 @@ const DataQualityWidget = () => {
                                     <React.Fragment key={item.id}>
                                         <tr
                                             className={`hover:bg-gray-50 cursor-pointer ${expandedRows[item.id] ? 'bg-gray-50' : ''}`}
-                                            onClick={() => item.count > 1 && toggleRow(item.id)}
+                                            onClick={() => toggleRow(item.id)} // Always toggle to see details
                                         >
                                             <td className="py-1.5 font-bold text-gray-700 flex items-center gap-2">
+                                                {/* Chevron on Left */}
+                                                <i className={`fa-solid ${expandedRows[item.id] ? 'fa-caret-down' : 'fa-caret-right'} text-gray-400 text-[10px]`}></i>
                                                 {item.id}
-                                                {item.count > 1 && (
-                                                    <i className={`fa-solid ${expandedRows[item.id] ? 'fa-caret-down' : 'fa-caret-right'} text-gray-400 text-[10px]`}></i>
-                                                )}
                                             </td>
                                             <td className="py-1.5 text-right text-gray-500">
-                                                {item.count > 1 ? (
+                                                {item.issueCount > 1 ? (
                                                     <span className="font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded text-[10px]">
-                                                        Multiple ({item.count})
+                                                        {item.summary}
                                                     </span>
                                                 ) : (
-                                                    <span className="truncate max-w-[120px] block ml-auto" title={item.issues[0].issue}>
-                                                        {item.issues[0].issue}
+                                                    <span className="truncate max-w-[120px] block ml-auto" title={item.summary}>
+                                                        {item.summary}
                                                     </span>
                                                 )}
                                             </td>
                                         </tr>
                                         {/* Expanded Content */}
-                                        {expandedRows[item.id] && item.count > 1 && (
-                                            <tr className="bg-gray-50/50">
-                                                <td colSpan="2" className="p-2 pl-4">
-                                                    <table className="w-full text-[10px]">
-                                                        <thead>
-                                                            <tr className="text-gray-400 border-b border-gray-200 border-dashed">
-                                                                <th className="font-normal pb-1">Item / Product</th>
-                                                                <th className="font-normal pb-1 text-right">Missing / Error Detail</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="divide-y divide-gray-100/50">
-                                                            {item.issues.map((subIssue, idx) => (
-                                                                <tr key={idx}>
-                                                                    <td className="py-1 font-medium text-gray-600">{subIssue.product}</td>
-                                                                    <td className="py-1 text-right text-red-500">{subIssue.issue}</td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
+                                        {expandedRows[item.id] && (
+                                            <tr className="bg-gray-100/50">
+                                                <td colSpan="2" className="p-0">
+                                                    <div className="bg-gray-50 border-y border-gray-100 p-2 pl-6 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] max-h-60 overflow-y-auto">
+                                                        <table className="w-full text-[10px]">
+                                                            <tbody className="divide-y divide-gray-200/50">
+                                                                {item.details.map((subIssue, idx) => (
+                                                                    <tr key={idx}>
+                                                                        <td className="py-2 font-medium text-gray-600 align-top w-1/3">{subIssue.productName}</td>
+                                                                        <td className="py-2 text-right align-top">
+                                                                            <div className="flex flex-wrap justify-end gap-1.5">
+                                                                                {subIssue.issues.map((issue, issueIdx) => (
+                                                                                    <span key={issueIdx} className="bg-[#FFF5F5] text-[#E53E3E] border border-[#FECACA] px-2 py-0.5 rounded whitespace-normal text-right mb-1">
+                                                                                        {issue}
+                                                                                    </span>
+                                                                                ))}
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )}

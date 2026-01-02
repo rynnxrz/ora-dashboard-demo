@@ -74,10 +74,10 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                     bgClass="bg-gray-100"
                     borderClass="border-gray-400"
                     iconClass="fa-solid fa-database"
-                    trend={<span className="text-gray-600 font-medium">Top Issue: Missing Shipping Date</span>}
+                    trend={<span className="text-gray-600 font-medium">Main Reason: Missing Shipping Date</span>}
                     subtext=""
-                    isActive={activeFilter === 'data'} // Not mapped in HTML but good to have
-                    onClick={() => onKpiClick('data')}
+                    isActive={activeFilter === 'data_issue'} // Not mapped in HTML but good to have
+                    onClick={() => onKpiClick('data_issue')}
                 />
             </div>
         </section>

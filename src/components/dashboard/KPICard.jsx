@@ -18,7 +18,7 @@ const KPICard = ({
 }) => {
     return (
         <div
-            className={`card p-4 border-l-4 cursor-pointer hover:shadow-md transition kpi-card relative overflow-hidden ${borderClass} ${isActive ? 'active-filter bg-white shadow-lg ring-2 ring-current transform scale-[1.02] z-10' : ''}`}
+            className={`card p-4 border-l-4 cursor-pointer hover:shadow-md transition kpi-card relative overflow-hidden ${borderClass} ${isActive ? 'active-filter bg-white shadow-xl ring-2 ring-offset-2 ring-current transform scale-[1.02] z-10' : ''}`}
             id={id}
             onClick={onClick}
         >
