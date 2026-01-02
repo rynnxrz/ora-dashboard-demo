@@ -18,7 +18,7 @@ const KPICard = ({
 }) => {
     return (
         <div
-            className={`card p-4 border-l-4 cursor-pointer hover:shadow-md transition kpi-card relative overflow-hidden ${borderClass} ${isActive ? 'active-filter bg-[#F0FDFA] ring-1 ring-[#2A9D8F] ring-inset' : ''}`}
+            className={`card p-4 border-l-4 cursor-pointer hover:shadow-md transition kpi-card relative overflow-hidden ${borderClass} ${isActive ? 'active-filter bg-white shadow-lg ring-2 ring-current transform scale-[1.02] z-10' : ''}`}
             id={id}
             onClick={onClick}
         >
@@ -27,7 +27,8 @@ const KPICard = ({
                     <div className="text-sm font-bold text-gray-700 mb-1">{title}</div>
                     <div className="text-xs text-gray-500 uppercase font-bold">{subtitle}</div>
                     <div className={`text-2xl font-bold mt-1 ${colorClass}`}>
-                        {value} <span className="text-sm text-gray-400 font-normal">{total ? `/ ${total}` : unit}</span>
+                        {value} <span className="text-sm text-gray-400 font-normal">{total && `/ ${total}`}</span>
+                        <div className="text-xs text-gray-400 font-normal mt-0">{unit}</div>
                     </div>
                 </div>
                 <div className={`${bgClass} p-2 rounded-full ${colorClass}`}>

@@ -9,19 +9,58 @@ ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 const DataQualityWidget = () => {
     const { t } = useLanguage();
     const [filter, setFilter] = useState('all'); // 'all' | 'date' | 'qty' | 'logic' | 'other'
+    const [expandedRows, setExpandedRows] = useState({});
 
-    // Mock Data for "Issue List"
+    const toggleRow = (id) => {
+        setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    // Mock Data Grouped by Contract
     const issueData = [
-        { id: 'C2411-002', issue: t('dq_issue_date') || 'Missing Shipping Date', type: 'date', updated: '2h ago' },
-        { id: 'C2411-005', issue: t('dq_issue_qty') || 'Quantity Mismatch', type: 'qty', updated: '5h ago' },
-        { id: 'C2411-009', issue: t('dq_issue_logic') || 'Time Logic Error (S2>S3)', type: 'logic', updated: '1d ago' },
-        { id: 'C2410-022', issue: t('dq_issue_other') || 'Missing Contact', type: 'other', updated: '2d ago' },
-        { id: 'C2411-012', issue: t('dq_issue_other') || 'Missing Label Spec', type: 'other', updated: '3d ago' }
+        {
+            id: 'C2411-002',
+            count: 2,
+            type: 'date',
+            issues: [
+                { product: 'Product A', issue: 'Missing Shipping Date' },
+                { product: 'Product B', issue: 'Shipping Date Logic Error' }
+            ]
+        },
+        {
+            id: 'C2411-005',
+            count: 1,
+            type: 'qty',
+            issues: [{ product: '-', issue: t('dq_issue_qty') || 'Quantity Mismatch' }]
+        },
+        {
+            id: 'C2411-009',
+            count: 1,
+            type: 'logic',
+            issues: [{ product: '-', issue: t('dq_issue_logic') || 'Time Logic Error (S2>S3)' }]
+        },
+        {
+            id: 'C2410-022',
+            count: 1,
+            type: 'other',
+            issues: [{ product: '-', issue: t('dq_issue_other') || 'Missing Contact' }]
+        },
+        {
+            id: 'C2411-012',
+            count: 1,
+            type: 'other',
+            issues: [{ product: '-', issue: t('dq_issue_other') || 'Missing Label Spec' }]
+        }
     ];
 
-    const filteredIssues = filter === 'all' ? issueData : issueData.filter(i => i.type === filter);
+    // Filter Logic - Simple check if any issue matches type or if top-level type matches
+    const filteredIssues = filter === 'all'
+        ? issueData
+        : issueData.filter(i => i.type === filter);
 
-    // Chart Data
+    // Sort by Count Descending
+    const sortedIssues = [...filteredIssues].sort((a, b) => b.count - a.count);
+
+    // Chart Data (Unchanged visuals, just context)
     const dqData = {
         labels: [t('dq_good') || 'Complete', t('dq_bad') || 'Incomplete'],
         datasets: [{
@@ -37,19 +76,9 @@ const DataQualityWidget = () => {
         plugins: {
             legend: { display: false },
             datalabels: { display: false },
-            tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        return context.label + ': ' + context.raw + '%';
-                    }
-                }
-            }
-        },
-        onClick: (event, elements) => {
-            // Mock click interaction on chart section if needed
+            tooltip: { callbacks: { label: (c) => c.label + ': ' + c.raw + '%' } }
         }
     };
-
 
     return (
         <div className="card lg:col-span-1 flex flex-col h-full">
@@ -86,12 +115,55 @@ const DataQualityWidget = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {filteredIssues.length > 0 ? (
-                                filteredIssues.map((item, idx) => (
-                                    <tr key={idx} className="hover:bg-gray-50 cursor-pointer" onClick={() => setFilter(filter === item.type ? 'all' : item.type)}>
-                                        <td className="py-1.5 font-bold text-gray-700">{item.id}</td>
-                                        <td className="py-1.5 text-right text-gray-500 truncate max-w-[120px]" title={item.issue}>{item.issue}</td>
-                                    </tr>
+                            {sortedIssues.length > 0 ? (
+                                sortedIssues.map((item) => (
+                                    <React.Fragment key={item.id}>
+                                        <tr
+                                            className={`hover:bg-gray-50 cursor-pointer ${expandedRows[item.id] ? 'bg-gray-50' : ''}`}
+                                            onClick={() => item.count > 1 && toggleRow(item.id)}
+                                        >
+                                            <td className="py-1.5 font-bold text-gray-700 flex items-center gap-2">
+                                                {item.id}
+                                                {item.count > 1 && (
+                                                    <i className={`fa-solid ${expandedRows[item.id] ? 'fa-caret-down' : 'fa-caret-right'} text-gray-400 text-[10px]`}></i>
+                                                )}
+                                            </td>
+                                            <td className="py-1.5 text-right text-gray-500">
+                                                {item.count > 1 ? (
+                                                    <span className="font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded text-[10px]">
+                                                        Multiple ({item.count})
+                                                    </span>
+                                                ) : (
+                                                    <span className="truncate max-w-[120px] block ml-auto" title={item.issues[0].issue}>
+                                                        {item.issues[0].issue}
+                                                    </span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                        {/* Expanded Content */}
+                                        {expandedRows[item.id] && item.count > 1 && (
+                                            <tr className="bg-gray-50/50">
+                                                <td colSpan="2" className="p-2 pl-4">
+                                                    <table className="w-full text-[10px]">
+                                                        <thead>
+                                                            <tr className="text-gray-400 border-b border-gray-200 border-dashed">
+                                                                <th className="font-normal pb-1">Item / Product</th>
+                                                                <th className="font-normal pb-1 text-right">Missing / Error Detail</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-100/50">
+                                                            {item.issues.map((subIssue, idx) => (
+                                                                <tr key={idx}>
+                                                                    <td className="py-1 font-medium text-gray-600">{subIssue.product}</td>
+                                                                    <td className="py-1 text-right text-red-500">{subIssue.issue}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
                                 ))
                             ) : (
                                 <tr>
@@ -102,9 +174,7 @@ const DataQualityWidget = () => {
                     </table>
                 </div>
             </div>
-            <div className="card-footer text-[10px] text-gray-400 text-center">
-                {t('p1d_footer') || "Click rows to filter by issue type"}
-            </div>
+            {/* Footer Removed */}
         </div>
     );
 };

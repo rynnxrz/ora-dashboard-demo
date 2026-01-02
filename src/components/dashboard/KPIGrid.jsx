@@ -24,12 +24,13 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                     subtitle={t('kpi_lead_sub') || "Cycle > Target"}
                     value="18"
                     total="142"
+                    unit="Contracts"
                     colorClass="text-red-600"
                     bgClass="bg-red-100"
                     borderClass="border-red-500"
                     iconClass="fa-solid fa-clock"
                     trend={<span><i className="fa-solid fa-arrow-up"></i> 5 vs last week</span>}
-                    subtext="Stage SLA > Target"
+                    subtext="Max Delay: +45d"
                     isActive={activeFilter === 'delay'} // Maps to 'delay' (Severe Delay)
                     onClick={() => onKpiClick('delay')}
                 />
@@ -44,7 +45,7 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                     borderClass="border-orange-400"
                     iconClass="fa-solid fa-hand-holding-dollar"
                     trend="High Priority"
-                    subtext="Pending > 3 Days"
+                    subtext="Longest Pending: 12d"
                     isActive={activeFilter === 'blocker'} // Maps to 'blocker'
                     onClick={() => onKpiClick('blocker')}
                 />
@@ -66,15 +67,15 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                 <KPICard
                     id="card-data"
                     title={t('kpi_data_title') || "Data Issues"}
-                    subtitle={t('kpi_data_sub') || "Incomplete"}
+                    subtitle={t('kpi_data_sub') || "INCOMPLETE DATA"}
                     value="15"
-                    unit="Records"
+                    unit="Contracts"
                     colorClass="text-gray-600"
                     bgClass="bg-gray-100"
                     borderClass="border-gray-400"
                     iconClass="fa-solid fa-database"
-                    trend={<span className="text-red-500">Affects Forecast</span>}
-                    subtext="Missing Fields"
+                    trend={<span className="text-gray-600 font-medium">Top Issue: Missing Shipping Date</span>}
+                    subtext=""
                     isActive={activeFilter === 'data'} // Not mapped in HTML but good to have
                     onClick={() => onKpiClick('data')}
                 />

@@ -29,7 +29,7 @@ export const TRANSLATIONS = {
         "Tab_delay": "Severe Delay",
         "th_contract": "Contract / Brand",
         "th_stage": "Current Stage",
-        "th_delay": "Max Delay",
+        "th_delay": "Days Delayed",
         "th_status": "Status / Reason",
         "th_time": "Time (Sign/Upd)",
 
