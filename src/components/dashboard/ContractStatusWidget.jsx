@@ -6,6 +6,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
     const [viewMode, setViewMode] = useState('list'); // 'list' | 'graph'
     const [filter, setFilter] = useState('all'); // 'all' | 'blocker' | 'delay'
     const [expandedRows, setExpandedRows] = useState({});
+    const [showAllRows, setShowAllRows] = useState(false);
 
     const toggleRow = (id) => {
         setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
@@ -45,11 +46,11 @@ const ContractStatusWidget = ({ externalFilter }) => {
             ]
         },
         // Data Issues Mock Objects (Linked to DataQualityWidget)
-        { id: 'C2411-002', brand: 'Specimen A', stage: 'S3 Material', delay: '+5d', isDataIssue: true, overdueDays: 5, signedDate: '2024-11-01', targetDate: '2024-12-01', updated: '1d ago' },
-        { id: 'C2411-005', brand: 'Specimen B', stage: 'S2 Payment', delay: '+10d', isDataIssue: true, overdueDays: 10, signedDate: '2024-11-05', targetDate: '2024-12-10', updated: '2d ago' },
-        { id: 'C2411-009', brand: 'Specimen C', stage: 'S4 Production', delay: '+8d', isDataIssue: true, overdueDays: 8, signedDate: '2024-10-25', targetDate: '2024-12-15', updated: '3d ago' },
-        { id: 'C2410-022', brand: 'Specimen D', stage: 'S3 Material', delay: '+3d', isDataIssue: true, overdueDays: 3, signedDate: '2024-11-10', targetDate: '2024-12-05', updated: '4d ago' },
-        { id: 'C2411-012', brand: 'Specimen E', stage: 'S1 Contract', delay: '+2d', isDataIssue: true, overdueDays: 2, signedDate: '2024-11-15', targetDate: '2024-12-20', updated: '5d ago' },
+        { id: 'C2411-002', brand: 'Specimen A', stage: 'S3 Material', delay: '+5d', isDataIssue: true, reason: 'Data Error', overdueDays: 5, signedDate: '2024-11-01', targetDate: '2024-12-01', updated: '1d ago' },
+        { id: 'C2411-005', brand: 'Specimen B', stage: 'S2 Payment', delay: '+10d', isDataIssue: true, reason: 'Data Error', overdueDays: 10, signedDate: '2024-11-05', targetDate: '2024-12-10', updated: '2d ago' },
+        { id: 'C2411-009', brand: 'Specimen C', stage: 'S4 Production', delay: '+8d', isDataIssue: true, reason: 'Data Error', overdueDays: 8, signedDate: '2024-10-25', targetDate: '2024-12-15', updated: '3d ago' },
+        { id: 'C2410-022', brand: 'Specimen D', stage: 'S3 Material', delay: '+3d', isDataIssue: true, reason: 'Data Error', overdueDays: 3, signedDate: '2024-11-10', targetDate: '2024-12-05', updated: '4d ago' },
+        { id: 'C2411-012', brand: 'Specimen E', stage: 'S1 Contract', delay: '+2d', isDataIssue: true, reason: 'Data Error', overdueDays: 2, signedDate: '2024-11-15', targetDate: '2024-12-20', updated: '5d ago' },
     ];
 
     const getFilteredData = () => {
@@ -63,6 +64,8 @@ const ContractStatusWidget = ({ externalFilter }) => {
     };
 
     const filteredData = getFilteredData();
+    const visibleRows = showAllRows ? filteredData : filteredData.slice(0, 4);
+    const hiddenCount = Math.max(filteredData.length - visibleRows.length, 0);
 
     const getFilterLabel = (filterKey) => {
         switch (filterKey) {
@@ -77,7 +80,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
     };
 
     return (
-        <div className="card lg:col-span-2">
+        <div className="card lg:col-span-2 h-full flex flex-col">
             <div className="card-header">
                 <div className="flex items-center gap-4">
                     <h3 className="card-title flex items-center gap-2">
@@ -114,7 +117,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
             {/* List View */}
             {
                 viewMode === 'list' && (
-                    <div className="p-0 overflow-x-auto flex-1">
+                    <div className="p-0 overflow-x-auto flex-1 overflow-y-auto">
                         <table className="w-full text-left text-xs">
                             <thead className="bg-gray-50 text-gray-500 uppercase border-b border-gray-200">
                                 <tr>
@@ -126,7 +129,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {filteredData.map((row) => (
+                                {visibleRows.map((row) => (
                                     <React.Fragment key={row.id}>
                                         <tr className={`hover:bg-gray-50 ${expandedRows[row.id] ? 'bg-gray-50' : ''}`}>
                                             <td className="px-4 py-3">
@@ -157,7 +160,8 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                             <td className="px-4 py-3">
                                                 <span className={`px-2 py-0.5 rounded border text-[10px] ${row.type === 'money' ? 'bg-red-50 text-red-600 border-red-100' :
                                                     row.type === 'materials' ? 'bg-orange-50 text-orange-600 border-orange-100' :
-                                                        'text-gray-500 bg-transparent border-transparent'
+                                                        row.isDataIssue ? 'bg-gray-100 text-gray-600 border-gray-200' :
+                                                            'text-gray-500 bg-transparent border-transparent'
                                                     }`}>
                                                     {row.reason}
                                                 </span>
@@ -206,8 +210,23 @@ const ContractStatusWidget = ({ externalFilter }) => {
                             </tbody>
                         </table>
                         <div className="p-2 text-center text-xs text-gray-400 border-t border-gray-100">
-                            {/* Dynamic Footer */}
-                            Displaying {filteredData.length} contracts {filter !== 'all' ? `with ${getFilterLabel(filter)}` : ''}.
+                            Displaying {visibleRows.length} of {filteredData.length} contracts {filter !== 'all' ? `with ${getFilterLabel(filter)}` : ''}.
+                            {hiddenCount > 0 && (
+                                <button
+                                    onClick={() => setShowAllRows(true)}
+                                    className="ml-2 text-[10px] font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded border border-dashed border-gray-200 px-2 py-0.5 transition-colors"
+                                >
+                                    Click to view more
+                                </button>
+                            )}
+                            {hiddenCount === 0 && showAllRows && filteredData.length > 4 && (
+                                <button
+                                    onClick={() => setShowAllRows(false)}
+                                    className="ml-2 text-[10px] font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded border border-dashed border-gray-200 px-2 py-0.5 transition-colors"
+                                >
+                                    Show less
+                                </button>
+                            )}
                         </div>
                     </div>
                 )

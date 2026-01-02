@@ -6,10 +6,11 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-const DataQualityWidget = () => {
+const DataQualityWidget = ({ isEmbedded }) => {
     const { t } = useLanguage();
     const [filter, setFilter] = useState('all'); // 'all' | 'date' | 'qty' | 'logic' | 'other'
     const [expandedRows, setExpandedRows] = useState({});
+    const [showAll, setShowAll] = useState(false);
 
     const toggleRow = (id) => {
         setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
@@ -93,6 +94,8 @@ const DataQualityWidget = () => {
 
     // Sort by Count Descending
     const sortedIssues = [...filteredIssues].sort((a, b) => b.issueCount - a.issueCount);
+    const visibleIssues = showAll ? sortedIssues : sortedIssues.slice(0, 3);
+    const hiddenCount = Math.max(sortedIssues.length - visibleIssues.length, 0);
 
     // Chart Data (Unchanged visuals, just context)
     const dqData = {
@@ -116,15 +119,17 @@ const DataQualityWidget = () => {
 
 
     return (
-        <div className="card lg:col-span-1 flex flex-col h-full">
-            <div className="card-header">
-                <div>
-                    <h3 className="card-title"><i className="fa-solid fa-check-double text-gray-600"></i> {t('p1d_title') || "Data Quality"}</h3>
-                    <span className="text-xs text-gray-400">{t('p1d_update') || "Last Update: 10 mins ago"}</span>
+        <div className={`flex flex-col h-full ${isEmbedded ? '' : 'card lg:col-span-1'}`}>
+            {!isEmbedded && (
+                <div className="card-header">
+                    <div>
+                        <h3 className="card-title"><i className="fa-solid fa-check-double text-gray-600"></i> {t('p1d_title') || "Data Quality"}</h3>
+                        <span className="text-xs text-gray-400">{t('p1d_update') || "Last Update: 10 mins ago"}</span>
+                    </div>
                 </div>
-            </div>
+            )}
 
-            <div className="p-4 flex-1 flex flex-col gap-4 overflow-hidden">
+            <div className="p-4 flex flex-col gap-4">
                 {/* Chart Section */}
                 <div className="h-32 relative shrink-0">
                     <Doughnut data={dqData} options={dqOptions} />
@@ -135,7 +140,7 @@ const DataQualityWidget = () => {
                 </div>
 
                 {/* List Section */}
-                <div className="flex-1 overflow-y-auto min-h-[150px] border-t pt-2 scroll-smooth">
+                <div className="border-t pt-2">
                     <div className="flex justify-between items-center mb-2">
                         <h4 className="text-xs font-bold text-gray-700">{t('p1d_list_title') || "Issue List"}</h4>
                         <div className="text-[10px] text-gray-400">
@@ -150,8 +155,8 @@ const DataQualityWidget = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {sortedIssues.length > 0 ? (
-                                sortedIssues.map((item) => (
+                            {visibleIssues.length > 0 ? (
+                                visibleIssues.map((item) => (
                                     <React.Fragment key={item.id}>
                                         <tr
                                             className={`hover:bg-gray-50 cursor-pointer ${expandedRows[item.id] ? 'bg-gray-50' : ''}`}
@@ -178,7 +183,7 @@ const DataQualityWidget = () => {
                                         {expandedRows[item.id] && (
                                             <tr className="bg-gray-100/50">
                                                 <td colSpan="2" className="p-0">
-                                                    <div className="bg-gray-50 border-y border-gray-100 p-2 pl-6 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] max-h-60 overflow-y-auto">
+                                                    <div className="bg-gray-50 border-y border-gray-100 p-2 pl-6 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
                                                         <table className="w-full text-[10px]">
                                                             <tbody className="divide-y divide-gray-200/50">
                                                                 {item.details.map((subIssue, idx) => (
@@ -210,6 +215,22 @@ const DataQualityWidget = () => {
                             )}
                         </tbody>
                     </table>
+                    {hiddenCount > 0 && (
+                        <button
+                            onClick={() => setShowAll(true)}
+                            className="w-full mt-2 py-1.5 text-[10px] font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded border border-dashed border-gray-200 transition-colors"
+                        >
+                            Click to view more
+                        </button>
+                    )}
+                    {hiddenCount === 0 && showAll && sortedIssues.length > 3 && (
+                        <button
+                            onClick={() => setShowAll(false)}
+                            className="w-full mt-2 py-1.5 text-[10px] font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded border border-dashed border-gray-200 transition-colors"
+                        >
+                            Show less
+                        </button>
+                    )}
                 </div>
             </div>
             {/* Footer Removed */}

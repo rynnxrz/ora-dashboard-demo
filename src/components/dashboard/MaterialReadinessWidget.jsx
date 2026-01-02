@@ -111,29 +111,30 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
     const hiddenCount = mockMaterialsData.riskBatches.length - 2;
 
     return (
-        <div className="card lg:col-span-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 h-full">
-            {/* Header */}
-            <div className="card-header p-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white rounded-t-2xl sticky top-0 z-20">
-                <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-4 bg-yellow-500 rounded-full"></div>
-                    <h3 className="font-bold text-slate-700 text-sm uppercase tracking-tight">MATERIAL READINESS</h3>
-                </div>
-                {isExpanded && (
+        <div className={`flex flex-col bg-white ${isExpanded ? 'fixed inset-0 z-50 m-4 shadow-2xl rounded-2xl border border-slate-200' : 'h-full rounded-2xl'}`}>
+            {/* Header - Only populate when expanded or if strictly needed. Since embedded in tab, hide default header unless expanded */}
+            {isExpanded && (
+                <div className="card-header p-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white rounded-t-2xl sticky top-0 z-20">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-4 bg-yellow-500 rounded-full"></div>
+                        <h3 className="font-bold text-slate-700 text-sm uppercase tracking-tight">MATERIAL READINESS</h3>
+                    </div>
+
                     <button onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }} className="text-slate-400 hover:text-slate-600 p-1">
                         <i className="fa-solid fa-times"></i>
                     </button>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Content */}
-            <div className={`p-3 flex-1 flex flex-col gap-3 ${isExpanded ? 'overflow-y-auto custom-scrollbar' : 'overflow-hidden'}`}>
+            <div className="p-3 flex flex-col gap-3">
 
                 {/* Donut Chart (Hide when expanded to focus on list) */}
                 {!isExpanded && (
-                    <div className="h-24 relative shrink-0">
+                    <div className="h-20 relative shrink-0">
                         <Doughnut data={chartData} options={chartOptions} />
                         <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
-                            <span className="text-2xl font-black text-slate-700">{readinessPercentage}%</span>
+                            <span className="text-xl font-black text-slate-700">{readinessPercentage}%</span>
                             <span className="text-[10px] text-slate-400 font-bold uppercase">Ready</span>
                         </div>
                     </div>
@@ -146,45 +147,45 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                         <span className="text-[9px] text-slate-400">{mockMaterialsData.riskBatches.length} items</span>
                     </div>
 
-                    <div className={`space-y-2 ${isExpanded ? '' : 'overflow-y-auto pr-1 flex-1 custom-scrollbar'}`}>
+                    <div className="space-y-2">
                         {displayedBatches.map((batch, idx) => {
                             const overdueStatus = getDeadlineStatus(batch.overdueDays);
                             const isOverdue = batch.overdueDays > 0;
                             const completionPct = (batch.progress / batch.totalItems) * 100;
 
                             return (
-                                <div key={idx} className="bg-slate-50 rounded-lg p-3 border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                                <div key={idx} className="bg-slate-50 rounded-lg p-2 border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                                     {/* Header: Just ID now */}
-                                    <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center justify-between mb-1">
                                         <span className="text-xs font-bold text-slate-700 font-mono tracking-tight">{batch.id}</span>
                                     </div>
 
                                     {/* Standardized 3-Point Timeline */}
-                                    <div className="relative flex items-start justify-between text-[10px] text-slate-500 pb-2">
+                                    <div className="relative flex items-start justify-between text-[10px] text-slate-500 pb-1">
 
                                         {/* Connector Line */}
-                                        <div className="absolute top-[5px] left-4 right-4 h-[1px] bg-slate-200 -z-0"></div>
+                                        <div className="absolute top-[4px] left-4 right-4 h-[1px] bg-slate-200 -z-0"></div>
 
                                         {/* Node 1: Signed Date */}
                                         <div className="relative z-10 flex flex-col items-center flex-1">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-slate-400 mb-1.5 border border-white box-content"></div>
-                                            <span className="text-[9px] text-slate-400 mb-px uppercase tracking-wider">Signed Date</span>
-                                            <span className="text-[10px] font-mono text-slate-600 font-medium">{batch.signedDate}</span>
+                                            <div className="w-2 h-2 rounded-full bg-slate-400 mb-1 border border-white box-content"></div>
+                                            <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider">Signed Date</span>
+                                            <span className="text-[9px] font-mono text-slate-600 font-medium">{batch.signedDate}</span>
                                         </div>
 
                                         {/* Node 2: Material Deadline */}
                                         <div className="relative z-10 flex flex-col items-center flex-[1.5]">
-                                            <div className={`w-2.5 h-2.5 rounded-full mb-1.5 border border-white box-content ${isOverdue ? 'bg-red-500' : 'bg-blue-500'}`}></div>
-                                            <span className="text-[9px] text-slate-400 mb-px uppercase tracking-wider">Material Deadline</span>
-                                            <span className={`text-[10px] font-mono font-bold mb-0.5 ${isOverdue ? 'text-red-500' : 'text-slate-700'}`}>{batch.materialTargetDate}</span>
+                                            <div className={`w-2 h-2 rounded-full mb-1 border border-white box-content ${isOverdue ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                                            <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider">Material Deadline</span>
+                                            <span className={`text-[9px] font-mono font-bold mb-0.5 ${isOverdue ? 'text-red-500' : 'text-slate-700'}`}>{batch.materialTargetDate}</span>
 
                                             {/* Explicit Status Text */}
-                                            <span className={`text-[9px] ${overdueStatus.color} mb-1 whitespace-nowrap`}>
+                                            <span className={`text-[8px] ${overdueStatus.color} mb-1 whitespace-nowrap`}>
                                                 {overdueStatus.text}
                                             </span>
 
                                             {/* Progress Bar & Missing Info */}
-                                            <div className="w-20 h-1.5 bg-slate-200 rounded-full overflow-hidden mb-0.5">
+                                            <div className="w-16 h-1 bg-slate-200 rounded-full overflow-hidden mb-0.5">
                                                 <div
                                                     className="h-full bg-emerald-500 rounded-full"
                                                     style={{ width: `${completionPct}%` }}
@@ -199,9 +200,9 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
 
                                         {/* Node 3: Prod Start */}
                                         <div className="relative z-10 flex flex-col items-center flex-1">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-blue-600 mb-1.5 border border-white box-content ring-2 ring-blue-100"></div>
-                                            <span className="text-[9px] text-slate-400 mb-px uppercase tracking-wider">Prod Start</span>
-                                            <span className="text-[10px] font-mono text-slate-600 font-medium mb-0.5">{batch.prodStartDate}</span>
+                                            <div className="w-2 h-2 rounded-full bg-blue-600 mb-1 border border-white box-content ring-2 ring-blue-100"></div>
+                                            <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider">Prod Start</span>
+                                            <span className="text-[9px] font-mono text-slate-600 font-medium mb-0.5">{batch.prodStartDate}</span>
                                         </div>
                                     </div>
                                 </div>

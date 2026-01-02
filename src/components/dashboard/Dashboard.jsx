@@ -3,10 +3,9 @@ import DashboardFilters from './DashboardFilters';
 import KPIGrid from './KPIGrid';
 import ContractStatusWidget from './ContractStatusWidget';
 
-import DataQualityWidget from './DataQualityWidget';
-import MaterialReadinessWidget from './MaterialReadinessWidget';
 import ProcessLeadTimeWidget from './ProcessLeadTimeWidget';
 import ClientRadarWidget from './ClientRadarWidget';
+import SidebarContainer from './SidebarContainer';
 
 const Dashboard = () => {
     // Shared State for interactions
@@ -31,15 +30,8 @@ const Dashboard = () => {
                     {/* Pass filter to Contract Status Widget */}
                     <ContractStatusWidget externalFilter={kpiFilter} />
 
-                    {/* Part 1 Right Column: Data Quality & Material Readiness */}
-                    <div className="flex flex-col gap-6">
-                        <div className="flex-1 min-h-0">
-                            <DataQualityWidget />
-                        </div>
-                        <div className="flex-1 min-h-0 h-[340px]">
-                            <MaterialReadinessWidget onRiskClick={(id) => handleKpiClick && handleKpiClick('material')} />
-                        </div>
-                    </div>
+                    {/* Part 1 Right Column: Tabbed Sidebar */}
+                    <SidebarContainer onRiskClick={(id) => handleKpiClick && handleKpiClick('material')} />
                 </div>
 
                 <ProcessLeadTimeWidget />

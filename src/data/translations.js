@@ -21,7 +21,7 @@ export const TRANSLATIONS = {
         "kpi_data_sub": "Data Records Incomplete",
 
         // Widget P1-B
-        "p1b_title": "P1-B. Key Contracts Stage Overview",
+        "p1b_title": "P1-B. Key Contracts Overview",
         "btn_list": "List",
         "btn_graph": "Graph",
         "Tab_all": "All",
@@ -41,7 +41,7 @@ export const TRANSLATIONS = {
         "zombie_i_sub": "Overdue > 7d",
 
         // Widget P1-D
-        "p1d_title": "Data Quality Completeness",
+        "p1d_title": "Data Quality",
         "p1d_update": "Last Update: 10 mins ago",
         "p1d_subtitle": "Left: Completeness, Right: Issue Types",
         "p1d_list_title": "Issue List",
@@ -206,7 +206,7 @@ export const TRANSLATIONS = {
         "kpi_data_sub": "字段缺失/异常",
 
         // Widget P1-B
-        "p1b_title": "P1-B. 关键订单阶段总览 (Key Contracts)",
+        "p1b_title": "P1-B. 关键订单概览 (Key Contracts)",
         "btn_list": "列表",
         "btn_graph": "图表",
         "Tab_all": "全部",
@@ -226,7 +226,7 @@ export const TRANSLATIONS = {
         "zombie_i_sub": "发货逾期超过 7 天 (Overdue > 7d)",
 
         // Widget P1-D
-        "p1d_title": "数据记录完整度 (Data Quality)",
+        "p1d_title": "数据完整度 (Data Quality)",
         "p1d_update": "Last Update: 10 mins ago",
         "p1d_subtitle": "左侧展示整体完整度，右侧展示问题分布。一条记录可能包含多种问题。",
         "p1d_list_title": "问题合同列表 (Issue List)",
