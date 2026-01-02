@@ -4,6 +4,7 @@ import KPIGrid from './KPIGrid';
 import ContractStatusWidget from './ContractStatusWidget';
 
 import DataQualityWidget from './DataQualityWidget';
+import MaterialReadinessWidget from './MaterialReadinessWidget';
 import ProcessLeadTimeWidget from './ProcessLeadTimeWidget';
 import ClientRadarWidget from './ClientRadarWidget';
 
@@ -30,7 +31,15 @@ const Dashboard = () => {
                     {/* Pass filter to Contract Status Widget */}
                     <ContractStatusWidget externalFilter={kpiFilter} />
 
-                    <DataQualityWidget />
+                    {/* Part 1 Right Column: Data Quality & Material Readiness */}
+                    <div className="flex flex-col gap-6">
+                        <div className="flex-1 min-h-0">
+                            <DataQualityWidget />
+                        </div>
+                        <div className="flex-1 min-h-0 h-[340px]">
+                            <MaterialReadinessWidget onRiskClick={(id) => handleKpiClick && handleKpiClick('material')} />
+                        </div>
+                    </div>
                 </div>
 
                 <ProcessLeadTimeWidget />

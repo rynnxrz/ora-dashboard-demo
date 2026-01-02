@@ -203,3 +203,39 @@ export const REPORT_DATA = [
         isSaved: true
     }
 ];
+
+// --- Helper to generate Lead Time Mock Data (for Lead Time Deep Dive Widget) ---
+// Logic: 100 completed contracts. 82 are <= 90 days. Median is 42.
+const generateLeadTimeContracts = () => {
+    const contracts = [];
+    // 1. Generate 82 "On-time" contracts (Duration <= 90)
+    // Target Median: 42.
+    // We need indices 49 and 50 (0-indexed) to be 42.
+    // Distribution:
+    // - 45 items: 20-41 days
+    // - 10 items: 42 days (covers indices 45-54)
+    // - 27 items: 43-90 days
+    // Total On-time: 45+10+27 = 82.
+    for (let i = 0; i < 82; i++) {
+        let duration;
+        if (i < 45) {
+            duration = 20 + Math.floor(Math.random() * 22); // 20 to 41
+        } else if (i < 55) {
+            duration = 42; // Exact median anchor
+        } else {
+            duration = 43 + Math.floor(Math.random() * 48); // 43 to 90
+        }
+        contracts.push({ id: `C-OT-${i}`, duration, onTime: true });
+    }
+
+    // 2. Generate 18 "Late" contracts (Duration > 90)
+    for (let i = 0; i < 18; i++) {
+        const duration = 91 + Math.floor(Math.random() * 60); // 91 to 150
+        contracts.push({ id: `C-LT-${i}`, duration, onTime: false });
+    }
+
+    return contracts;
+};
+
+export const LEAD_TIME_CONTRACTS = generateLeadTimeContracts();
+

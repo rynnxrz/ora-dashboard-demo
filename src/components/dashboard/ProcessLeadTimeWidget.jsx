@@ -1,11 +1,13 @@
 import React, { useState, useRef, useMemo } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
     Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
     LineElement, PointElement, ArcElement
 } from 'chart.js';
-import { Bar, Chart, Doughnut } from 'react-chartjs-2';
+import { Bar, Chart } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import FactoryOutputWidget from './FactoryOutputWidget';
+import { LEAD_TIME_CONTRACTS } from '../../data/mockData';
 
 ChartJS.register(
     CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement,
@@ -13,8 +15,25 @@ ChartJS.register(
 );
 
 const ProcessLeadTimeWidget = () => {
+    const { t, language } = useLanguage();
     // --- State ---
     const chartRef = useRef(null);
+
+    // --- Metrics Calculation (New Logic) ---
+    // 1. Overall Median Cycle: (Signing Date -> Shipping Date)
+    // 2. On-time Delivery Rate: (Duration <= 90 Days)
+    const metrics = useMemo(() => {
+        const sorted = [...LEAD_TIME_CONTRACTS].sort((a, b) => a.duration - b.duration);
+        const count = sorted.length;
+        const mid = Math.floor(count / 2);
+        const median = count % 2 !== 0 ? sorted[mid].duration : (sorted[mid - 1].duration + sorted[mid].duration) / 2;
+
+        const onTimeCount = sorted.filter(c => c.duration <= 90).length;
+        const onTimeRate = Math.round((onTimeCount / count) * 100);
+
+        return { median, onTimeRate, onTimeCount, totalCount: count };
+    }, []);
+
     const [selectedStageIndex, setSelectedStageIndex] = useState(null); // P2-A Stage Selection
     const [selectedLine, setSelectedLine] = useState(null);       // P2-B Line Selection
 
@@ -42,7 +61,7 @@ const ProcessLeadTimeWidget = () => {
             ]
         },
         {
-            label: 'S2 Money', fullLabel: 'S2 回款确认',
+            label: 'S2 Payment', fullLabel: 'S2 回款确认',
             target: 4, actual: 10, q3Actual: 5, breach: 85, q3Breach: 65,
             totalCount: 20, breachCount: 17,
             topContributors: [
@@ -79,22 +98,22 @@ const ProcessLeadTimeWidget = () => {
     // --- 2. MOCK DATA (P2-B Bottlenecks) ---
     const productionLines = [
         {
-            name: 'Liquids (液剂)',
-            adherence: 75, total: 4, passed: 3, delay: 1.7, status: 'WARNING',
+            name: 'Liquids Line',
+            adherence: 75, total: 4, passed: 3, delay: 1.75, status: 'CRITICAL',
             impactDays: 7, // 1 contract * 7 days delay
-            avgTime: 18,
+            avgDelay: 1.75, // 7 / 4
             topContributors: [
-                { id: 'C2411-L05', status: 'Production', days: 15, planDate: '11-10', actDate: '12-02', gap: 7 } // Planned 15d
+                { id: 'C2411-L05', status: 'S4 Production', days: 15, planDate: '11-10', actDate: '12-02', gap: 7 } // Planned 15d
             ]
         },
         {
-            name: 'Powder (粉剂)',
+            name: 'Powder Line',
             adherence: 100, total: 8, passed: 8, delay: 0.0, status: 'STABLE',
             impactDays: 0,
-            avgTime: 14,
+            avgDelay: 0,
             topContributors: []
         },
-        { name: 'Capsules (胶囊)', adherence: 100, total: 8, passed: 8, delay: 0, status: 'GOOD', impactDays: 0 }
+        { name: 'Capsules Line', adherence: 100, total: 8, passed: 8, delay: 0, status: 'STABLE', impactDays: 0, avgDelay: 0 }
     ];
     // Filter and Sort
     const visibleBottlenecks = productionLines
@@ -272,20 +291,21 @@ const ProcessLeadTimeWidget = () => {
                 <div className="animate-in fade-in slide-in-from-right-2 duration-300 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-2 flex-shrink-0">
                         <div>
-                            <h4 className="font-bold text-slate-800 text-base">{s.fullLabel}</h4>
-                            <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">Stage Diagnosis</p>
+                            <h4 className="font-bold text-slate-800 text-base">{language === 'zh' ? s.fullLabel : s.label}</h4>
+                            <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">{t('p2_stage_diagnosis')}</p>
                         </div>
                         <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${s.breach > 50 ? 'bg-red-50 text-red-600 border-red-100' :
                             s.breach > 20 ? 'bg-orange-50 text-orange-600 border-orange-100' :
                                 'bg-emerald-50 text-emerald-600 border-emerald-100'
                             }`}>
-                            {s.breach > 50 ? 'CRITICAL' : s.breach > 20 ? 'WARNING' : 'HEALTHY'}
+
+                            {t(s.breach > 50 ? 'p2_status_critical' : s.breach > 20 ? 'p2_status_warning' : 'p2_status_healthy')}
                         </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 mb-3 flex-shrink-0">
                         <div className="bg-slate-50 border border-slate-100 p-2 rounded">
-                            <span className="text-[10px] text-slate-500 block">平均耗时</span>
+                            <span className="text-[10px] text-slate-500 block">{t('p2_avg_time')}</span>
                             <div className="flex items-baseline gap-1">
                                 <span className="font-bold text-slate-800">{s.actual}d</span>
                                 <span className={`text-[10px] font-bold ${gap > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
@@ -294,7 +314,7 @@ const ProcessLeadTimeWidget = () => {
                             </div>
                         </div>
                         <div className="bg-slate-50 border border-slate-100 p-2 rounded">
-                            <span className="text-[10px] text-slate-500 block">异常率 (Breach)</span>
+                            <span className="text-[10px] text-slate-500 block">{t('p2_breach_rate')}</span>
                             <div className="flex items-baseline gap-1 items-end">
                                 <span className="font-bold text-slate-800">{s.breach}%</span>
                                 <span className="text-[10px] text-slate-400 font-medium ml-1">
@@ -309,7 +329,7 @@ const ProcessLeadTimeWidget = () => {
                             <>
                                 <h5 className="text-[10px] font-bold text-slate-500 uppercase mb-2 flex items-center gap-1 sticky top-0 bg-white z-10">
                                     <i className="fa-solid fa-triangle-exclamation text-red-400"></i>
-                                    Top Delay Contributors
+                                    {t('p2_top_contributors')}
                                 </h5>
                                 <div className="space-y-1 pb-2">
                                     {s.topContributors.map((item, idx) => (
@@ -334,9 +354,12 @@ const ProcessLeadTimeWidget = () => {
                                 <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center mb-2">
                                     <i className="fa-solid fa-check text-emerald-500 text-sm"></i>
                                 </div>
-                                <h5 className="font-bold text-emerald-800 text-sm">运行平稳</h5>
+                                <h5 className="font-bold text-emerald-800 text-sm">{t('p2_running_smoothly')}</h5>
                                 <p className="text-[10px] text-emerald-600 mt-1 max-w-[160px] leading-tight">
-                                    {s.label}阶段运行平稳 (异常数: {s.breachCount}/{s.totalCount})，无显著异常波动。
+                                    {t('p2_running_smoothly_desc')
+                                        .replace('{stage}', language === 'zh' ? s.fullLabel.split(' ')[1] : s.label)
+                                        .replace('{count}', `${s.breachCount}/${s.totalCount}`)
+                                    }
                                 </p>
                             </div>
                         )}
@@ -348,19 +371,20 @@ const ProcessLeadTimeWidget = () => {
         return (
             <div className="h-full flex flex-col">
                 <h4 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                    <i className="fa-solid fa-chart-pie text-indigo-500"></i> 全流程概览
+                    <i className="fa-solid fa-chart-pie text-indigo-500"></i> {t('p2_overall_overview_title')}
                 </h4>
 
                 <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                        <span className="text-xs text-slate-400 block mb-1">总平均周期</span>
-                        <span className="text-xl font-black text-slate-800">42<small className="text-xs text-slate-500 ml-1">天</small></span>
+                        <span className="text-xs text-slate-400 block mb-1">{t('p2_median_cycle_label')}</span>
+                        <span className="text-xl font-black text-slate-800">{metrics.median}<small className="text-xs text-slate-500 ml-1">Days</small></span>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                        <span className="text-xs text-slate-400 block mb-1">准时交付率</span>
+                        <span className="text-xs text-slate-400 block mb-1">{t('p2_ontime_rate_label')}</span>
+                        {/* Logic: Duration <= 90 days = On-time */}
                         <div className="flex items-baseline gap-1">
-                            <span className="text-xl font-black text-emerald-600">82<small className="text-xs text-emerald-500 ml-1">%</small></span>
-                            <span className="text-[10px] text-slate-400 font-medium">(82/100)</span>
+                            <span className="text-xl font-black text-emerald-600">{metrics.onTimeRate}<small className="text-xs text-emerald-500 ml-1">%</small></span>
+                            <span className="text-[10px] text-slate-400 font-medium">({metrics.onTimeCount}/{metrics.totalCount})</span>
                         </div>
                     </div>
                 </div>
@@ -368,33 +392,34 @@ const ProcessLeadTimeWidget = () => {
                 <div className="flex-1 bg-white rounded border border-slate-100 p-3 flex items-start gap-3">
                     <i className="fa-solid fa-circle-info text-slate-300 mt-0.5"></i>
                     <p className="text-xs text-slate-500 leading-relaxed">
-                        <b className="text-slate-700">操作提示：</b> <br />
-                        点击左侧柱状图中的 <span className="text-red-500 font-bold">红色异常阶段</span> 或下方 <span className="text-rose-500 font-bold">异常产线</span>，即可下钻查看导致拖期的具体合同明细。
+                        <b className="text-slate-700">{t('p2_tip_label')}</b> <br />
+                        <span dangerouslySetInnerHTML={{
+                            __html: t('p2_tip_content')
+                                .replace('<red>', '<span class="text-red-500 font-bold">')
+                                .replace('</red>', '</span>')
+                                .replace('<rose>', '<span class="text-rose-500 font-bold">')
+                                .replace('</rose>', '</span>')
+                        }} />
                     </p>
                 </div>
             </div>
         );
     }
 
-    // --- 7. P4 Component Data (Material Readiness) ---
-    const p4Data = {
-        labels: ['Ready', 'Waiting', 'High Risk'],
-        datasets: [{ data: [85, 10, 5], backgroundColor: ['#2A9D8F', '#E9C46A', '#E76F51'], borderWidth: 0 }]
-    };
-    const p4Options = { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, datalabels: { display: false } } };
+
 
     return (
         <div className="p-6 bg-slate-50 font-sans">
             {/* Header */}
             <div className="mb-6">
                 <div className="flex items-baseline gap-2">
-                    <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">交付周期深度透视</h2>
-                    <span className="text-slate-400 text-sm font-medium">Lead Time Deep Dive</span>
+                    <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">{t('p2_deep_dive_title')}</h2>
+                    {language === 'zh' && <span className="text-slate-400 text-sm font-medium">Lead Time Deep Dive</span>}
                 </div>
                 <p className="text-slate-500 text-sm mt-1">
-                    整体中位周期: <b className="text-slate-800">42 天</b>
+                    {t('p2_median_cycle_label')}: <b className="text-slate-800">{metrics.median} {language === 'en' ? 'Days' : '天'}</b>
                     <span className="mx-2 text-slate-300">|</span>
-                    准时交付率: <b className="text-emerald-600">82%</b>
+                    {t('p2_ontime_rate_label')}: <b className="text-emerald-600">{metrics.onTimeRate}%</b>
                 </p>
             </div>
 
@@ -444,24 +469,26 @@ const ProcessLeadTimeWidget = () => {
                 </div>
             </div>
 
-            {/* BOTTOM GRID: P2-B & P4 */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
+            {/* BOTTOM GRID: P2-B */}
+            <div className="grid grid-cols-1 gap-6 mt-6">
                 {/* P2-B: BOTTLENECKS (RANKING LIST) */}
-                <div className="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
-                    <div className="flex items-center gap-2 mb-4 flex-shrink-0">
-                        <div className="w-2 h-6 bg-rose-500 rounded-full"></div>
-                        <div>
-                            <h3 className="font-bold text-slate-700 leading-none">P2-B. 产线效能警示 (按累计延迟排序)</h3>
-                            <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">Top Delays by Cumulative Days</p>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <div className="flex items-center justify-between mb-4 flex-shrink-0">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-6 bg-rose-500 rounded-full"></div>
+                            <div>
+                                <h3 className="font-bold text-slate-700 leading-none uppercase">P2-B. PRODUCTION LINE EFFICIENCY <span className="text-slate-400 text-xs font-normal normal-case ml-1">(Sorted by Cumulative Delays)</span></h3>
+                                <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">Filter: Current Quarter</p>
+                            </div>
                         </div>
                     </div>
 
                     {/* Ranking Table Header */}
-                    <div className="grid grid-cols-12 gap-4 text-xs font-bold text-slate-400 border-b border-slate-100 pb-2 mb-2 px-2">
-                        <div className="col-span-4">产线 (Line)</div>
-                        <div className="col-span-4">准时交付率 (Adherence)</div>
-                        <div className="col-span-3 text-right">累计延迟 / 平均延迟</div>
-                        <div className="col-span-1 text-right">状态</div>
+                    <div className="grid grid-cols-12 gap-4 text-xs font-bold text-slate-400 border-b border-slate-100 pb-2 mb-2 px-2 uppercase">
+                        <div className="col-span-4">Line</div>
+                        <div className="col-span-4">On-time Adherence</div>
+                        <div className="col-span-3 text-right">Cumulative / Avg Delay</div>
+                        <div className="col-span-1 text-right">Status</div>
                     </div>
 
                     {/* Ranking List Content */}
@@ -489,19 +516,19 @@ const ProcessLeadTimeWidget = () => {
                                         {/* Adherence Progess */}
                                         <div className="col-span-4">
                                             <div className="flex items-center justify-between mb-1">
-                                                <span className={`text-xs font-bold ${line.status === 'CRITICAL' ? 'text-red-600' :
-                                                    line.status === 'WARNING' ? 'text-orange-500' : 'text-slate-600'
+                                                <span className={`text-xs font-bold ${line.adherence >= 90 ? 'text-emerald-600' :
+                                                    line.adherence >= 80 ? 'text-yellow-600' : 'text-red-600'
                                                     }`}>
                                                     {line.adherence}%
                                                 </span>
-                                                <span className="text-[10px] text-slate-400">
+                                                <span className="text-[10px] text-slate-400 font-mono">
                                                     ({line.passed}/{line.total})
                                                 </span>
                                             </div>
                                             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                                 <div
-                                                    className={`h-full rounded-full ${line.status === 'CRITICAL' ? 'bg-red-500' :
-                                                        line.status === 'WARNING' ? 'bg-orange-400' : 'bg-emerald-400'
+                                                    className={`h-full rounded-full ${line.adherence >= 90 ? 'bg-emerald-500' :
+                                                        line.adherence >= 80 ? 'bg-yellow-400' : 'bg-red-500'
                                                         }`}
                                                     style={{ width: `${line.adherence}%` }}
                                                 ></div>
@@ -512,10 +539,10 @@ const ProcessLeadTimeWidget = () => {
                                         <div className="col-span-3 text-right">
                                             <div className="flex flex-col items-end">
                                                 <span className={`font-bold text-xs ${line.impactDays > 20 ? 'text-red-500' : 'text-orange-500'}`}>
-                                                    {line.impactDays}d <span className="text-[9px] text-slate-400 font-normal">Impact</span>
+                                                    {line.impactDays}d <span className="text-[9px] text-slate-400 font-normal">Cumulative</span>
                                                 </span>
                                                 <span className="text-[10px] text-slate-400 font-mono">
-                                                    {line.delay.toFixed(1)}d Delay
+                                                    {line.avgDelay ? line.avgDelay.toFixed(1) : '0.0'}d Avg Delay
                                                 </span>
                                             </div>
                                         </div>
@@ -538,8 +565,7 @@ const ProcessLeadTimeWidget = () => {
                                         <div className="min-h-0 bg-slate-50 rounded-lg border border-slate-100 p-3 ml-4">
                                             <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200/50">
                                                 <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
-                                                    <i className="fa-solid fa-file-circle-exclamation text-red-400"></i>
-                                                    Top Contributor (Root Cause)
+                                                    Root Cause
                                                 </span>
                                             </div>
 
@@ -549,8 +575,12 @@ const ProcessLeadTimeWidget = () => {
                                                         <div key={i} className="flex items-center justify-between text-xs bg-white p-2 rounded border border-slate-100 shadow-sm">
                                                             <div>
                                                                 <div className="flex items-center gap-2 mb-1">
-                                                                    <span className="font-mono font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded text-[10px]">{c.id}</span>
-                                                                    <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded border border-slate-100 max-w-[80px] truncate">{c.status || 'Pending'}</span>
+                                                                    <span className="font-mono font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded text-[10px]">
+                                                                        {c.id}
+                                                                    </span>
+                                                                    <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded border border-slate-100">
+                                                                        {c.status}
+                                                                    </span>
                                                                 </div>
                                                                 <span className="text-[9px] font-bold text-slate-500 flex items-center gap-1">
                                                                     <i className="fa-solid fa-clock text-slate-300"></i>
@@ -580,35 +610,7 @@ const ProcessLeadTimeWidget = () => {
                     </div>
                 </div>
 
-                {/* P4: Material Readiness */}
-                <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
-                    <div className="flex items-center gap-2 mb-6">
-                        <div className="w-2 h-6 bg-yellow-500 rounded-full"></div>
-                        <h3 className="font-bold text-slate-700">P4. 物料准备</h3>
-                    </div>
 
-                    <div className="h-40 relative mb-4">
-                        <Doughnut data={p4Data} options={p4Options} />
-                        <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
-                            <span className="text-3xl font-bold text-slate-700">85%</span>
-                            <span className="text-xs text-slate-400 font-medium mt-1">Ready</span>
-                        </div>
-                    </div>
-
-                    <div className="border-t border-slate-100 pt-4 mt-auto">
-                        <h4 className="font-bold text-slate-800 text-xs mb-3">风险批次</h4>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-slate-600 font-medium">C2411-05</span>
-                                <span className="text-red-500 font-bold">-2d</span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-slate-600 font-medium">C2411-08</span>
-                                <span className="text-red-500 font-bold">-1d</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {/* P2-C: FACTORY OUTPUT & EFFICIENCY TRENDS */}
