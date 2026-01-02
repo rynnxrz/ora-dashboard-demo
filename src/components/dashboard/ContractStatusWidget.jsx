@@ -88,16 +88,16 @@ const ContractStatusWidget = ({ externalFilter }) => {
                         <span>{t('p1b_title') || "P1-B. Key Contracts"}</span>
                     </h3>
                     <div className="flex items-center gap-3">
-                        <div className="flex bg-gray-100 rounded p-0.5 space-x-1">
+                        <div className="flex bg-gray-100 rounded p-0.5 space-x-1 ml-6">
                             <button
                                 onClick={() => setViewMode('list')}
-                                className={`px-2 py-0.5 text-xs rounded shadow-sm font-bold border transition-all ${viewMode === 'list' ? 'bg-white text-gray-800 border-gray-200' : 'text-gray-500 border-transparent hover:text-gray-800'}`}
+                                className={`px-3 py-1 text-xs rounded shadow-sm font-bold border transition-all ${viewMode === 'list' ? 'bg-white text-gray-800 border-gray-200' : 'text-gray-500 border-transparent hover:text-gray-800'}`}
                             >
                                 {t('btn_list') || "List"}
                             </button>
                             <button
                                 onClick={() => setViewMode('graph')}
-                                className={`px-2 py-0.5 text-xs rounded shadow-sm font-bold border transition-all ${viewMode === 'graph' ? 'bg-white text-gray-800 border-gray-200' : 'text-gray-500 border-transparent hover:text-gray-800'}`}
+                                className={`px-3 py-1 text-xs rounded shadow-sm font-bold border transition-all ${viewMode === 'graph' ? 'bg-white text-gray-800 border-gray-200' : 'text-gray-500 border-transparent hover:text-gray-800'}`}
                             >
                                 {t('btn_graph') || "Graph"}
                             </button>

@@ -7,27 +7,28 @@ const SidebarContainer = ({ onRiskClick }) => {
 
     return (
         <div className="card bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
-            {/* Tabs Header */}
-            <div className="flex border-b border-slate-100 shrink-0">
-                <button
-                    onClick={() => setActiveTab('dataQuality')}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'dataQuality'
-                        ? 'text-ora-primary border-b-2 border-ora-primary bg-slate-50'
-                        : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-                        }`}
-                >
-                    Data Quality
-                </button>
-                <div className="w-[1px] bg-slate-100"></div>
-                <button
-                    onClick={() => setActiveTab('materialReadiness')}
-                    className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === 'materialReadiness'
-                        ? 'text-yellow-600 border-b-2 border-yellow-500 bg-slate-50'
-                        : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-                        }`}
-                >
-                    Material Readiness
-                </button>
+            {/* Tabs Header - Segmented Pill Style */}
+            <div className="p-3 border-b border-slate-100 shrink-0">
+                <div className="flex bg-slate-100 p-1 rounded-lg">
+                    <button
+                        onClick={() => setActiveTab('dataQuality')}
+                        className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${activeTab === 'dataQuality'
+                            ? 'bg-white text-slate-700 shadow-sm ring-1 ring-black/5'
+                            : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                    >
+                        Data Quality
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('materialReadiness')}
+                        className={`flex-1 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${activeTab === 'materialReadiness'
+                            ? 'bg-white text-slate-700 shadow-sm ring-1 ring-black/5'
+                            : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                    >
+                        Material Readiness
+                    </button>
+                </div>
             </div>
 
             {/* Tab Content Area - No internal padding here, let widgets handle it if needed OR generic padding */}

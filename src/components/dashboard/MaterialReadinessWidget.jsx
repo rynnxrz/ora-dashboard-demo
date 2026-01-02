@@ -8,7 +8,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const MaterialReadinessWidget = ({ onRiskClick }) => {
     const { language } = useLanguage();
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     // --- Mock Data Generation ---
     const mockMaterialsData = useMemo(() => {
@@ -25,7 +25,7 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     overdueDays: 2, // 2 days past Jan 4
                     status: 'Missing',
                     progress: 3, totalItems: 5,
-                    missing: 'Main Fabric, Buttons'
+                    missing: 'Main Fabric, Buttons, Care Labels'
                 },
                 {
                     id: 'C2411-08',
@@ -35,7 +35,7 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     overdueDays: 1,
                     status: 'Partial',
                     progress: 4, totalItems: 5,
-                    missing: 'Packaging Labels'
+                    missing: 'Packaging Labels, Hangtags'
                 },
                 {
                     id: 'C2411-12',
@@ -45,7 +45,7 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     overdueDays: 3, // Critical
                     status: 'Critical',
                     progress: 1, totalItems: 6,
-                    missing: 'Raw Material A, B'
+                    missing: 'Raw Material A, B, Lining, Zippers, Thread'
                 },
                 {
                     id: 'C2411-15',
@@ -55,7 +55,7 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     overdueDays: 7, // Severe
                     status: 'Critical',
                     progress: 0, totalItems: 4,
-                    missing: 'All Materials'
+                    missing: 'All Materials: Fabric, Trims, Accessories, Packaging'
                 },
                 {
                     id: 'C2411-18',
@@ -65,7 +65,7 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     overdueDays: 5,
                     status: 'Severe',
                     progress: 2, totalItems: 5,
-                    missing: 'Zippers, Thread'
+                    missing: 'Zippers, Thread, Elastic Bands'
                 }
             ]
         };
@@ -107,30 +107,87 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
     };
 
     // Expansion Logic
-    const displayedBatches = isExpanded ? mockMaterialsData.riskBatches : mockMaterialsData.riskBatches.slice(0, 2);
+    const displayedBatches = mockMaterialsData.riskBatches.slice(0, 2); // Always only 2 in widget
     const hiddenCount = mockMaterialsData.riskBatches.length - 2;
 
-    return (
-        <div className={`flex flex-col bg-white ${isExpanded ? 'fixed inset-0 z-50 m-4 shadow-2xl rounded-2xl border border-slate-200' : 'h-full rounded-2xl'}`}>
-            {/* Header - Only populate when expanded or if strictly needed. Since embedded in tab, hide default header unless expanded */}
-            {isExpanded && (
-                <div className="card-header p-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white rounded-t-2xl sticky top-0 z-20">
-                    <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-4 bg-yellow-500 rounded-full"></div>
-                        <h3 className="font-bold text-slate-700 text-sm uppercase tracking-tight">MATERIAL READINESS</h3>
+    // Helper to render batch card
+    const renderBatchCard = (batch, isDrawer = false) => {
+        const isOverdue = batch.overdueDays > 0;
+        const overdueStatus = getDeadlineStatus(batch.overdueDays);
+        const completionPct = (batch.progress / batch.totalItems) * 100;
+
+        return (
+            <div key={batch.id} className={`bg-slate-50 rounded-lg border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)] ${isDrawer ? 'p-3 mb-3' : 'p-1.5'}`}>
+                {/* Header */}
+                <div className={`flex items-center justify-between ${isDrawer ? 'mb-2' : 'mb-0.5 px-1'}`}>
+                    <span className="text-xs font-bold text-slate-700 font-mono tracking-tight">{batch.id}</span>
+                </div>
+
+                {/* Timeline */}
+                <div className={`relative flex items-start justify-between text-[10px] text-slate-500 ${isDrawer ? 'pb-2' : 'pb-0.5'}`}>
+                    {/* Connector Line */}
+                    <div className="absolute top-[4px] left-4 right-4 h-[1px] bg-slate-200 -z-0"></div>
+
+                    {/* Node 1: Signed */}
+                    <div className="relative z-10 flex flex-col items-center flex-1">
+                        <div className={`rounded-full bg-slate-400 border border-white box-content ${isDrawer ? 'w-2.5 h-2.5 mb-1' : 'w-2 h-2 mb-0.5'}`}></div>
+                        <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider leading-none">Signed</span>
+                        <span className="text-[9px] font-mono text-slate-600 font-medium leading-none">{batch.signedDate}</span>
                     </div>
 
-                    <button onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }} className="text-slate-400 hover:text-slate-600 p-1">
-                        <i className="fa-solid fa-times"></i>
-                    </button>
+                    {/* Node 2: Deadline */}
+                    <div className="relative z-10 flex flex-col items-center flex-[2]">
+                        <div className={`rounded-full border border-white box-content ${isOverdue ? 'bg-red-500' : 'bg-blue-500'} ${isDrawer ? 'w-2.5 h-2.5 mb-1' : 'w-2 h-2 mb-0.5'}`}></div>
+                        <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider leading-none">Deadline</span>
+                        <span className={`text-[9px] font-mono font-bold mb-0.5 leading-none ${isOverdue ? 'text-red-500' : 'text-slate-700'}`}>{batch.materialTargetDate}</span>
+                        <span className={`text-[8px] ${overdueStatus.color} mb-1 whitespace-nowrap leading-none`}>
+                            {overdueStatus.text}
+                        </span>
+
+                        {/* Widget View: Compact Miss Pill */}
+                        {!isDrawer && (
+                            <div className="bg-red-50 rounded px-1.5 py-0.5 mt-0.5 inline-block max-w-full">
+                                <span className="text-[9px] text-red-500 font-bold truncate block leading-tight">
+                                    Miss: {batch.missing}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Node 3: Prod Start */}
+                    <div className="relative z-10 flex flex-col items-center flex-1">
+                        <div className={`rounded-full bg-blue-600 border border-white box-content ring-2 ring-blue-100 ${isDrawer ? 'w-2.5 h-2.5 mb-1' : 'w-2 h-2 mb-0.5'}`}></div>
+                        <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider leading-none">Prod Start</span>
+                        <span className="text-[9px] font-mono text-slate-600 font-medium mb-0.5 leading-none">{batch.prodStartDate}</span>
+                        {/* Drawer View: Buffer Info */}
+                        {isDrawer && (
+                            <span className="text-[9px] text-slate-400 mt-0.5">Buffer: 3 days</span>
+                        )}
+                    </div>
                 </div>
-            )}
 
-            {/* Content */}
-            <div className="p-3 flex flex-col gap-3">
+                {/* Drawer View: Detailed Missing Row */}
+                {isDrawer && batch.missing && (
+                    <div className="mt-2 border-t border-slate-100 pt-2 text-left">
+                        <div className="text-[13px] leading-snug text-[#E53E3E]">
+                            <span className="font-bold mr-1">Missing:</span>
+                            {batch.missing}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
-                {/* Donut Chart (Hide when expanded to focus on list) */}
-                {!isExpanded && (
+    return (
+        <>
+            {/* Main Widget */}
+            <div className={`flex flex-col bg-white h-full rounded-2xl`}>
+                {/* Header (Hidden when embedded usually, but logic here kept simple) */}
+                {/* Content */}
+                <div className="p-3 flex flex-col gap-3 h-full">
+
+                    {/* Donut Chart */}
                     <div className="h-20 relative shrink-0">
                         <Doughnut data={chartData} options={chartOptions} />
                         <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
@@ -138,90 +195,60 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                             <span className="text-[10px] text-slate-400 font-bold uppercase">Ready</span>
                         </div>
                     </div>
-                )}
 
-                {/* Risk List with Timeline */}
-                <div className="flex-1 min-h-0 flex flex-col">
-                    <div className="flex items-center justify-between mb-2 shrink-0">
-                        <h4 className="text-[10px] font-bold text-slate-500 uppercase">High-Risk Batches</h4>
-                        <span className="text-[9px] text-slate-400">{mockMaterialsData.riskBatches.length} items</span>
+                    {/* Risk List (Widget View) */}
+                    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                        <div className="flex items-center justify-between mb-2 shrink-0">
+                            <h4 className="text-[10px] font-bold text-slate-500 uppercase">High-Risk Batches</h4>
+                            <span className="text-[9px] text-slate-400">{mockMaterialsData.riskBatches.length} items</span>
+                        </div>
+
+                        <div className="space-y-2 overflow-hidden">
+                            {displayedBatches.map((batch) => renderBatchCard(batch, false))}
+                        </div>
+
+                        {/* More Button */}
+                        {hiddenCount > 0 && (
+                            <button
+                                onClick={() => setIsDrawerOpen(true)}
+                                className="w-full mt-auto py-2 text-[10px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded border border-dashed border-slate-200 transition-colors shrink-0"
+                            >
+                                +{hiddenCount} more high-risk batches
+                            </button>
+                        )}
                     </div>
-
-                    <div className="space-y-2">
-                        {displayedBatches.map((batch, idx) => {
-                            const overdueStatus = getDeadlineStatus(batch.overdueDays);
-                            const isOverdue = batch.overdueDays > 0;
-                            const completionPct = (batch.progress / batch.totalItems) * 100;
-
-                            return (
-                                <div key={idx} className="bg-slate-50 rounded-lg p-2 border border-slate-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                                    {/* Header: Just ID now */}
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-xs font-bold text-slate-700 font-mono tracking-tight">{batch.id}</span>
-                                    </div>
-
-                                    {/* Standardized 3-Point Timeline */}
-                                    <div className="relative flex items-start justify-between text-[10px] text-slate-500 pb-1">
-
-                                        {/* Connector Line */}
-                                        <div className="absolute top-[4px] left-4 right-4 h-[1px] bg-slate-200 -z-0"></div>
-
-                                        {/* Node 1: Signed Date */}
-                                        <div className="relative z-10 flex flex-col items-center flex-1">
-                                            <div className="w-2 h-2 rounded-full bg-slate-400 mb-1 border border-white box-content"></div>
-                                            <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider">Signed Date</span>
-                                            <span className="text-[9px] font-mono text-slate-600 font-medium">{batch.signedDate}</span>
-                                        </div>
-
-                                        {/* Node 2: Material Deadline */}
-                                        <div className="relative z-10 flex flex-col items-center flex-[1.5]">
-                                            <div className={`w-2 h-2 rounded-full mb-1 border border-white box-content ${isOverdue ? 'bg-red-500' : 'bg-blue-500'}`}></div>
-                                            <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider">Material Deadline</span>
-                                            <span className={`text-[9px] font-mono font-bold mb-0.5 ${isOverdue ? 'text-red-500' : 'text-slate-700'}`}>{batch.materialTargetDate}</span>
-
-                                            {/* Explicit Status Text */}
-                                            <span className={`text-[8px] ${overdueStatus.color} mb-1 whitespace-nowrap`}>
-                                                {overdueStatus.text}
-                                            </span>
-
-                                            {/* Progress Bar & Missing Info */}
-                                            <div className="w-16 h-1 bg-slate-200 rounded-full overflow-hidden mb-0.5">
-                                                <div
-                                                    className="h-full bg-emerald-500 rounded-full"
-                                                    style={{ width: `${completionPct}%` }}
-                                                ></div>
-                                            </div>
-                                            <div className="bg-slate-100 rounded px-1 py-0.5 max-w-[100px] text-center">
-                                                <span className="text-[8px] text-slate-400 truncate block leading-tight">
-                                                    Miss: {batch.missing}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Node 3: Prod Start */}
-                                        <div className="relative z-10 flex flex-col items-center flex-1">
-                                            <div className="w-2 h-2 rounded-full bg-blue-600 mb-1 border border-white box-content ring-2 ring-blue-100"></div>
-                                            <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider">Prod Start</span>
-                                            <span className="text-[9px] font-mono text-slate-600 font-medium mb-0.5">{batch.prodStartDate}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Expand Trigger */}
-                    {!isExpanded && hiddenCount > 0 && (
-                        <button
-                            onClick={() => setIsExpanded(true)}
-                            className="w-full mt-2 py-1.5 text-[10px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded border border-dashed border-slate-200 transition-colors shrink-0"
-                        >
-                            +{hiddenCount} more high-risk batches
-                        </button>
-                    )}
                 </div>
             </div>
-        </div >
+
+            {/* Side Drawer */}
+            {isDrawerOpen && (
+                <div className="fixed inset-0 z-[100] flex justify-end pointer-events-none">
+                    {/* No Backdrop (Per Request to keep left side interactive) */}
+
+                    {/* Drawer Panel */}
+                    <div className="w-[550px] bg-white h-full shadow-2xl border-l border-slate-200 pointer-events-auto flex flex-col animate-slide-in-right">
+                        {/* Drawer Header */}
+                        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">High-Risk Batches Details</h2>
+                                <p className="text-xs text-slate-500">Reviewing {mockMaterialsData.riskBatches.length} items requiring attention</p>
+                            </div>
+                            <button
+                                onClick={() => setIsDrawerOpen(false)}
+                                className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                                <i className="fa-solid fa-times text-lg"></i>
+                            </button>
+                        </div>
+
+                        {/* Drawer Content */}
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                            {mockMaterialsData.riskBatches.map((batch) => renderBatchCard(batch, true))}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 
