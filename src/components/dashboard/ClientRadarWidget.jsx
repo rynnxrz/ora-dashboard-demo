@@ -1,21 +1,70 @@
 import React from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
     CategoryScale,
     LinearScale,
     BarElement,
+    ArcElement,
     Title,
     Tooltip,
     Legend,
     ChartDataLabels
 );
 
+// Custom Plugin for 70% Risk Threshold Marker
+const riskThresholdPlugin = {
+    id: 'riskThreshold',
+    afterDraw: (chart) => {
+        if (chart.config.type !== 'doughnut') return;
+        const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+        const centerX = (left + right) / 2;
+        const centerY = (top + bottom) / 2;
+        const outerRadius = chart.getDatasetMeta(0).data[0].outerRadius;
+        const innerRadius = chart.getDatasetMeta(0).data[0].innerRadius;
+
+        // 70% angle. Start is -90deg (top). 
+        // 70% of 360 = 252 degrees.
+        // -90 + 252 = 162 degrees.
+        // Convert to radians: 162 * (Math.PI / 180)
+        const angle = (162) * (Math.PI / 180);
+
+        const xStart = centerX + (outerRadius + 8) * Math.cos(angle);
+        const yStart = centerY + (outerRadius + 8) * Math.sin(angle);
+        const xEnd = centerX + (innerRadius - 4) * Math.cos(angle);
+        const yEnd = centerY + (innerRadius - 4) * Math.sin(angle);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(xStart, yStart);
+        ctx.lineTo(xEnd, yEnd);
+        ctx.strokeStyle = '#9CA3AF'; // Gray-400
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]); // Dashed line
+        ctx.stroke();
+
+        // Add label "70%"
+        ctx.fillStyle = '#9CA3AF';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Position label slightly outside
+        const labelX = centerX + (outerRadius + 18) * Math.cos(angle);
+        const labelY = centerY + (outerRadius + 18) * Math.sin(angle);
+        ctx.fillText('70%', labelX, labelY);
+
+        ctx.restore();
+    }
+};
+
+ChartJS.register(riskThresholdPlugin);
+
 const ClientRadarWidget = () => {
     const [activeTab, setActiveTab] = React.useState('risks');
-    const [selectedClientName, setSelectedClientName] = React.useState(null);
+    const [highlightedClients, setHighlightedClients] = React.useState([]);
 
     // Mock Data Source - Expanded for Round 4 (Differentiation)
     const mockClients = [
@@ -65,8 +114,12 @@ const ClientRadarWidget = () => {
     // 3. Dynamic Chart List Logic
     // If a client is selected from the list, ensure they appear in the chart
     let chartClients = [...topByVolume];
-    if (selectedClientName) {
-        const selectedClient = clientsWithDelta.find(c => c.name === selectedClientName);
+    // Check if any highlighted client (that is NOT part of top 8) needs to be added?
+    // For single selection (from list), yes.
+    // Logic: if we have ONE highlighted client and it's not in top 8, add it.
+    if (highlightedClients.length === 1) {
+        const selectedName = highlightedClients[0];
+        const selectedClient = clientsWithDelta.find(c => c.name === selectedName);
         if (selectedClient) {
             const alreadyInChart = chartClients.some(c => c.name === selectedClient.name);
             if (!alreadyInChart) {
@@ -79,10 +132,68 @@ const ClientRadarWidget = () => {
     // Interaction Helper
     const handleClientClick = (clientName) => {
         // Toggle selection
-        if (selectedClientName === clientName) {
-            setSelectedClientName(null);
+        if (highlightedClients.includes(clientName) && highlightedClients.length === 1) {
+            setHighlightedClients([]);
         } else {
-            setSelectedClientName(clientName);
+            setHighlightedClients([clientName]);
+        }
+    };
+
+    // --- 3C: Brand Capacity Concentration Logic ---
+    // Calculate Top 3 Clients for Q4
+    const top3ClientsQ4 = [...clientsWithDelta].sort((a, b) => b.q4 - a.q4).slice(0, 3);
+    const top3Q4Sum = top3ClientsQ4.reduce((sum, c) => sum + c.q4, 0);
+    const top3Q4Share = Math.round((top3Q4Sum / totalQ4Days) * 100);
+
+    // Calculate Top 3 Clients for Q3 (for Comparison)
+    const totalQ3Days = clientsWithDelta.reduce((sum, client) => sum + client.q3, 0);
+    const top3ClientsQ3 = [...clientsWithDelta].sort((a, b) => b.q3 - a.q3).slice(0, 3);
+    const top3Q3Sum = top3ClientsQ3.reduce((sum, c) => sum + c.q3, 0);
+    const top3Q3Share = Math.round((top3Q3Sum / totalQ3Days) * 100);
+
+    // Risk Status Logic
+    let riskStatus = 'Low';
+    let riskColor = 'text-green-700'; // Darker text
+    let riskBg = 'bg-green-50'; // Background
+    let riskBorder = 'border-green-500';
+
+    if (top3Q4Share > 70) {
+        riskStatus = 'High';
+        riskColor = 'text-red-700';
+        riskBg = 'bg-red-50';
+        riskBorder = 'border-red-500';
+    } else if (top3Q4Share >= 50) {
+        riskStatus = 'Moderate';
+        riskColor = 'text-orange-700'; // Darker Orage
+        riskBg = 'bg-orange-50'; // Light Orange BG
+        riskBorder = 'border-orange-500';
+    }
+
+    // Max Exposure Logic
+    const maxExposureClient = topByVolume[0];
+    const maxExposurePct = ((maxExposureClient.q4 / totalQ4Days) * 100).toFixed(0);
+
+    // QoQ Comparison
+    const shareDelta = (top3Q4Share - top3Q3Share).toFixed(1);
+    const isRiskIncreasing = shareDelta > 0;
+
+    // Handle Donut Click
+    const handleDonutClick = (event, elements) => {
+        if (elements.length > 0) {
+            const index = elements[0].index;
+            if (index === 0) { // Top 3 Slice
+                const top3Names = top3ClientsQ4.map(c => c.name);
+
+                // Toggle: if already fully selected, clear; otherwise select
+                const allSelected = top3Names.every(name => highlightedClients.includes(name));
+                if (allSelected && highlightedClients.length === top3Names.length) {
+                    setHighlightedClients([]);
+                } else {
+                    setHighlightedClients(top3Names);
+                }
+            } else {
+                setHighlightedClients([]); // Clear if clicking "Others"
+            }
         }
     };
 
@@ -95,8 +206,10 @@ const ClientRadarWidget = () => {
                 data: chartClients.map(c => c.q3),
                 backgroundColor: (ctx) => {
                     const name = chartClients[ctx.dataIndex].name;
-                    // If selection active, dim others
-                    if (selectedClientName && name !== selectedClientName) return '#E5E7EB80'; // Dimmed
+                    // If selection active
+                    if (highlightedClients.length > 0) {
+                        return highlightedClients.includes(name) ? '#E5E7EB' : '#E5E7EB40';
+                    }
                     return '#E5E7EB';
                 },
                 barPercentage: 0.6,
@@ -114,7 +227,7 @@ const ClientRadarWidget = () => {
                     if (client.q4 === 0) color = '#EF4444'; // Red (Stop)
 
                     // Dimming Interaction
-                    if (selectedClientName && client.name !== selectedClientName) {
+                    if (highlightedClients.length > 0 && !highlightedClients.includes(client.name)) {
                         return color + '40'; // Low opacity
                     }
                     return color;
@@ -123,18 +236,12 @@ const ClientRadarWidget = () => {
                 datalabels: {
                     color: (ctx) => {
                         const client = chartClients[ctx.dataIndex];
-                        if (selectedClientName && client.name !== selectedClientName) return '#99999940';
+                        if (highlightedClients.length > 0 && !highlightedClients.includes(client.name)) return '#99999940';
                         return '#666';
                     },
                     anchor: 'end',
                     align: 'top',
-                    formatter: (value, context) => {
-                        const idx = context.dataIndex;
-                        const client = chartClients[idx];
-                        // const sign = client.delta > 0 ? '+' : '';
-                        // Simplify label for chart: just Q4 value
-                        return `${value}`;
-                    }
+                    formatter: (value) => `${value}`
                 }
             }
         ]
@@ -168,62 +275,54 @@ const ClientRadarWidget = () => {
     };
 
     // --- Render Helpers ---
-    const renderDeltaBadge = (client) => {
-        if (client.q4 === 0) return <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xxs">🛑 Stop</span>;
-        if (client.delta < 0) return <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full text-xxs">🟠 Shrink</span>;
-        return <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xxs">🟢 Grow</span>;
-    };
-
     const renderCombinedImpact = (client) => {
         const sign = client.delta > 0 ? '+' : '';
         const colorClass = client.delta >= 0 ? 'text-green-600' : (client.q4 === 0 ? 'text-red-600' : 'text-orange-500');
+        // New Metric: Share of Total
+        const shareOfTotal = ((client.q4 / totalQ4Days) * 100).toFixed(1);
 
         return (
-            <span className={`${colorClass} font-bold`}>{sign}{client.delta}d ({sign}{client.pct}%)</span>
+            <div className="flex flex-col items-end">
+                <span className={`${colorClass} font-bold`}>{sign}{client.delta}d</span>
+                <span className="text-xxs text-gray-400">Impact</span>
+            </div>
         );
     };
 
-    // 3C Data (Static)
-    const capacityData = {
-        labels: ['AlphaNutrition', 'BioLabs', 'Others'],
-        datasets: [{
-            data: [1550, 1200, 1250],
-            backgroundColor: ['#2A9D8F', '#264653', '#E5E7EB'],
-            borderRadius: 4,
-            barPercentage: 0.6
-        }]
+    const displayList = activeTab === 'risks' ? highRisk : topGrowing;
+
+    // 3C Donut Data
+    const donutData = {
+        labels: ['Top 3 Clients', 'Others'],
+        datasets: [
+            {
+                data: [top3Q4Sum, totalQ4Days - top3Q4Sum],
+                backgroundColor: ['#0F766E', '#E5E7EB'], // Teal-700 vs Gray-200
+                borderWidth: 0,
+                hoverOffset: 4
+            }
+        ]
     };
-    const capacityOptions = {
-        indexAxis: 'y',
+
+    const donutOptions = {
+        cutout: '70%',
         responsive: true,
         maintainAspectRatio: false,
-        scales: {
-            x: { display: false, max: 4000 },
-            y: { grid: { display: false } }
-        },
         plugins: {
             legend: { display: false },
-            datalabels: {
-                anchor: 'end',
-                align: 'start',
-                offset: 4,
-                color: (context) => context.dataIndex === 2 ? '#374151' : '#fff',
-                formatter: (value, ctx) => {
-                    const percentage = Math.round((value / 4000) * 100);
-                    return ctx.dataIndex === 2 ? `Others ${percentage}%` : `${percentage}%`;
-                }
-            },
             tooltip: {
                 callbacks: {
                     label: function (context) {
-                        return `${context.raw} Days (${Math.round((context.raw / 4000) * 100)}%)`;
+                        const val = context.raw;
+                        const pct = Math.round((val / totalQ4Days) * 100);
+                        return `${context.label}: ${val} days (${pct}%)`;
                     }
                 }
-            }
-        }
+            },
+            datalabels: { display: false }
+        },
+        onClick: handleDonutClick
     };
-
-    const displayList = activeTab === 'risks' ? highRisk : topGrowing;
 
     return (
         <section className="pb-10 mt-8">
@@ -231,7 +330,7 @@ const ClientRadarWidget = () => {
                 <h2 className="text-base font-bold text-gray-800 uppercase tracking-wide border-l-4 border-secondary pl-3">
                     PART 3. CLIENT & CAPACITY RADAR
                 </h2>
-                <span className="text-xs text-gray-400">Measured in Occupied Capacity Days (Total: {totalQ4Days.toLocaleString()}d)</span>
+                <span className="text-xs text-gray-400">Quarter-over-Quarter Capacity Allocation (Total: {totalQ4Days.toLocaleString()}d)</span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -249,7 +348,7 @@ const ClientRadarWidget = () => {
                             <div className="flex-1 min-h-0 relative">
                                 <Bar data={riskData} options={riskOptions} />
                             </div>
-                            <div className="text-center text-xs text-gray-400 mt-2 shrink-0">Total Capacity Distribution (Top 8 Clients)</div>
+                            <div className="text-center text-xs text-gray-400 mt-2 shrink-0">Total Capacity Distribution</div>
                         </div>
 
                         {/* Interactive List: Tabbed (Narrower) */}
@@ -274,8 +373,8 @@ const ClientRadarWidget = () => {
 
                             {/* Fixed Header */}
                             <div className="grid grid-cols-10 text-gray-400 bg-gray-50 uppercase text-xxs py-2 px-2 rounded-t font-medium mb-1">
-                                <div className="col-span-4">Brand</div>
-                                <div className="col-span-6 text-right">Impact</div>
+                                <div className="col-span-6">Brand / Share</div>
+                                <div className="col-span-4 text-right">Impact</div>
                             </div>
 
                             {/* Scrollable List Content */}
@@ -283,17 +382,21 @@ const ClientRadarWidget = () => {
                                 <table className="w-full text-left text-xs table-fixed">
                                     <tbody className="divide-y divide-gray-100">
                                         {displayList.map((client, idx) => {
-                                            const isSelected = selectedClientName === client.name;
+                                            const isSelected = highlightedClients.includes(client.name);
+                                            // Context Percentage
+                                            const shareOfTotal = ((client.q4 / totalQ4Days) * 100).toFixed(1);
+
                                             return (
                                                 <tr
                                                     key={idx}
                                                     onClick={() => handleClientClick(client.name)}
                                                     className={`cursor-pointer transition-colors ${isSelected ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-gray-50'}`}
                                                 >
-                                                    <td className="px-2 py-3 font-bold text-gray-700 truncate w-[40%]" title={client.name}>
-                                                        {client.name}
+                                                    <td className="px-2 py-3 w-[60%]" title={client.name}>
+                                                        <div className="font-bold text-gray-700 truncate">{client.name}</div>
+                                                        <div className="text-[10px] text-gray-400">({shareOfTotal}% of Total)</div>
                                                     </td>
-                                                    <td className="px-2 py-3 text-right w-[60%]">
+                                                    <td className="px-2 py-3 text-right w-[40%]">
                                                         {renderCombinedImpact(client)}
                                                     </td>
                                                 </tr>
@@ -306,20 +409,61 @@ const ClientRadarWidget = () => {
                     </div>
                 </div>
 
-                {/* Widget 3C: Brand Capacity Concentration */}
+                {/* Widget 3C: Brand Capacity Concentration (Refactored) */}
                 <div className="card">
                     <div className="card-header">
-                        <h3 className="card-title"><i className="fa-solid fa-chart-pie text-secondary"></i> 3C. Brand Capacity Concentration</h3>
+                        <h3 className="card-title text-sm"><i className="fa-solid fa-chart-pie text-secondary"></i> 3C. CLIENT DEPENDENCY ANALYSIS</h3>
                     </div>
-                    <div className="p-4 flex flex-col justify-between h-full">
-                        <div className="h-40 relative">
-                            <Bar data={capacityData} options={capacityOptions} />
+                    <div className="p-4 flex flex-col h-full relative">
+                        {/* Donut Chart Container */}
+                        <div className="relative h-48 w-full flex justify-center items-center mb-2">
+                            <Doughnut data={donutData} options={donutOptions} plugins={[riskThresholdPlugin]} />
+                            {/* Center Text Overlay */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <div className="text-secondary text-xs uppercase font-medium">Top 3 Share</div>
+                                <div className="text-2xl font-bold text-gray-800">{top3Q4Share}%</div>
+                            </div>
                         </div>
-                        {/* Risk Warning */}
-                        <div className="mt-4 text-xs border-l-2 border-ora-warning pl-2 text-gray-600">
-                            <span className="font-bold text-ora-warning">Concentration Risk:</span>
-                            <br />
-                            Top 2 Clients (AlphaNutrition + BioLabs) occupy <span className="font-bold">69%</span> of total capacity (2,750/4,000 Days).
+
+                        {/* QoQ & Risk Status Block */}
+                        <div className="mt-auto space-y-3">
+                            {/* QoQ Metrics */}
+                            <div className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded border border-gray-100">
+                                <div className="text-gray-500">
+                                    Q3 Comparison:<br />
+                                    <strong>{top3Q3Share}%</strong>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-gray-400 text-[10px] uppercase tracking-wide">Trend</div>
+                                    {isRiskIncreasing ? (
+                                        <div className="text-orange-500 font-bold">
+                                            +{shareDelta}% Increase <i className="fa-solid fa-arrow-trend-up"></i>
+                                        </div>
+                                    ) : (
+                                        <div className="text-green-600 font-bold">
+                                            {shareDelta}% Decrease <i className="fa-solid fa-arrow-trend-down"></i>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className={`text-xs border-l-4 ${riskBorder} pl-3 py-2 ${riskBg} rounded-r relative`}>
+                                {/* Max Exposure Metric */}
+                                <div className="flex justify-between items-center mb-2 border-b border-gray-200 pb-1">
+                                    <span className="text-gray-500">Max Exposure:</span>
+                                    <span className="font-bold text-gray-700">{maxExposureClient.name} ({maxExposurePct}%)</span>
+                                </div>
+
+                                <div className="mb-1 text-gray-600 leading-tight">
+                                    Top 3 Clients occupy <span className="font-bold">{top3Q4Share}%</span> of total capacity.
+                                </div>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="font-bold text-gray-500">Risk Status:</span>
+                                    <span className={`uppercase font-bold ${riskColor} px-2 py-0.5 bg-white border border-gray-100 rounded shadow-sm text-xxs`}>
+                                        {riskStatus}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
