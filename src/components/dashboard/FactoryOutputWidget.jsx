@@ -291,8 +291,8 @@ const FactoryOutputWidget = () => {
                     <div>
                         <h3 className="font-bold text-slate-700 leading-none">
                             {viewMode === 'overall'
-                                ? (isZh ? '季度产出与效率趋势' : 'P2-C. Quarterly Output & Efficiency Trends')
-                                : (isZh ? '当前产线负荷排行' : 'P2-C. Current Production Load Ranking')}
+                                ? (isZh ? '2D 季度产出与效率趋势' : '2D. Quarterly Output & Efficiency Trends')
+                                : (isZh ? '2D 当前产线负荷排行' : '2D. Current Production Load Ranking')}
                         </h3>
                         <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">{isZh ? '工厂产出与效率趋势' : 'Factory Output & Efficiency Trends'}</p>
                     </div>

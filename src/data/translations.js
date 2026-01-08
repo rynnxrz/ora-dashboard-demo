@@ -9,8 +9,8 @@ export const TRANSLATIONS = {
         "refresh_data": "Refresh Data",
 
         // Part 1
-        "p1_title": "Part 1. Internal Exception Radar",
-        "p1_subtitle": "Click cards to filter details",
+        "p1_title": "Part 1: Daily Focus",
+        "p1_subtitle": "1A. Internal Exception Radar | Click cards to filter details",
         "kpi_lead_title": "Lead Time Breach",
         "kpi_lead_sub": "Overall Cycle > Target",
         "kpi_pay_title": "Payment Blocked",
@@ -21,7 +21,8 @@ export const TRANSLATIONS = {
         "kpi_data_sub": "Data Records Incomplete",
 
         // Widget P1-B
-        "p1b_title": "P1-B. Key Contracts Overview",
+        "p1b_title": "1B. Key Order Overview",
+        "p1c_panel_title": "1C. Key Order Data Quality / Material Readiness",
         "btn_list": "List",
         "btn_graph": "Graph",
         "Tab_all": "All",
@@ -34,7 +35,7 @@ export const TRANSLATIONS = {
         "th_time": "Time (Sign/Upd)",
 
         // Widget P1-C
-        "p1c_title": "P1-C. Zombie Contracts & Inventory",
+        "p1c_title": "Inactive Contracts & Inventory",
         "btn_zombie_contracts": "Inactive Contracts",
         "btn_zombie_inventory": "Stuck Inventory",
         "zombie_c_sub": "Inactive > 45d",
@@ -62,17 +63,17 @@ export const TRANSLATIONS = {
         "dq_filter_comp": "Complete · No Action",
 
         // Part 2
-        "p2_title": "Part 2. Lead Time Deep Dive",
+        "p2_title": "Part 2: Lead Time Deep Dive",
         "p2_subtitle": "Process Cycle vs Target",
         "p2_banner_title": "Contract Entry Latency",
         "p2_banner_desc": "About 15% contracts entered > 3 days after signing.",
         "p2_banner_btn": "View Details",
 
         // P2 Lead Time Deep Dive
-        "p2_deep_dive_title": "LEAD TIME DEEP DIVE",
+        "p2_deep_dive_title": "Part 2: Lead Time Deep Dive",
         "p2_median_cycle_label": "Overall Median Cycle",
         "p2_ontime_rate_label": "On-time Delivery Rate",
-        "p2_overall_overview_title": "Overall Overview",
+        "p2_overall_overview_title": "2B. End-to-End Overview",
         "p2_tip_label": "Tip:",
         "p2_tip_content": "Click on <red>Red Anomalous Stages</red> in the chart or <rose>Bottleneck Lines</rose> below to drill down into contracts.",
         "p2_stage_diagnosis": "Stage Diagnosis",
@@ -85,7 +86,7 @@ export const TRANSLATIONS = {
         "p2_running_smoothly": "Running Smoothly",
         "p2_running_smoothly_desc": "{stage} is running smoothly (Breach: {count}) with no significant anomalies.",
 
-        "p3b_title": "P2-A. Capacity Utilization",
+        "p3b_title": "3B. Client Concentration Analysis",
         "p3b_sub": "Avg Days",
         "p3b_footer_l": "Median Cycle: 42 Days",
         "p3b_footer_r": "Based on completed contracts",
@@ -111,9 +112,9 @@ export const TRANSLATIONS = {
         "g1_kpi_time": "Avg Lead Time",
 
         // Part 3
-        "p3_title": "Part 3. Client & Capacity Radar",
+        "p3_title": "Part 3: Client & Capacity Radar",
         "p3_sub": "Q3 2024 vs Q4 2024",
-        "p3a_title": "3A. Client Risk Watch",
+        "p3a_title": "3A. Client Risk & Growth",
         "p3a_footer": "Based on quarterly volume comparison",
         "p3a_th_brand": "Brand",
         "p3a_th_status": "Status",
@@ -121,12 +122,12 @@ export const TRANSLATIONS = {
         "risk_dormant": "This Q No Order",
         "risk_cooling": "Order Dropped",
 
-        "p3c_title": "3C. Brand Capacity Concentration",
+        "p3c_title": "3C. Format Capacity Matrix",
         "p3c_risk_label": "High Risk:",
         "p3c_risk_desc": "Top 3 clients take 72% capacity.",
         "p3c_footer": "Based on scheduled units",
 
-        "p3d_title": "P3-D. White Space Matrix",
+        "p3d_title": "Format Capacity Matrix",
         "p3d_legend_core": "Core Biz",
         "p3d_legend_occasional": "Occasional",
         "p3d_legend_never": "Never",
@@ -194,8 +195,8 @@ export const TRANSLATIONS = {
         "refresh_data": "刷新数据",
 
         // Part 1
-        "p1_title": "第一部分：内部异常雷达",
-        "p1_subtitle": "点击卡片筛选详情",
+        "p1_title": "第一部分：每日关注",
+        "p1_subtitle": "1A 内部异常雷达 | 点击卡片筛选详情",
         "kpi_lead_title": "整体周期超出内部目标",
         "kpi_lead_sub": "阶段超出目标",
         "kpi_pay_title": "收款环节有阻塞",
@@ -206,7 +207,8 @@ export const TRANSLATIONS = {
         "kpi_data_sub": "字段缺失/异常",
 
         // Widget P1-B
-        "p1b_title": "关键订单概览",
+        "p1b_title": "1B 关键订单概览",
+        "p1c_panel_title": "1C 关键订单 数据完整度/物料准备",
         "btn_list": "列表",
         "btn_graph": "图表",
         "Tab_all": "全部",
@@ -219,7 +221,7 @@ export const TRANSLATIONS = {
         "th_time": "时间 (签约/更新)",
 
         // Widget P1-C
-        "p1c_title": "僵尸合同与库存",
+        "p1c_title": "停滞合同与库存",
         "btn_zombie_contracts": "停滞中的合同",
         "btn_zombie_inventory": "滞留成品/半成品",
         "zombie_c_sub": "超过 45 天无更新",
@@ -254,10 +256,10 @@ export const TRANSLATIONS = {
         "p2_banner_btn": "查看明细",
 
         // P2 Lead Time Deep Dive
-        "p2_deep_dive_title": "交付周期深度透视",
+        "p2_deep_dive_title": "第二部分：交付周期深度透视",
         "p2_median_cycle_label": "整体中位周期",
         "p2_ontime_rate_label": "准时交付率",
-        "p2_overall_overview_title": "全流程概览",
+        "p2_overall_overview_title": "2B 全流程概览",
         "p2_tip_label": "操作提示：",
         "p2_tip_content": "点击左侧柱状图中的 <red>红色异常阶段</red> 或下方 <rose>异常产线</rose>，即可下钻查看导致拖期的具体合同明细。",
         "p2_stage_diagnosis": "阶段诊断",
@@ -270,7 +272,7 @@ export const TRANSLATIONS = {
         "p2_running_smoothly": "运行平稳",
         "p2_running_smoothly_desc": "{stage} 阶段运行平稳 (异常数: {count})，无显著异常波动。",
 
-        "p3b_title": "产能利用率",
+        "p3b_title": "3B 客户集中度分析",
         "p3b_sub": "平均天数",
         "p3b_footer_l": "整体中位周期：42 天",
         "p3b_footer_r": "基于已完成的合同",
@@ -298,7 +300,7 @@ export const TRANSLATIONS = {
         // Part 3
         "p3_title": "第三部分：客户与产能雷达",
         "p3_sub": "2024年第三季度对比第四季度",
-        "p3a_title": "客户风险预警",
+        "p3a_title": "3A 客户风险与增长",
         "p3a_footer": "基于季度出货量对比",
         "p3a_th_brand": "品牌",
         "p3a_th_status": "状态",
@@ -306,12 +308,12 @@ export const TRANSLATIONS = {
         "risk_dormant": "本季未下单",
         "risk_cooling": "下单明显变少",
 
-        "p3c_title": "品牌产能集中度",
+        "p3c_title": "3C 剂型产能矩阵",
         "p3c_risk_label": "高风险：",
         "p3c_risk_desc": "当前前三大客户占用排产产能约 72%，集中度偏高。",
         "p3c_footer": "基于排产数量",
 
-        "p3d_title": "剂型白地",
+        "p3d_title": "剂型产能矩阵",
         "p3d_legend_core": "核心业务",
         "p3d_legend_occasional": "偶尔生产",
         "p3d_legend_never": "从未合作",

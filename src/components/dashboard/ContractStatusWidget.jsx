@@ -222,7 +222,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
                 <div className="flex items-center gap-4">
                     <h3 className="card-title flex items-center gap-2">
                         <i className="fa-solid fa-list-check text-ora-primary"></i>
-                        <span>{t('p1b_title') || "P1-B. Key Contracts"}</span>
+                        <span>{t('p1b_title') || "1B. Key Order Overview"}</span>
                     </h3>
                     <div className="flex items-center gap-3">
                         <div className="flex bg-gray-100 rounded p-0.5 space-x-1 ml-6">

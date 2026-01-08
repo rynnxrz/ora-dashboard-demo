@@ -11,7 +11,7 @@ const ZombieWidget = () => {
             <div className="card-header">
                 <h3 className="card-title">
                     <i className="fa-solid fa-skull text-gray-500"></i>
-                    <span>{t('p1c_title') || "P1-C. Zombie Contracts & Inventory"}</span>
+                    <span>{t('p1c_title') || "Inactive Contracts & Inventory"}</span>
                 </h3>
                 <div className="flex bg-gray-100 rounded p-0.5 space-x-1">
                     <button

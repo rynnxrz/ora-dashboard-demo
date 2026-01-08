@@ -9,7 +9,7 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
     return (
         <section>
             <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-base font-bold text-gray-800 uppercase tracking-wide border-l-4 border-ora-primary pl-3">
+                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight border-l-4 border-ora-primary pl-3">
                     {t('p1_title')}
                 </h2>
                 <span className="text-xs text-gray-400 italic ml-2">

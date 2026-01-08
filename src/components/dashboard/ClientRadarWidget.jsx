@@ -146,7 +146,7 @@ const ClientRadarWidget = () => {
         }
     };
 
-    // --- 3C: Brand Capacity Concentration Logic ---
+    // --- 3B: Client Concentration Logic ---
     // Calculate Top 3 Clients for Q4
     const top3ClientsQ4 = [...clientsWithDelta].sort((a, b) => b.q4 - a.q4).slice(0, 3);
     const top3Q4Sum = top3ClientsQ4.reduce((sum, c) => sum + c.q4, 0);
@@ -279,7 +279,7 @@ const ClientRadarWidget = () => {
         scales: { y: { display: false }, x: { grid: { display: false } } }
     };
 
-    // --- Helpers for 3D Matrix (Preserved/Updated) ---
+    // --- Helpers for 3C Matrix (Preserved/Updated) ---
     const getStatusColor = (days) => {
         if (days > 500) return 'bg-teal-600 text-white';
         if (days > 0) return 'bg-teal-100 text-teal-800';
@@ -303,7 +303,7 @@ const ClientRadarWidget = () => {
 
     const displayList = activeTab === 'risks' ? highRisk : topGrowing;
 
-    // 3C Donut Data
+    // 3B Donut Data
     const donutData = {
         labels: isZh ? ['前三客户', '其他'] : ['Top 3 Clients', 'Others'],
         datasets: [
@@ -341,7 +341,7 @@ const ClientRadarWidget = () => {
     return (
         <section className="pb-10 mt-8">
             <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-base font-bold text-gray-800 uppercase tracking-wide border-l-4 border-secondary pl-3">
+                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight border-l-4 border-secondary pl-3">
                     {t('p3_title')}
                 </h2>
                 <span className="text-xs text-gray-400">
@@ -353,11 +353,11 @@ const ClientRadarWidget = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* 3A: Client Risk Watch */}
+                {/* 3A: Client Risk & Growth */}
                 <div className="card lg:col-span-2">
                     <div className="card-header">
                         <h3 className="card-title">
-                            <i className="fa-solid fa-user-shield text-ora-primary"></i> {isZh ? '客户风险预警' : '3A. Client Risk Watch'}
+                            <i className="fa-solid fa-user-shield text-ora-primary"></i> {t('p3a_title')}
                         </h3>
                     </div>
                     <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[350px]">
@@ -427,10 +427,10 @@ const ClientRadarWidget = () => {
                     </div>
                 </div>
 
-                {/* Widget 3C: Brand Capacity Concentration (Refactored) */}
+                {/* Widget 3B: Client Concentration (Refactored) */}
                 <div className="card">
                     <div className="card-header">
-                        <h3 className="card-title text-sm"><i className="fa-solid fa-chart-pie text-secondary"></i> {isZh ? '客户集中度分析' : '3C. Client Dependency Analysis'}</h3>
+                        <h3 className="card-title text-sm"><i className="fa-solid fa-chart-pie text-secondary"></i> {t('p3b_title')}</h3>
                     </div>
                     <div className="p-4 flex flex-col h-full relative">
                         {/* Donut Chart Container */}
@@ -490,10 +490,10 @@ const ClientRadarWidget = () => {
                     </div>
                 </div>
 
-                {/* Widget 3D: White Space Matrix */}
+                {/* Widget 3C: Format Capacity Matrix */}
                 <div className="card lg:col-span-3">
                     <div className="card-header flex justify-between items-center">
-                        <h3 className="card-title"><i className="fa-solid fa-border-all text-teal-600"></i> {isZh ? '剂型产能矩阵' : '3D. Format Capacity Matrix (White Space)'}</h3>
+                        <h3 className="card-title"><i className="fa-solid fa-border-all text-teal-600"></i> {t('p3c_title')}</h3>
                         <div className="flex items-center gap-3 text-xxs">
                             <div className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-600 rounded-sm"></span> {coreLabel}（&gt;500{dayUnit}）</div>
                             <div className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-100 rounded-sm border border-teal-200"></span> {expLabel}（1-200{dayUnit}）</div>

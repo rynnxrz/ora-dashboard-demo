@@ -5,13 +5,14 @@ import MaterialReadinessWidget from './MaterialReadinessWidget';
 
 const SidebarContainer = ({ onRiskClick }) => {
     const [activeTab, setActiveTab] = useState('dataQuality');
-    const { language } = useLanguage();
+    const { t, language } = useLanguage();
     const isZh = language === 'zh';
 
     return (
         <div className="card bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
             {/* Tabs Header - Segmented Pill Style */}
             <div className="p-3 border-b border-slate-100 shrink-0">
+                <h3 className="text-xs font-bold text-slate-600 mb-2">{t('p1c_panel_title')}</h3>
                 <div className="flex bg-slate-100 p-1 rounded-lg">
                     <button
                         onClick={() => setActiveTab('dataQuality')}

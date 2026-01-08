@@ -37,8 +37,8 @@ const ProcessLeadTimeWidget = () => {
         return { median, onTimeRate, onTimeCount, totalCount: count };
     }, []);
 
-    const [selectedStageIndex, setSelectedStageIndex] = useState(null); // P2-A Stage Selection
-    const [selectedLine, setSelectedLine] = useState(null);       // P2-B Line Selection
+    const [selectedStageIndex, setSelectedStageIndex] = useState(null); // 2A Stage Selection
+    const [selectedLine, setSelectedLine] = useState(null);       // 2C Line Selection
 
     // Helper to switch selections
     const handleStageClick = (index) => {
@@ -51,7 +51,7 @@ const ProcessLeadTimeWidget = () => {
         // Independent states: Don't clear selectedStageIndex
     };
 
-    // --- 1. MOCK DATA (P2-A & Drill-down) ---
+    // --- 1. MOCK DATA (2A & Drill-down) ---
     const stages = [
         {
             label: isZh ? '阶段1 合同' : 'S1 Contract', fullLabel: isZh ? '阶段1 合同录入' : 'S1 Contract Entry',
@@ -98,7 +98,7 @@ const ProcessLeadTimeWidget = () => {
         }
     ];
 
-    // --- 2. MOCK DATA (P2-B Bottlenecks) ---
+    // --- 2. MOCK DATA (2C Bottlenecks) ---
     const productionLines = [
         {
             name: isZh ? '液体产线' : 'Liquids Line',
@@ -287,7 +287,7 @@ const ProcessLeadTimeWidget = () => {
     const getDiagnosisContent = () => {
         // [CASE A REMOVED: Line Diagnosis now handled by inline accordion]
 
-        // CASE B: Stage Diagnosis (P2-A Selection)
+        // CASE B: Stage Diagnosis (2A Selection)
         if (selectedStageIndex !== null) {
             const s = stages[selectedStageIndex];
             const stageLabel = isZh ? s.fullLabel : s.label;
@@ -426,7 +426,7 @@ const ProcessLeadTimeWidget = () => {
             <div className="mb-6">
                 <div className="flex items-baseline gap-2">
                     <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">{t('p2_deep_dive_title')}</h2>
-                    {!isZh && <span className="text-slate-400 text-sm font-medium">Lead Time Deep Dive</span>}
+                    {!isZh && <span className="text-slate-400 text-sm font-medium">Lead Time Analysis</span>}
                 </div>
                 <p className="text-slate-500 text-sm mt-1">
                     {t('p2_median_cycle_label')}: <b className="text-slate-800">{metrics.median} {isZh ? '天' : 'Days'}</b>
@@ -436,13 +436,13 @@ const ProcessLeadTimeWidget = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* LEFT CHART: P2-A */}
+                {/* LEFT CHART: 2A */}
                 <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                     <div className="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-white z-10">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-6 bg-indigo-500 rounded-full"></div>
                             <div>
-                                <h3 className="font-bold text-slate-700 leading-none">{isZh ? '阶段耗时监控' : 'P2-A. Stage Duration Tracking'}</h3>
+                                <h3 className="font-bold text-slate-700 leading-none">{isZh ? '2A 阶段耗时监控' : '2A. Stage Duration Tracking'}</h3>
                                 <p className="text-[10px] text-slate-400 mt-1">{isZh ? '颜色代表异常率（红色=不稳定）' : 'Color indicates breach rate (Red=Unstable)'}</p>
                             </div>
                         </div>
@@ -481,16 +481,16 @@ const ProcessLeadTimeWidget = () => {
                 </div>
             </div>
 
-            {/* BOTTOM GRID: P2-B */}
+            {/* BOTTOM GRID: 2C */}
             <div className="grid grid-cols-1 gap-6 mt-6">
-                {/* P2-B: BOTTLENECKS (RANKING LIST) */}
+                {/* 2C: BOTTLENECKS (RANKING LIST) */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
                     <div className="flex items-center justify-between mb-4 flex-shrink-0">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-6 bg-rose-500 rounded-full"></div>
                             <div>
                                 <h3 className="font-bold text-slate-700 leading-none uppercase">
-                                    {isZh ? '产线效率排行' : 'P2-B. Production Line Efficiency'}
+                                    {isZh ? '2C 产线效率排行' : '2C. Production Line Efficiency Ranking'}
                                     <span className="text-slate-400 text-xs font-normal normal-case ml-1">
                                         {isZh ? '（按累计延误排序）' : '(Sorted by Cumulative Delays)'}
                                     </span>
@@ -630,7 +630,7 @@ const ProcessLeadTimeWidget = () => {
 
             </div>
 
-            {/* P2-C: FACTORY OUTPUT & EFFICIENCY TRENDS */}
+            {/* 2D: FACTORY OUTPUT & EFFICIENCY TRENDS */}
             <div className="mt-6">
                 <FactoryOutputWidget />
             </div>
