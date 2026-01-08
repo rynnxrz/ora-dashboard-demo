@@ -7,7 +7,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const DataQualityWidget = ({ isEmbedded }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const isZh = language === 'zh';
     const [filter, setFilter] = useState('all'); // 'all' | 'date' | 'qty' | 'logic' | 'other'
     const [expandedRows, setExpandedRows] = useState({});
     const [showAll, setShowAll] = useState(false);
@@ -23,15 +24,15 @@ const DataQualityWidget = ({ isEmbedded }) => {
             isDataIssue: true,
             issueCount: 3,
             type: 'date',
-            summary: "Multiple (3)",
+            summary: isZh ? "多项（3）" : "Multiple (3)",
             details: [
                 {
-                    productName: "Product A",
-                    issues: ["Missing: Shipping Date", "Missing: Price"]
+                    productName: isZh ? "产品一" : "Product A",
+                    issues: isZh ? ["缺失：发货日期", "缺失：价格"] : ["Missing: Shipping Date", "Missing: Price"]
                 },
                 {
-                    productName: "Product B",
-                    issues: ["Update Required"]
+                    productName: isZh ? "产品二" : "Product B",
+                    issues: isZh ? ["需要更新"] : ["Update Required"]
                 }
             ],
             currentStage: "S3",
@@ -42,9 +43,9 @@ const DataQualityWidget = ({ isEmbedded }) => {
             isDataIssue: true,
             issueCount: 1,
             type: 'qty',
-            summary: "Missing: Quantity",
+            summary: isZh ? "缺失：数量" : "Missing: Quantity",
             details: [
-                { productName: "All Products", issues: ["Missing: Quantity"] }
+                { productName: isZh ? "全部产品" : "All Products", issues: isZh ? ["缺失：数量"] : ["Missing: Quantity"] }
             ],
             currentStage: "S2",
             daysDelayed: 10
@@ -54,9 +55,9 @@ const DataQualityWidget = ({ isEmbedded }) => {
             isDataIssue: true,
             issueCount: 1,
             type: 'logic',
-            summary: "Update Required",
+            summary: isZh ? "需要更新" : "Update Required",
             details: [
-                { productName: "Production Slot", issues: ["Update Required"] }
+                { productName: isZh ? "生产档期" : "Production Slot", issues: isZh ? ["需要更新"] : ["Update Required"] }
             ],
             currentStage: "S4",
             daysDelayed: 8
@@ -66,9 +67,9 @@ const DataQualityWidget = ({ isEmbedded }) => {
             isDataIssue: true,
             issueCount: 1,
             type: 'other',
-            summary: "Missing: Fields",
+            summary: isZh ? "缺失：字段" : "Missing: Fields",
             details: [
-                { productName: "Materials", issues: ["Missing: Fields"] }
+                { productName: isZh ? "物料" : "Materials", issues: isZh ? ["缺失：字段"] : ["Missing: Fields"] }
             ],
             currentStage: "S3",
             daysDelayed: 3
@@ -78,9 +79,9 @@ const DataQualityWidget = ({ isEmbedded }) => {
             isDataIssue: true,
             issueCount: 1,
             type: 'other',
-            summary: "Missing: Header Info",
+            summary: isZh ? "缺失：合同抬头信息" : "Missing: Header Info",
             details: [
-                { productName: "Contract Header", issues: ["Missing: Header Info"] }
+                { productName: isZh ? "合同抬头" : "Contract Header", issues: isZh ? ["缺失：合同抬头信息"] : ["Missing: Header Info"] }
             ],
             currentStage: "S1",
             daysDelayed: 2
@@ -135,7 +136,7 @@ const DataQualityWidget = ({ isEmbedded }) => {
                     <Doughnut data={dqData} options={dqOptions} />
                     <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
                         <span className="text-2xl font-bold text-gray-700">92%</span>
-                        <span className="text-[10px] text-gray-400">Score</span>
+                        <span className="text-[10px] text-gray-400">{isZh ? '评分' : 'Score'}</span>
                     </div>
                 </div>
 
@@ -150,8 +151,8 @@ const DataQualityWidget = ({ isEmbedded }) => {
                     <table className="w-full text-left text-xs">
                         <thead className="text-gray-400 border-b border-gray-100">
                             <tr>
-                                <th className="py-1 font-medium">Contract</th>
-                                <th className="py-1 font-medium text-right">{t('p1d_th_issue') || "Issue"}</th>
+                                <th className="py-1 font-medium">{t('p1d_th_contract') || (isZh ? "合同" : "Contract")}</th>
+                                <th className="py-1 font-medium text-right">{t('p1d_th_issue') || (isZh ? "问题" : "Issue")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -220,7 +221,7 @@ const DataQualityWidget = ({ isEmbedded }) => {
                             onClick={() => setShowAll(true)}
                             className="w-full mt-2 py-1.5 text-[10px] font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded border border-dashed border-gray-200 transition-colors"
                         >
-                            Click to view more
+                            {isZh ? '查看更多' : 'Click to view more'}
                         </button>
                     )}
                     {hiddenCount === 0 && showAll && sortedIssues.length > 3 && (
@@ -228,7 +229,7 @@ const DataQualityWidget = ({ isEmbedded }) => {
                             onClick={() => setShowAll(false)}
                             className="w-full mt-2 py-1.5 text-[10px] font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded border border-dashed border-gray-200 transition-colors"
                         >
-                            Show less
+                            {isZh ? '收起' : 'Show less'}
                         </button>
                     )}
                 </div>

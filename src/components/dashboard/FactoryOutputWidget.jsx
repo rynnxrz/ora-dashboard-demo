@@ -5,6 +5,7 @@ import {
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 ChartJS.register(
     CategoryScale, LinearScale, BarElement, LineElement, PointElement,
@@ -12,101 +13,106 @@ ChartJS.register(
 );
 
 // --- Data Constants ---
-const FULL_PRODUCTION_LINES = [
+const getProductionLines = (isZh) => [
     {
         id: 'liquid_sachet',
-        name: 'Liquid Sachet',
+        name: isZh ? '液体条包' : 'Liquid Sachet',
         color: '#f97316', // Orange
         load: 88,
         trend: [1200, 1350, 1600, 1900],
-        note: 'Critical visual check required',
-        subLines: [{ name: 'LS-01', load: 95 }, { name: 'LS-02', load: 81 }]
+        note: isZh ? '需要重点目检' : 'Critical visual check required',
+        subLines: isZh ? [{ name: '一号线', load: 95 }, { name: '二号线', load: 81 }] : [{ name: 'LS-01', load: 95 }, { name: 'LS-02', load: 81 }]
     },
     {
         id: 'liquid_pouch',
-        name: 'Liquid Pouch',
+        name: isZh ? '液体袋' : 'Liquid Pouch',
         color: '#ef4444', // Red
         load: 82,
         trend: [800, 850, 900, 1100],
-        note: 'New spout equipment active',
-        subLines: [{ name: 'LP-A', load: 85 }, { name: 'LP-B', load: 79 }]
+        note: isZh ? '新喷嘴设备已启用' : 'New spout equipment active',
+        subLines: isZh ? [{ name: '一号线', load: 85 }, { name: '二号线', load: 79 }] : [{ name: 'LP-A', load: 85 }, { name: 'LP-B', load: 79 }]
     },
     {
         id: 'gel_candy',
-        name: 'Gel Candy',
+        name: isZh ? '软糖' : 'Gel Candy',
         color: '#eab308', // Yellow
         load: 75,
         trend: [500, 600, 750, 800],
-        note: 'Temperature sensitive',
-        subLines: [{ name: 'GC-01', load: 75 }]
+        note: isZh ? '对温度敏感' : 'Temperature sensitive',
+        subLines: isZh ? [{ name: '一号线', load: 75 }] : [{ name: 'GC-01', load: 75 }]
     },
     {
         id: 'tablets',
-        name: 'Tablets',
+        name: isZh ? '片剂' : 'Tablets',
         color: '#10b981', // Emerald
         load: 70,
         trend: [1100, 1200, 1300, 1400],
-        note: 'Stable output',
-        subLines: [{ name: 'TB-X', load: 72 }, { name: 'TB-Y', load: 68 }]
+        note: isZh ? '产出稳定' : 'Stable output',
+        subLines: isZh ? [{ name: '一号线', load: 72 }, { name: '二号线', load: 68 }] : [{ name: 'TB-X', load: 72 }, { name: 'TB-Y', load: 68 }]
     },
     {
         id: 'sachet_filling',
-        name: 'Sachet Filling',
+        name: isZh ? '条包充填' : 'Sachet Filling',
         color: '#06b6d4', // Cyan
         load: 65,
         trend: [900, 950, 950, 980],
-        note: 'Routine maintenance due',
-        subLines: [{ name: 'SF-1', load: 60 }, { name: 'SF-2', load: 70 }]
+        note: isZh ? '需例行保养' : 'Routine maintenance due',
+        subLines: isZh ? [{ name: '一号线', load: 60 }, { name: '二号线', load: 70 }] : [{ name: 'SF-1', load: 60 }, { name: 'SF-2', load: 70 }]
     },
     {
         id: 'hard_cap',
-        name: 'Hard Cap',
+        name: isZh ? '硬胶囊' : 'Hard Cap',
         color: '#3b82f6', // Blue
         load: 60,
         trend: [600, 650, 700, 720],
-        note: 'Material delay resolved',
-        subLines: [{ name: 'HC-Line', load: 60 }]
+        note: isZh ? '物料延误已解决' : 'Material delay resolved',
+        subLines: isZh ? [{ name: '一号线', load: 60 }] : [{ name: 'HC-Line', load: 60 }]
     },
     {
         id: 'soft_cap',
-        name: 'Soft Cap',
+        name: isZh ? '软胶囊' : 'Soft Cap',
         color: '#8b5cf6', // Violet
         load: 55,
         trend: [300, 320, 350, 400],
-        note: 'Low volume run',
-        subLines: [{ name: 'SC-Line', load: 55 }]
+        note: isZh ? '低产量运行' : 'Low volume run',
+        subLines: isZh ? [{ name: '一号线', load: 55 }] : [{ name: 'SC-Line', load: 55 }]
     },
     {
         id: 'square_sachet',
-        name: 'Square Sachet',
+        name: isZh ? '方袋' : 'Square Sachet',
         color: '#d946ef', // Fuchsia
         load: 45,
         trend: [200, 250, 300, 350],
-        note: 'Transitioning format',
-        subLines: [{ name: 'SS-01', load: 45 }]
+        note: isZh ? '规格切换中' : 'Transitioning format',
+        subLines: isZh ? [{ name: '一号线', load: 45 }] : [{ name: 'SS-01', load: 45 }]
     },
     {
         id: 'packing',
-        name: 'Packing/Bottle',
+        name: isZh ? '包装/瓶装' : 'Packing/Bottle',
         color: '#64748b', // Slate
         load: 40,
         trend: [300, 300, 320, 320],
-        note: 'Underutilized',
-        subLines: [{ name: 'PK-Main', load: 40 }]
+        note: isZh ? '产能偏低' : 'Underutilized',
+        subLines: isZh ? [{ name: '主线', load: 40 }] : [{ name: 'PK-Main', load: 40 }]
     }
 ];
 
 const FactoryOutputWidget = () => {
+    const { language } = useLanguage();
+    const isZh = language === 'zh';
+    const dayUnit = isZh ? '天' : 'Days';
+    const shortDayUnit = isZh ? '天' : 'd';
     const [viewMode, setViewMode] = useState('overall'); // 'overall' | 'line'
     const [selectedLineIds, setSelectedLineIds] = useState([]);
     const [expandedLineIds, setExpandedLineIds] = useState([]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const fullProductionLines = useMemo(() => getProductionLines(isZh), [isZh]);
 
     // Initial Logic for 'line' view selection
     useEffect(() => {
         if (viewMode === 'line') {
             // Sort by load descending
-            const sorted = [...FULL_PRODUCTION_LINES].sort((a, b) => b.load - a.load);
+            const sorted = [...fullProductionLines].sort((a, b) => b.load - a.load);
             const n = sorted.length;
             if (n <= 5) {
                 setSelectedLineIds(sorted.map(l => l.id));
@@ -126,7 +132,7 @@ const FactoryOutputWidget = () => {
     }, [viewMode]);
 
     // Common Labels
-    const labels = ['Q1', 'Q2', 'Q3', 'Q4 (Current)'];
+    const labels = isZh ? ['一季度', '二季度', '三季度', '四季度（当前）'] : ['Q1', 'Q2', 'Q3', 'Q4 (Current)'];
 
     // --- Data for Overall View ---
     const laborDaysData = [2800, 3100, 3500, 4000];
@@ -137,7 +143,7 @@ const FactoryOutputWidget = () => {
         datasets: [
             {
                 type: 'bar',
-                label: 'Quarterly Labor Days',
+                label: isZh ? '季度工时' : 'Quarterly Labor Days',
                 data: laborDaysData,
                 backgroundColor: (ctx) => ctx.dataIndex === 3 ? '#6366f1' : '#cbd5e1',
                 barThickness: 40,
@@ -155,7 +161,7 @@ const FactoryOutputWidget = () => {
             },
             {
                 type: 'line',
-                label: 'Avg Lead Time (Days)',
+                label: isZh ? '平均交付周期' : 'Avg Lead Time (Days)',
                 data: leadTimeData,
                 borderColor: '#10b981',
                 backgroundColor: '#10b981',
@@ -171,7 +177,7 @@ const FactoryOutputWidget = () => {
                     anchor: 'start',
                     offset: 6,
                     font: { weight: 'bold' },
-                    formatter: (val) => `${val}d`
+                    formatter: (val) => `${val}${shortDayUnit}`
                 }
             }
         ]
@@ -192,7 +198,7 @@ const FactoryOutputWidget = () => {
             },
             yDesc: {
                 type: 'linear', display: true, position: 'left', beginAtZero: true,
-                title: { display: true, text: 'Labor Days (Per Quarter)', color: '#6366f1' },
+                title: { display: true, text: isZh ? '季度工时' : 'Labor Days (Per Quarter)', color: '#6366f1' },
                 grid: { borderDash: [4, 4], color: '#f1f5f9' }, max: 5000
             }
         }
@@ -204,7 +210,7 @@ const FactoryOutputWidget = () => {
             ...commonOptions.scales,
             yAsc: {
                 type: 'linear', display: true, position: 'right', beginAtZero: false, min: 30, max: 60,
-                title: { display: true, text: 'Avg Lead Time (Days)', color: '#10b981' }, grid: { display: false }
+                title: { display: true, text: isZh ? '平均交付周期' : 'Avg Lead Time (Days)', color: '#10b981' }, grid: { display: false }
             }
         },
         plugins: {
@@ -213,8 +219,8 @@ const FactoryOutputWidget = () => {
                 ...commonOptions.plugins.tooltip,
                 callbacks: {
                     label: (ctx) => {
-                        if (ctx.dataset.type === 'bar') return ` Labor Days: ${ctx.raw.toLocaleString()}`;
-                        return ` Avg Lead Time: ${ctx.raw} Days`;
+                        if (ctx.dataset.type === 'bar') return isZh ? ` 工时：${ctx.raw.toLocaleString()}` : ` Labor Days: ${ctx.raw.toLocaleString()}`;
+                        return isZh ? ` 平均交付：${ctx.raw} ${dayUnit}` : ` Avg Lead Time: ${ctx.raw} Days`;
                     }
                 }
             }
@@ -224,10 +230,10 @@ const FactoryOutputWidget = () => {
     // --- Derived Data for Line View ---
     const selectedLines = useMemo(() => {
         // Sort selected lines by LOAD descending for display
-        return FULL_PRODUCTION_LINES
+        return fullProductionLines
             .filter(line => selectedLineIds.includes(line.id))
             .sort((a, b) => b.load - a.load);
-    }, [selectedLineIds]);
+    }, [selectedLineIds, fullProductionLines]);
 
     const summaryStats = useMemo(() => {
         if (selectedLines.length === 0) return { capacity: 0, avgLoad: 0 };
@@ -260,16 +266,20 @@ const FactoryOutputWidget = () => {
     // Dynamic Footnote
     const getFootnote = () => {
         if (viewMode === 'overall') {
-            return `Q4 cumulative delivery: 100 contracts. Efficiency improved by 12.5% vs. Q1 initial stage.`;
+            return isZh
+                ? '第四季度累计交付：100份合同。效率较第一季度提升 12.5%。'
+                : 'Q4 cumulative delivery: 100 contracts. Efficiency improved by 12.5% vs. Q1 initial stage.';
         }
-        return `Default view showing 1 Top, 1 Median, and 3 Bottom lines by current occupancy.`;
+        return isZh
+            ? '默认视图显示 1 个最高、1 个中位、3 个最低产线（按当前负荷）。'
+            : 'Default view showing 1 Top, 1 Median, and 3 Bottom lines by current occupancy.';
     };
 
     // Render Color Helper
     const getStatusColor = (load) => {
-        if (load > 80) return { bar: 'bg-orange-500', text: 'text-orange-600', label: 'High' };
-        if (load >= 60) return { bar: 'bg-emerald-500', text: 'text-emerald-600', label: 'Optimal' };
-        return { bar: 'bg-slate-300', text: 'text-slate-500', label: 'Low' };
+        if (load > 80) return { bar: 'bg-orange-500', text: 'text-orange-600', label: isZh ? '高' : 'High' };
+        if (load >= 60) return { bar: 'bg-emerald-500', text: 'text-emerald-600', label: isZh ? '正常' : 'Optimal' };
+        return { bar: 'bg-slate-300', text: 'text-slate-500', label: isZh ? '低' : 'Low' };
     };
 
     return (
@@ -280,9 +290,11 @@ const FactoryOutputWidget = () => {
                     <div className="w-2 h-6 bg-purple-500 rounded-full"></div>
                     <div>
                         <h3 className="font-bold text-slate-700 leading-none">
-                            {viewMode === 'overall' ? 'P2-C. QUARTERLY OUTPUT & EFFICIENCY TRENDS' : 'P2-C. CURRENT PRODUCTION LOAD RANKING'}
+                            {viewMode === 'overall'
+                                ? (isZh ? '季度产出与效率趋势' : 'P2-C. Quarterly Output & Efficiency Trends')
+                                : (isZh ? '当前产线负荷排行' : 'P2-C. Current Production Load Ranking')}
                         </h3>
-                        <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">Factory Output & Efficiency Trends</p>
+                        <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">{isZh ? '工厂产出与效率趋势' : 'Factory Output & Efficiency Trends'}</p>
                     </div>
                 </div>
 
@@ -293,13 +305,13 @@ const FactoryOutputWidget = () => {
                             onClick={() => setViewMode('overall')}
                             className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'overall' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
-                            Overall Factory
+                            {isZh ? '整体工厂' : 'Overall Factory'}
                         </button>
                         <button
                             onClick={() => setViewMode('line')}
                             className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'line' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                         >
-                            By Production Line
+                            {isZh ? '按产线' : 'By Production Line'}
                         </button>
                     </div>
 
@@ -311,14 +323,14 @@ const FactoryOutputWidget = () => {
                                 className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs font-bold text-slate-600 hover:bg-slate-50 shadow-sm"
                             >
                                 <i className="fa-solid fa-filter text-slate-400"></i>
-                                Select Lines ({selectedLineIds.length})
+                                {isZh ? `选择产线（${selectedLineIds.length}）` : `Select Lines (${selectedLineIds.length})`}
                                 <i className={`fa-solid fa-chevron-down ml-1 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`}></i>
                             </button>
 
                             {isFilterOpen && (
                                 <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-slate-200 rounded-lg shadow-xl p-2 max-h-60 overflow-y-auto z-20">
-                                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-2 px-2">Production Categories</div>
-                                    {FULL_PRODUCTION_LINES.map(line => {
+                                    <div className="text-[10px] uppercase font-bold text-slate-400 mb-2 px-2">{isZh ? '产线类别' : 'Production Categories'}</div>
+                                    {fullProductionLines.map(line => {
                                         const isSelected = selectedLineIds.includes(line.id);
                                         const isDisabled = !isSelected && selectedLineIds.length >= 5;
                                         return (
@@ -426,14 +438,14 @@ const FactoryOutputWidget = () => {
                                 <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
                                     <i className="fa-solid fa-industry text-4xl text-indigo-600"></i>
                                 </div>
-                                <span className="text-xs text-indigo-500 font-bold uppercase block mb-1">Current Quarter Labor Days</span>
+                                <span className="text-xs text-indigo-500 font-bold uppercase block mb-1">{isZh ? '本季度工时' : 'Current Quarter Labor Days'}</span>
                                 <div className="flex items-baseline gap-2 mb-2">
                                     <span className="text-3xl font-black text-indigo-700">4,000</span>
-                                    <span className="text-sm text-indigo-600 font-bold">Days</span>
+                                    <span className="text-sm text-indigo-600 font-bold">{isZh ? '天' : 'Days'}</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-xs font-bold text-indigo-600 bg-white inline-block px-1.5 py-0.5 rounded shadow-sm border border-indigo-50">
                                     <i className="fa-solid fa-arrow-trend-up"></i>
-                                    ↑ 14.3% QoQ
+                                    {isZh ? '↑ 14.3% 环比' : '↑ 14.3% QoQ'}
                                 </div>
                             </div>
                             {/* Card 2: Efficiency */}
@@ -441,14 +453,14 @@ const FactoryOutputWidget = () => {
                                 <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
                                     <i className="fa-solid fa-stopwatch text-4xl text-emerald-600"></i>
                                 </div>
-                                <span className="text-xs text-emerald-600 font-bold uppercase block mb-1">Avg Lead Time (Current)</span>
+                                <span className="text-xs text-emerald-600 font-bold uppercase block mb-1">{isZh ? '当前平均交付周期' : 'Avg Lead Time (Current)'}</span>
                                 <div className="flex items-baseline gap-2 mb-2">
                                     <span className="text-3xl font-black text-emerald-700">42</span>
-                                    <span className="text-sm text-emerald-600 font-bold">Days</span>
+                                    <span className="text-sm text-emerald-600 font-bold">{isZh ? '天' : 'Days'}</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-white inline-block px-1.5 py-0.5 rounded shadow-sm border border-emerald-50">
                                     <i className="fa-solid fa-bolt"></i>
-                                    ↓ 3d vs Q3
+                                    {isZh ? '↓ 3天 对比上季' : '↓ 3d vs Q3'}
                                 </div>
                             </div>
                         </>
@@ -456,24 +468,24 @@ const FactoryOutputWidget = () => {
                         /* Line View Summary Stats (Replacing old list) */
                         <div className="mt-0 p-4 bg-slate-50 rounded-xl border border-slate-100 h-full flex flex-col justify-center gap-6">
                             <div>
-                                <span className="text-xs text-slate-500 font-bold uppercase block mb-1">Total Available Capacity</span>
+                                <span className="text-xs text-slate-500 font-bold uppercase block mb-1">{isZh ? '可用总产能' : 'Total Available Capacity'}</span>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-3xl font-black text-slate-700">{summaryStats.capacity}</span>
-                                    <span className="text-sm text-slate-500 font-bold">Days</span>
+                                    <span className="text-sm text-slate-500 font-bold">{isZh ? '天' : 'Days'}</span>
                                 </div>
-                                <p className="text-[10px] text-slate-400 mt-1">Based on {selectedLines.length} selected lines</p>
+                                <p className="text-[10px] text-slate-400 mt-1">{isZh ? `基于 ${selectedLines.length} 条产线` : `Based on ${selectedLines.length} selected lines`}</p>
                             </div>
 
                             <div className="w-full h-px bg-slate-200"></div>
 
                             <div>
-                                <span className="text-xs text-slate-500 font-bold uppercase block mb-1">Avg Occupancy Rate</span>
+                                <span className="text-xs text-slate-500 font-bold uppercase block mb-1">{isZh ? '平均占用率' : 'Avg Occupancy Rate'}</span>
                                 <div className="flex items-baseline gap-2">
                                     <span className={`text-3xl font-black ${summaryStats.avgLoad > 80 ? 'text-orange-500' : 'text-emerald-600'}`}>
                                         {summaryStats.avgLoad}%
                                     </span>
                                 </div>
-                                <p className="text-[10px] text-slate-400 mt-1">Weighted average across selection</p>
+                                <p className="text-[10px] text-slate-400 mt-1">{isZh ? '按所选产线加权' : 'Weighted average across selection'}</p>
                             </div>
                         </div>
                     )}

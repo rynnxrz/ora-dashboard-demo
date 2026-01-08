@@ -1,11 +1,55 @@
-import React, { useState } from 'react';
-import { MACHINE_DATA, CONTRACT_DATA } from '../../data/mockData';
+import React, { useMemo, useState } from 'react';
+import { MACHINE_DATA } from '../../data/mockData';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const ProductionCalendarWidget = () => {
+    const { language } = useLanguage();
+    const isZh = language === 'zh';
     const [selectedGroupIndex, setSelectedGroupIndex] = useState(0); // Default: Square Sachet
     const [searchTerm, setSearchTerm] = useState('');
 
-    const activeGroup = MACHINE_DATA[selectedGroupIndex] || MACHINE_DATA[0];
+    const lineMap = {
+        'Powder stick sachet': '粉剂条包',
+        'PSS': '粉条1',
+        'PSS R': '粉条2',
+        'SF R1': '充填1',
+        'SF R2': '充填2',
+        'LS01 L': '液条1',
+        'LS01 R': '液条2',
+        'LS02': '液条3',
+        'LS03': '液条4',
+        'LS04 R': '液条5',
+        'Bottle 1': '瓶装1',
+        'Bottle 2': '瓶装2',
+        'Bottle 3': '瓶装3',
+        'Cap 1': '胶囊1',
+        'Cap 2': '胶囊2',
+        'Liquid Pouch': '液体袋',
+        'Gel Candy Blister': '软糖泡罩'
+    };
+    const machineNameMap = {
+        'Square Sachet': '方袋',
+        'Sachet Filling': '条包充填',
+        'Tablets': '片剂',
+        'Liquid Sachet': '液体条包',
+        'Packing': '包装',
+        'Hard Cap': '硬胶囊',
+        'Soft Cap': '软胶囊',
+        'Pouch': '袋装',
+        'Gel Candy': '软糖'
+    };
+
+    const machineData = useMemo(() => {
+        if (!isZh) return MACHINE_DATA;
+        return MACHINE_DATA.map(group => ({
+            ...group,
+            name: machineNameMap[group.name] || group.name,
+            displayName: machineNameMap[group.displayName] || group.displayName,
+            lines: group.lines.map(line => lineMap[line] || line)
+        }));
+    }, [isZh]);
+
+    const activeGroup = machineData[selectedGroupIndex] || machineData[0];
     // In screenshot: Square Sachet has LS01 L, LS01 R, LS02, LS03.
     // Our mock data might differ slightly, let's allow it but try to map if possible.
     // For "Square Sachet", let's assume we show the lines defined in mock data.
@@ -32,8 +76,8 @@ const ProductionCalendarWidget = () => {
         // Example 1: 01/01 on LS01 L (Index 0)
         if (dateStr === '01/01' && lineIndex === 0) {
             return {
-                product: 'Little U...',
-                task: 'M-12345',
+                product: isZh ? '小雨...' : 'Little U...',
+                task: isZh ? '任务-12345' : 'M-12345',
                 planned: 1000,
                 actual: 800,
                 status: 'done'
@@ -53,14 +97,14 @@ const ProductionCalendarWidget = () => {
         <div className="flex-1 bg-white flex flex-col h-full rounded shadow-sm border border-gray-200 overflow-hidden">
             {/* Header */}
             <div className="px-4 py-3 border-b border-gray-200 bg-white flex justify-between items-center">
-                <h2 className="font-bold text-gray-800 text-sm">Production Calendar</h2>
+                <h2 className="font-bold text-gray-800 text-sm">{isZh ? '生产日历' : 'Production Calendar'}</h2>
             </div>
 
             {/* Toolbar */}
             <div className="px-4 py-2 border-b border-gray-200 bg-white flex flex-wrap items-center gap-2 justify-between">
                 <div className="flex items-center gap-2">
-                    <button className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600">All</button>
-                    {MACHINE_DATA.map((group, idx) => (
+                    <button className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-600">{isZh ? '全部' : 'All'}</button>
+                    {machineData.map((group, idx) => (
                         <button
                             key={group.name}
                             onClick={() => setSelectedGroupIndex(idx)}
@@ -71,7 +115,7 @@ const ProductionCalendarWidget = () => {
                     ))}
                     {/* Mock Dropdown for Liquid Sachet as per screenshot */}
                     <div className="relative border border-gray-300 rounded px-2 py-1 flex items-center gap-2 bg-white">
-                        <span className="text-xs text-gray-700">Liquid Sachet</span>
+                        <span className="text-xs text-gray-700">{isZh ? '液体条包' : 'Liquid Sachet'}</span>
                         <i className="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
                     </div>
                 </div>
@@ -81,7 +125,7 @@ const ProductionCalendarWidget = () => {
                         <i className="fa-solid fa-magnifying-glass absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
                         <input
                             type="text"
-                            placeholder="Contracts Number"
+                            placeholder={isZh ? '合同编号' : 'Contracts Number'}
                             className="pl-7 pr-3 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-[#297A88]"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -89,12 +133,12 @@ const ProductionCalendarWidget = () => {
                     </div>
 
                     <div className="flex rounded border border-gray-300 overflow-hidden">
-                        <button className="px-3 py-1 text-xs bg-[#E0F7FA] text-[#006064] font-bold border-r border-gray-300">LS01 L</button>
-                        <button className="px-3 py-1 text-xs bg-white text-gray-600 hover:bg-gray-50">LS01 R</button>
+                        <button className="px-3 py-1 text-xs bg-[#E0F7FA] text-[#006064] font-bold border-r border-gray-300">{isZh ? '液条1' : 'LS01 L'}</button>
+                        <button className="px-3 py-1 text-xs bg-white text-gray-600 hover:bg-gray-50">{isZh ? '液条2' : 'LS01 R'}</button>
                     </div>
 
                     <button className="flex items-center gap-1 text-xs text-gray-600 px-2">
-                        More <i className="fa-solid fa-chevron-down text-[10px]"></i>
+                        {isZh ? '更多' : 'More'} <i className="fa-solid fa-chevron-down text-[10px]"></i>
                     </button>
 
                     <button className="text-gray-400 hover:text-gray-600 px-1">
@@ -121,10 +165,10 @@ const ProductionCalendarWidget = () => {
                             <th className="p-2 border border-gray-200 bg-white sticky left-0 z-30"></th>
                             {lines.map((_, idx) => (
                                 <React.Fragment key={idx}>
-                                    <th className="p-1 border border-gray-200 bg-white font-bold w-24 truncate">Product Name</th>
-                                    <th className="p-1 border border-gray-200 bg-white font-bold w-20 truncate">Task Number</th>
-                                    <th className="p-1 border border-gray-200 bg-white font-bold w-16 truncate">Planned Quantity</th>
-                                    <th className="p-1 border border-gray-200 bg-white font-bold w-16 truncate">Actual Quantity</th>
+                                    <th className="p-1 border border-gray-200 bg-white font-bold w-24 truncate">{isZh ? '产品' : 'Product Name'}</th>
+                                    <th className="p-1 border border-gray-200 bg-white font-bold w-20 truncate">{isZh ? '任务号' : 'Task Number'}</th>
+                                    <th className="p-1 border border-gray-200 bg-white font-bold w-16 truncate">{isZh ? '计划量' : 'Planned Quantity'}</th>
+                                    <th className="p-1 border border-gray-200 bg-white font-bold w-16 truncate">{isZh ? '实际量' : 'Actual Quantity'}</th>
                                 </React.Fragment>
                             ))}
                         </tr>
@@ -133,7 +177,7 @@ const ProductionCalendarWidget = () => {
                         {dates.map((d, rowIdx) => {
                             const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                             const dateLabel = d.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' });
-                            const weekDay = d.toLocaleDateString('en-US', { weekday: 'short' });
+                            const weekDay = d.toLocaleDateString(isZh ? 'zh-CN' : 'en-US', { weekday: 'short' });
 
                             return (
                                 <tr key={rowIdx} className={isWeekend ? 'bg-gray-50/30' : ''}>
@@ -171,7 +215,7 @@ const ProductionCalendarWidget = () => {
                             <td className="p-2 border border-gray-200 bg-white sticky left-0 z-10"></td>
                             <td colSpan={2} className="p-1 border border-gray-200 border-dashed border-[#297A88] text-[#297A88] font-medium text-xs bg-[#E0F7FA]/20 relative">
                                 <div className="absolute inset-0 border-2 border-dashed border-[#297A88] pointer-events-none opacity-50"></div>
-                                <span className="relative z-10 pl-2">Sachet...</span>
+                                <span className="relative z-10 pl-2">{isZh ? '条包...' : 'Sachet...'}</span>
                             </td>
                             <td className="p-2 border border-gray-200"></td>
                             <td className="p-2 border border-gray-200"></td>

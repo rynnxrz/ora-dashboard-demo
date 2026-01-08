@@ -2,7 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const ContractStatusWidget = ({ externalFilter }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const isZh = language === 'zh';
+    const labels = {
+        filter: isZh ? '筛选：' : 'Filter:',
+        targetUpdated: isZh ? '目标/更新' : 'TARGET & UPDATED',
+        signed: isZh ? '签约：' : 'Signed:',
+        target: isZh ? '目标：' : 'Target:',
+        updated: isZh ? '更新：' : 'Updated:',
+        overdue: isZh ? '逾期' : 'Days Overdue',
+        remaining: isZh ? '剩余' : 'Days Remaining',
+        viewMore: isZh ? '查看更多' : 'Click to view more',
+        showLess: isZh ? '收起' : 'Show less',
+        contract: isZh ? '合同' : 'Contract',
+        summary: isZh ? '汇总' : 'Summary',
+        s1: isZh ? '阶段1 合同' : 'S1 Contract',
+        s2: isZh ? '阶段2 回款' : 'S2 Payment',
+        s3: isZh ? '阶段3 物料' : 'S3 Mat',
+        s4: isZh ? '阶段4 生产' : 'S4 Prod',
+        s5: isZh ? '阶段5 发货' : 'S5 Ship',
+        dataError: isZh ? '数据错误' : 'Data Error',
+        ok: isZh ? '正常' : 'OK',
+        pending: isZh ? '待处理' : 'Pending',
+        missing: isZh ? '缺失' : 'Missing',
+        delay: isZh ? '延误' : 'Delay',
+        finished: isZh ? '已完成' : 'Finished',
+        displayCount: isZh ? '显示' : 'Displaying',
+        of: isZh ? '共' : 'of',
+        contracts: isZh ? '个合同' : 'contracts',
+        with: isZh ? '筛选为' : 'with',
+        colorNote: isZh ? '颜色表示延误程度。' : 'Color indicates delay severity.'
+    };
     const [viewMode, setViewMode] = useState('list'); // 'list' | 'graph'
     const [filter, setFilter] = useState('all'); // 'all' | 'blocker' | 'delay'
     const [expandedRows, setExpandedRows] = useState({});
@@ -24,33 +54,140 @@ const ContractStatusWidget = ({ externalFilter }) => {
     }, [externalFilter]);
 
     const mockData = [
-        { id: 'C2411-003', brand: 'Little Umbrella', stage: 'S2 款项', delay: '+45d', reason: '款项未到', overdueDays: 45, signedDate: '2024-10-01', targetDate: '2024-11-20', updated: '2d ago', isBlocker: true, isLimit: false, type: 'money' },
-        { id: 'C2411-008', brand: 'PowerGums', stage: 'S3 物料', delay: '+20d', reason: '物料未齐', overdueDays: 20, signedDate: '2024-10-15', targetDate: '2024-12-05', updated: '1d ago', isBlocker: true, isLimit: false, type: 'materials' },
+        {
+            id: 'C2411-003',
+            brand: isZh ? '小雨伞' : 'Little Umbrella',
+            stageNum: 2,
+            stage: isZh ? '阶段2 回款' : 'S2 Payment',
+            delay: isZh ? '+45天' : '+45d',
+            reason: isZh ? '款项未到' : 'Payment Missing',
+            overdueDays: 45,
+            signedDate: '2024-10-01',
+            targetDate: '2024-11-20',
+            updated: isZh ? '2天前' : '2d ago',
+            isBlocker: true,
+            isLimit: false,
+            type: 'money'
+        },
+        {
+            id: 'C2411-008',
+            brand: isZh ? '能量软糖' : 'PowerGums',
+            stageNum: 3,
+            stage: isZh ? '阶段3 物料' : 'S3 Material',
+            delay: isZh ? '+20天' : '+20d',
+            reason: isZh ? '物料未齐' : 'Materials Missing',
+            overdueDays: 20,
+            signedDate: '2024-10-15',
+            targetDate: '2024-12-05',
+            updated: isZh ? '1天前' : '1d ago',
+            isBlocker: true,
+            isLimit: false,
+            type: 'materials'
+        },
         {
             id: 'C2410-001',
-            brand: 'Vitality',
+            brand: isZh ? '活力' : 'Vitality',
             // Parent summarizes worst case (Model A)
-            stage: 'S4 生产',
-            delay: '+15d',
-            reason: '超出内部目标',
+            stageNum: 4,
+            stage: isZh ? '阶段4 生产' : 'S4 Production',
+            delay: isZh ? '+15天' : '+15d',
+            reason: isZh ? '超出内部目标' : 'Lead Time Breach',
             overdueDays: 15,
             signedDate: '2024-09-28',
             targetDate: '2024-11-15',
-            updated: 'Active',
+            updated: isZh ? '进行中' : 'Active',
             isBlocker: false,
             isLimit: true,
             type: 'leadtime',
             products: [
-                { id: 'Model-A', name: 'Vitality-Model-A', stage: 'S4 生产', delay: '+15d', overdueDays: 15, updated: '2024-10-20', status: 'delayed' },
-                { id: 'Model-B', name: 'Vitality-Model-B', stage: 'S5 发货', delay: 'OK', overdueDays: 0, updated: 'Finished', status: 'finished' }
+                {
+                    id: 'Model-A',
+                    name: isZh ? '型号一' : 'Model-A',
+                    stageNum: 4,
+                    stage: isZh ? '阶段4 生产' : 'S4 Production',
+                    delay: isZh ? '+15天' : '+15d',
+                    overdueDays: 15,
+                    updated: '2024-10-20',
+                    status: 'delayed'
+                },
+                {
+                    id: 'Model-B',
+                    name: isZh ? '型号二' : 'Model-B',
+                    stageNum: 5,
+                    stage: isZh ? '阶段5 发货' : 'S5 Shipping',
+                    delay: isZh ? '正常' : 'OK',
+                    overdueDays: 0,
+                    updated: isZh ? '已完成' : 'Finished',
+                    status: 'finished'
+                }
             ]
         },
         // Data Issues Mock Objects (Linked to DataQualityWidget)
-        { id: 'C2411-002', brand: 'Specimen A', stage: 'S3 Material', delay: '+5d', isDataIssue: true, reason: 'Data Error', overdueDays: 5, signedDate: '2024-11-01', targetDate: '2024-12-01', updated: '1d ago' },
-        { id: 'C2411-005', brand: 'Specimen B', stage: 'S2 Payment', delay: '+10d', isDataIssue: true, reason: 'Data Error', overdueDays: 10, signedDate: '2024-11-05', targetDate: '2024-12-10', updated: '2d ago' },
-        { id: 'C2411-009', brand: 'Specimen C', stage: 'S4 Production', delay: '+8d', isDataIssue: true, reason: 'Data Error', overdueDays: 8, signedDate: '2024-10-25', targetDate: '2024-12-15', updated: '3d ago' },
-        { id: 'C2410-022', brand: 'Specimen D', stage: 'S3 Material', delay: '+3d', isDataIssue: true, reason: 'Data Error', overdueDays: 3, signedDate: '2024-11-10', targetDate: '2024-12-05', updated: '4d ago' },
-        { id: 'C2411-012', brand: 'Specimen E', stage: 'S1 Contract', delay: '+2d', isDataIssue: true, reason: 'Data Error', overdueDays: 2, signedDate: '2024-11-15', targetDate: '2024-12-20', updated: '5d ago' },
+        {
+            id: 'C2411-002',
+            brand: isZh ? '样品一' : 'Specimen A',
+            stageNum: 3,
+            stage: isZh ? '阶段3 物料' : 'S3 Material',
+            delay: isZh ? '+5天' : '+5d',
+            isDataIssue: true,
+            reason: isZh ? '数据错误' : 'Data Error',
+            overdueDays: 5,
+            signedDate: '2024-11-01',
+            targetDate: '2024-12-01',
+            updated: isZh ? '1天前' : '1d ago'
+        },
+        {
+            id: 'C2411-005',
+            brand: isZh ? '样品二' : 'Specimen B',
+            stageNum: 2,
+            stage: isZh ? '阶段2 回款' : 'S2 Payment',
+            delay: isZh ? '+10天' : '+10d',
+            isDataIssue: true,
+            reason: isZh ? '数据错误' : 'Data Error',
+            overdueDays: 10,
+            signedDate: '2024-11-05',
+            targetDate: '2024-12-10',
+            updated: isZh ? '2天前' : '2d ago'
+        },
+        {
+            id: 'C2411-009',
+            brand: isZh ? '样品三' : 'Specimen C',
+            stageNum: 4,
+            stage: isZh ? '阶段4 生产' : 'S4 Production',
+            delay: isZh ? '+8天' : '+8d',
+            isDataIssue: true,
+            reason: isZh ? '数据错误' : 'Data Error',
+            overdueDays: 8,
+            signedDate: '2024-10-25',
+            targetDate: '2024-12-15',
+            updated: isZh ? '3天前' : '3d ago'
+        },
+        {
+            id: 'C2410-022',
+            brand: isZh ? '样品四' : 'Specimen D',
+            stageNum: 3,
+            stage: isZh ? '阶段3 物料' : 'S3 Material',
+            delay: isZh ? '+3天' : '+3d',
+            isDataIssue: true,
+            reason: isZh ? '数据错误' : 'Data Error',
+            overdueDays: 3,
+            signedDate: '2024-11-10',
+            targetDate: '2024-12-05',
+            updated: isZh ? '4天前' : '4d ago'
+        },
+        {
+            id: 'C2411-012',
+            brand: isZh ? '样品五' : 'Specimen E',
+            stageNum: 1,
+            stage: isZh ? '阶段1 合同' : 'S1 Contract',
+            delay: isZh ? '+2天' : '+2d',
+            isDataIssue: true,
+            reason: isZh ? '数据错误' : 'Data Error',
+            overdueDays: 2,
+            signedDate: '2024-11-15',
+            targetDate: '2024-12-20',
+            updated: isZh ? '5天前' : '5d ago'
+        }
     ];
 
     const getFilteredData = () => {
@@ -69,12 +206,12 @@ const ContractStatusWidget = ({ externalFilter }) => {
 
     const getFilterLabel = (filterKey) => {
         switch (filterKey) {
-            case 'lead-time': return 'Lead Time Breach'; // Map from KPIGrid ID if needed, but externalFilter sends 'delay'
-            case 'delay': return 'Lead Time Breach';
-            case 'blocker': return 'Payment Blocked';
-            case 'material': return 'Material Risk';
-            case 'data': return 'Data Issues';
-            case 'data_issue': return 'Data Issues';
+            case 'lead-time': return t('kpi_lead_title'); // Map from KPIGrid ID if needed, but externalFilter sends 'delay'
+            case 'delay': return t('kpi_lead_title');
+            case 'blocker': return t('kpi_pay_title');
+            case 'material': return t('kpi_mat_title');
+            case 'data': return t('kpi_data_title');
+            case 'data_issue': return t('kpi_data_title');
             default: return '';
         }
     };
@@ -105,7 +242,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
 
                         {filter !== 'all' && (
                             <span className="bg-ora-primary text-white text-[10px] px-2 py-0.5 rounded-full font-normal capitalize">
-                                Filter: {getFilterLabel(filter)}
+                                {labels.filter} {getFilterLabel(filter)}
                             </span>
                         )}
                     </div>
@@ -125,7 +262,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                     <th className="px-4 py-3 font-semibold">{t('th_stage') || "Stage"}</th>
                                     <th className="px-4 py-3 font-semibold">{t('th_delay') || "DAYS DELAYED"}</th>
                                     <th className="px-4 py-3 font-semibold">{t('th_status') || "Status"}</th>
-                                    <th className="px-4 py-3 font-semibold text-right">TARGET & UPDATED</th>
+                                    <th className="px-4 py-3 font-semibold text-right">{labels.targetUpdated}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -145,7 +282,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                                     <div>
                                                         <div className="font-bold text-gray-800">{row.id}</div>
                                                         <div className="text-xs text-gray-500">{row.brand}</div>
-                                                        <div className="text-[10px] text-gray-400 mt-0.5">Signed: {row.signedDate}</div>
+                                                        <div className="text-[10px] text-gray-400 mt-0.5">{labels.signed} {row.signedDate}</div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -167,11 +304,14 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 text-right">
-                                                <div className="font-bold text-gray-700 text-xs">Target: {row.targetDate}</div>
+                                                <div className="font-bold text-gray-700 text-xs">{labels.target} {row.targetDate}</div>
                                                 <div className={`text-xs font-bold ${row.overdueDays > 0 ? 'text-red-500' : 'text-green-600'}`}>
-                                                    {row.overdueDays > 0 ? `+${row.overdueDays} Days Overdue` : `${Math.abs(row.overdueDays)} Days Remaining`}
+                                                    {row.overdueDays > 0
+                                                        ? (isZh ? `逾期 ${row.overdueDays} 天` : `+${row.overdueDays} Days Overdue`)
+                                                        : (isZh ? `剩余 ${Math.abs(row.overdueDays)} 天` : `${Math.abs(row.overdueDays)} Days Remaining`)
+                                                    }
                                                 </div>
-                                                <div className="text-[10px] text-gray-400 mt-0.5">Updated: {row.updated}</div>
+                                                <div className="text-[10px] text-gray-400 mt-0.5">{labels.updated} {row.updated}</div>
                                             </td>
                                         </tr>
                                         {/* Child Rows */}
@@ -198,9 +338,9 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                                 <td className="px-4 py-2"></td>
                                                 <td className="px-4 py-2 text-right">
                                                     {child.status === 'finished' ? (
-                                                        <span className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full">✔ Finished</span>
+                                                        <span className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded-full">✔ {labels.finished}</span>
                                                     ) : (
-                                                        <span className="text-[10px] text-red-500 font-bold">Delay: {child.delay}</span>
+                                                        <span className="text-[10px] text-red-500 font-bold">{labels.delay}：{child.delay}</span>
                                                     )}
                                                 </td>
                                             </tr>
@@ -210,13 +350,16 @@ const ContractStatusWidget = ({ externalFilter }) => {
                             </tbody>
                         </table>
                         <div className="p-2 text-center text-xs text-gray-400 border-t border-gray-100">
-                            Displaying {visibleRows.length} of {filteredData.length} contracts {filter !== 'all' ? `with ${getFilterLabel(filter)}` : ''}.
+                            {isZh
+                                ? `显示 ${visibleRows.length}/${filteredData.length} 个合同${filter !== 'all' ? `（${labels.filter}${getFilterLabel(filter)}）` : ''}。`
+                                : `Displaying ${visibleRows.length} of ${filteredData.length} contracts ${filter !== 'all' ? `with ${getFilterLabel(filter)}` : ''}.`
+                            }
                             {hiddenCount > 0 && (
                                 <button
                                     onClick={() => setShowAllRows(true)}
                                     className="ml-2 text-[10px] font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded border border-dashed border-gray-200 px-2 py-0.5 transition-colors"
                                 >
-                                    Click to view more
+                                    {labels.viewMore}
                                 </button>
                             )}
                             {hiddenCount === 0 && showAllRows && filteredData.length > 4 && (
@@ -224,7 +367,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                     onClick={() => setShowAllRows(false)}
                                     className="ml-2 text-[10px] font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded border border-dashed border-gray-200 px-2 py-0.5 transition-colors"
                                 >
-                                    Show less
+                                    {labels.showLess}
                                 </button>
                             )}
                         </div>
@@ -239,19 +382,19 @@ const ContractStatusWidget = ({ externalFilter }) => {
                         <div className="min-w-[600px]">
                             {/* Header */}
                             <div className="grid grid-cols-7 gap-2 mb-2 text-xs font-bold text-gray-500 text-center border-b pb-2">
-                                <div className="text-left pl-2">Contract</div>
-                                <div>S1 Contract</div>
-                                <div>S2 Payment</div>
-                                <div>S3 Mat</div>
-                                <div>S4 Prod</div>
-                                <div>S5 Ship</div>
-                                <div className="text-right pr-2">Summary</div>
+                                <div className="text-left pl-2">{labels.contract}</div>
+                                <div>{labels.s1}</div>
+                                <div>{labels.s2}</div>
+                                <div>{labels.s3}</div>
+                                <div>{labels.s4}</div>
+                                <div>{labels.s5}</div>
+                                <div className="text-right pr-2">{labels.summary}</div>
                             </div>
 
                             {/* Dynamic Rows */}
                             <div className="space-y-2">
                                 {filteredData.map(row => {
-                                    const currentStageNum = parseInt(row.stage.substring(1, 2));
+                                    const currentStageNum = row.stageNum;
                                     const isExpanded = expandedRows[row.id];
 
                                     // Helper for Data Issue Styling
@@ -279,24 +422,24 @@ const ContractStatusWidget = ({ externalFilter }) => {
 
                                                 {/* S1 */}
                                                 <div className={`flex items-center justify-center rounded h-8 font-bold text-[10px] ${row.isDataIssue && currentStageNum === 1 ? '' : 'bg-green-500 text-white'}`} style={row.isDataIssue && currentStageNum === 1 ? getDataIssueStyle() : {}}>
-                                                    {row.isDataIssue && currentStageNum === 1 ? 'Data Error' : 'OK'}
+                                                    {row.isDataIssue && currentStageNum === 1 ? labels.dataError : labels.ok}
                                                 </div>
 
                                                 {/* S2 */}
                                                 {currentStageNum === 2 ? (
                                                     row.isDataIssue ? (
                                                         <div className="flex flex-col items-center justify-center h-8 rounded p-1" style={getDataIssueStyle()}>
-                                                            <span className="font-bold text-[8px] leading-tight">Data Error</span>
+                                                            <span className="font-bold text-[8px] leading-tight">{labels.dataError}</span>
                                                         </div>
                                                     ) : (
                                                         <div className="bg-red-500 text-white flex flex-col items-center justify-center h-8 rounded p-1">
                                                             <span className="font-bold leading-tight">{row.delay}</span>
-                                                            <span className="text-[8px] leading-tight opacity-90">Pending</span>
+                                                            <span className="text-[8px] leading-tight opacity-90">{labels.pending}</span>
                                                         </div>
                                                     )
                                                 ) : (
                                                     <div className={`h-8 rounded flex items-center justify-center ${currentStageNum > 2 ? 'bg-green-500 text-white' : 'bg-gray-100'}`}>
-                                                        {currentStageNum > 2 && 'OK'}
+                                                        {currentStageNum > 2 && labels.ok}
                                                     </div>
                                                 )}
 
@@ -304,17 +447,17 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                                 {currentStageNum === 3 ? (
                                                     row.isDataIssue ? (
                                                         <div className="flex flex-col items-center justify-center h-8 rounded p-1" style={getDataIssueStyle()}>
-                                                            <span className="font-bold text-[8px] leading-tight">Data Error</span>
+                                                            <span className="font-bold text-[8px] leading-tight">{labels.dataError}</span>
                                                         </div>
                                                     ) : (
                                                         <div className="bg-orange-500 text-white flex flex-col items-center justify-center h-8 rounded p-1">
                                                             <span className="font-bold leading-tight">{row.delay}</span>
-                                                            <span className="text-[8px] leading-tight opacity-90">Missing</span>
+                                                            <span className="text-[8px] leading-tight opacity-90">{labels.missing}</span>
                                                         </div>
                                                     )
                                                 ) : (
                                                     <div className={`h-8 rounded flex items-center justify-center ${currentStageNum > 3 ? 'bg-green-500 text-white' : 'bg-gray-100'}`}>
-                                                        {currentStageNum > 3 && 'OK'}
+                                                        {currentStageNum > 3 && labels.ok}
                                                     </div>
                                                 )}
 
@@ -322,17 +465,17 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                                 {currentStageNum === 4 ? (
                                                     row.isDataIssue ? (
                                                         <div className="flex flex-col items-center justify-center h-8 rounded p-1" style={getDataIssueStyle()}>
-                                                            <span className="font-bold text-[8px] leading-tight">Data Error</span>
+                                                            <span className="font-bold text-[8px] leading-tight">{labels.dataError}</span>
                                                         </div>
                                                     ) : (
                                                         <div className="bg-red-400 text-white flex flex-col items-center justify-center h-8 rounded p-1">
                                                             <span className="font-bold leading-tight">{row.delay}</span>
-                                                            <span className="text-[8px] leading-tight opacity-90">Delay</span>
+                                                            <span className="text-[8px] leading-tight opacity-90">{labels.delay}</span>
                                                         </div>
                                                     )
                                                 ) : (
                                                     <div className={`h-8 rounded flex items-center justify-center ${currentStageNum > 4 ? 'bg-green-500 text-white' : 'bg-gray-100'}`}>
-                                                        {currentStageNum > 4 && 'OK'}
+                                                        {currentStageNum > 4 && labels.ok}
                                                     </div>
                                                 )}
 
@@ -341,16 +484,19 @@ const ContractStatusWidget = ({ externalFilter }) => {
 
                                                 {/* Summary Column */}
                                                 <div className="flex flex-col items-end pr-2 justify-center">
-                                                    <div className="font-bold text-gray-700">Target: {row.targetDate}</div>
+                                                    <div className="font-bold text-gray-700">{labels.target} {row.targetDate}</div>
                                                     <div className={`font-bold ${row.overdueDays > 0 ? 'text-red-500' : 'text-green-600'}`}>
-                                                        {row.overdueDays > 0 ? `+${row.overdueDays}d` : `-${Math.abs(row.overdueDays)}d`}
+                                                        {row.overdueDays > 0
+                                                            ? (isZh ? `+${row.overdueDays}天` : `+${row.overdueDays}d`)
+                                                            : (isZh ? `-${Math.abs(row.overdueDays)}天` : `-${Math.abs(row.overdueDays)}d`)
+                                                        }
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {/* Child Rows in Graph View */}
                                             {isExpanded && row.products && row.products.map((child, idx) => {
-                                                const childStageNum = parseInt(child.stage.substring(1, 2));
+                                                const childStageNum = child.stageNum;
                                                 const isFinished = child.status === 'finished';
 
                                                 return (
@@ -358,12 +504,12 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                                         <div className="pl-6 flex items-center gap-1.5 opacity-80">
                                                             <div className="w-1 h-1 rounded-full bg-gray-400"></div>
                                                             <span className={`font-medium ${isFinished ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                                {child.name.replace('Vitality-', '')}
+                                                                {child.name}
                                                             </span>
                                                         </div>
 
                                                         {/* S1 - Child */}
-                                                        <div className={`flex items-center justify-center rounded h-6 font-bold text-[8px] ${isFinished ? 'bg-green-100 text-green-700' : 'bg-green-400 text-white'}`}>OK</div>
+                                                        <div className={`flex items-center justify-center rounded h-6 font-bold text-[8px] ${isFinished ? 'bg-green-100 text-green-700' : 'bg-green-400 text-white'}`}>{labels.ok}</div>
 
                                                         {/* S2 - S5 Child Logic Simplified for Demo (Assuming standard progress) */}
                                                         {[2, 3, 4, 5].map(step => (
@@ -371,14 +517,14 @@ const ContractStatusWidget = ({ externalFilter }) => {
                                                     ${childStageNum === step && !isFinished && child.overdueDays > 0 ? 'bg-red-400 text-white' :
                                                                     childStageNum >= step || isFinished ? (isFinished ? 'bg-green-100 text-green-700' : 'bg-green-400 text-white') : 'bg-gray-100'}
                                                 `}>
-                                                                {(childStageNum >= step || isFinished) && 'OK'}
-                                                                {childStageNum === step && !isFinished && child.overdueDays > 0 && `+${child.overdueDays}d`}
+                                                                {(childStageNum >= step || isFinished) && labels.ok}
+                                                                {childStageNum === step && !isFinished && child.overdueDays > 0 && (isZh ? `+${child.overdueDays}天` : `+${child.overdueDays}d`)}
                                                             </div>
                                                         ))}
 
                                                         <div className="text-right pr-2">
                                                             {isFinished ? (
-                                                                <span className="text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Finished</span>
+                                                                <span className="text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full">{labels.finished}</span>
                                                             ) : (
                                                                 <span className="text-red-500 font-bold">{child.delay}</span>
                                                             )}
@@ -392,7 +538,7 @@ const ContractStatusWidget = ({ externalFilter }) => {
                             </div>
                         </div>
                         <div className="mt-4 text-xs text-gray-400 text-center">
-                            Color indicates delay severity.
+                            {labels.colorNote}
                         </div>
                     </div>
                 )

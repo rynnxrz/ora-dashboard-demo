@@ -3,6 +3,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 const DashboardFilters = () => {
     const { t, toggleLanguage, language } = useLanguage();
+    const isZh = language === 'zh';
 
     return (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
@@ -11,7 +12,7 @@ const DashboardFilters = () => {
                 <p className="text-xs text-gray-400 mt-1 flex items-center gap-2">
                     <span>{t('header_update') || "Last Update: 2024-11-28 09:00 AM"}</span>
                     <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                    <span className="text-green-600 font-bold"><i className="fa-solid fa-circle-check"></i> System Online</span>
+                    <span className="text-green-600 font-bold"><i className="fa-solid fa-circle-check"></i> {isZh ? '系统正常' : 'System Online'}</span>
                 </p>
             </div>
 
@@ -43,7 +44,7 @@ const DashboardFilters = () => {
 
                 <button onClick={toggleLanguage} className="flex items-center gap-2 bg-white border border-gray-300 text-gray-600 px-3 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm">
                     <i className="fa-solid fa-globe"></i>
-                    <span>{language === 'en' ? '中文' : 'EN'}</span>
+                    <span>{language === 'en' ? '中文' : '英文'}</span>
                 </button>
             </div>
         </div>

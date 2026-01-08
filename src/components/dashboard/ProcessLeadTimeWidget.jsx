@@ -16,6 +16,9 @@ ChartJS.register(
 
 const ProcessLeadTimeWidget = () => {
     const { t, language } = useLanguage();
+    const isZh = language === 'zh';
+    const dayUnit = isZh ? '天' : 'd';
+    const targetLabel = isZh ? '目标' : 'Target';
     // --- State ---
     const chartRef = useRef(null);
 
@@ -51,7 +54,7 @@ const ProcessLeadTimeWidget = () => {
     // --- 1. MOCK DATA (P2-A & Drill-down) ---
     const stages = [
         {
-            label: 'S1 Contract', fullLabel: 'S1 合同录入',
+            label: isZh ? '阶段1 合同' : 'S1 Contract', fullLabel: isZh ? '阶段1 合同录入' : 'S1 Contract Entry',
             target: 2, actual: 5, q3Actual: 4, breach: 75, q3Breach: 40,
             totalCount: 20, breachCount: 15,
             topContributors: [
@@ -61,7 +64,7 @@ const ProcessLeadTimeWidget = () => {
             ]
         },
         {
-            label: 'S2 Payment', fullLabel: 'S2 回款确认',
+            label: isZh ? '阶段2 回款' : 'S2 Payment', fullLabel: isZh ? '阶段2 回款确认' : 'S2 Payment Confirmation',
             target: 4, actual: 10, q3Actual: 5, breach: 85, q3Breach: 65,
             totalCount: 20, breachCount: 17,
             topContributors: [
@@ -71,7 +74,7 @@ const ProcessLeadTimeWidget = () => {
             ]
         },
         {
-            label: 'S3 Material', fullLabel: 'S3 物料准备',
+            label: isZh ? '阶段3 物料' : 'S3 Material', fullLabel: isZh ? '阶段3 物料准备' : 'S3 Material Prep',
             target: 10, actual: 11, q3Actual: 11, breach: 30, q3Breach: 25,
             totalCount: 20, breachCount: 6,
             topContributors: [
@@ -80,7 +83,7 @@ const ProcessLeadTimeWidget = () => {
             ]
         },
         {
-            label: 'S4 Production', fullLabel: 'S4 生产排产',
+            label: isZh ? '阶段4 生产' : 'S4 Production', fullLabel: isZh ? '阶段4 生产排产' : 'S4 Production Scheduling',
             target: 15, actual: 15.2, q3Actual: 16, breach: 5, q3Breach: 15, // +0.2d (Avg), 5% Breach (1/20) - Healthy but with 1 issue
             totalCount: 20, breachCount: 1,
             topContributors: [
@@ -88,7 +91,7 @@ const ProcessLeadTimeWidget = () => {
             ]
         },
         {
-            label: 'S5 Shipping', fullLabel: 'S5 出货排车',
+            label: isZh ? '阶段5 出货' : 'S5 Shipping', fullLabel: isZh ? '阶段5 出货排车' : 'S5 Shipping Scheduling',
             target: 5, actual: 5, q3Actual: 5.5, breach: 0, q3Breach: 4,
             totalCount: 20, breachCount: 0,
             topContributors: []
@@ -98,7 +101,7 @@ const ProcessLeadTimeWidget = () => {
     // --- 2. MOCK DATA (P2-B Bottlenecks) ---
     const productionLines = [
         {
-            name: 'Liquids Line',
+            name: isZh ? '液体产线' : 'Liquids Line',
             adherence: 75, total: 4, passed: 3, delay: 1.75, status: 'CRITICAL',
             impactDays: 7, // 1 contract * 7 days delay
             avgDelay: 1.75, // 7 / 4
@@ -107,13 +110,13 @@ const ProcessLeadTimeWidget = () => {
             ]
         },
         {
-            name: 'Powder Line',
+            name: isZh ? '粉剂产线' : 'Powder Line',
             adherence: 100, total: 8, passed: 8, delay: 0.0, status: 'STABLE',
             impactDays: 0,
             avgDelay: 0,
             topContributors: []
         },
-        { name: 'Capsules Line', adherence: 100, total: 8, passed: 8, delay: 0, status: 'STABLE', impactDays: 0, avgDelay: 0 }
+        { name: isZh ? '胶囊产线' : 'Capsules Line', adherence: 100, total: 8, passed: 8, delay: 0, status: 'STABLE', impactDays: 0, avgDelay: 0 }
     ];
     // Filter and Sort
     const visibleBottlenecks = productionLines
@@ -146,7 +149,7 @@ const ProcessLeadTimeWidget = () => {
         labels: stages.map(s => s.label),
         datasets: [
             {
-                label: '目标 (Target)',
+                label: targetLabel,
                 data: targetMarkers,
                 backgroundColor: '#0f172a',
                 barThickness: 40,
@@ -155,7 +158,7 @@ const ProcessLeadTimeWidget = () => {
                 datalabels: { display: false }
             },
             {
-                label: '实际时长',
+                label: isZh ? '实际时长' : 'Actual Duration',
                 data: timeData,
                 backgroundColor: stages.map((s, i) => {
                     const color = getStatusColor(s.breach);
@@ -181,9 +184,9 @@ const ProcessLeadTimeWidget = () => {
                     formatter: (v, ctx) => {
                         const s = stages[ctx.dataIndex];
                         const gap = s.actual - s.target;
-                        if (gap > 0) return `+${parseFloat(gap.toFixed(1))}d`;
-                        if (gap < 0) return `${parseFloat(gap.toFixed(1))}d`;
-                        return '✓';
+                        if (gap > 0) return `+${parseFloat(gap.toFixed(1))}${dayUnit}`;
+                        if (gap < 0) return `${parseFloat(gap.toFixed(1))}${dayUnit}`;
+                        return isZh ? '√' : '✓';
                     }
                 }
             }
@@ -207,13 +210,17 @@ const ProcessLeadTimeWidget = () => {
             tooltip: {
                 callbacks: {
                     label: (ctx) => {
-                        if (ctx.dataset.label === '目标 (Target)') return ` 目标: ${stages[ctx.dataIndex].target}天`;
+                        if (ctx.dataset.label === targetLabel) {
+                            return isZh
+                                ? ` 目标：${stages[ctx.dataIndex].target}${dayUnit}`
+                                : ` Target: ${stages[ctx.dataIndex].target}${dayUnit}`;
+                        }
                         const s = stages[ctx.dataIndex];
                         const gap = s.actual - s.target;
                         return [
-                            ` 实际: ${s.actual}天 (目标${s.target}天)`,
-                            ` 偏差: ${gap > 0 ? '+' : ''}${gap}天`,
-                            ` 异常率: ${s.breach}%`
+                            isZh ? ` 实际：${s.actual}${dayUnit}（目标${s.target}${dayUnit}）` : ` Actual: ${s.actual}${dayUnit} (Target ${s.target}${dayUnit})`,
+                            isZh ? ` 偏差：${gap > 0 ? '+' : ''}${gap}${dayUnit}` : ` Gap: ${gap > 0 ? '+' : ''}${gap}${dayUnit}`,
+                            isZh ? ` 异常率：${s.breach}%` : ` Breach: ${s.breach}%`
                         ];
                     }
                 }
@@ -242,7 +249,7 @@ const ProcessLeadTimeWidget = () => {
         labels: stages.map(s => s.label),
         datasets: [
             {
-                label: '本季异常率',
+                label: isZh ? '本季异常率' : 'Current Breach',
                 data: stages.map(s => s.breach),
                 backgroundColor: activeRightColors,
                 borderRadius: 3,
@@ -250,7 +257,7 @@ const ProcessLeadTimeWidget = () => {
                 order: 1
             },
             {
-                label: '上季度异常率',
+                label: isZh ? '上季异常率' : 'Last Quarter',
                 data: stages.map(s => s.q3Breach),
                 backgroundColor: '#cbd5e1',
                 borderRadius: 2,
@@ -283,6 +290,7 @@ const ProcessLeadTimeWidget = () => {
         // CASE B: Stage Diagnosis (P2-A Selection)
         if (selectedStageIndex !== null) {
             const s = stages[selectedStageIndex];
+            const stageLabel = isZh ? s.fullLabel : s.label;
             const gap = s.actual - s.target;
             const trendDiff = s.breach - s.q3Breach;
             const isCritical = s.breach > 20;
@@ -291,7 +299,7 @@ const ProcessLeadTimeWidget = () => {
                 <div className="animate-in fade-in slide-in-from-right-2 duration-300 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-2 flex-shrink-0">
                         <div>
-                            <h4 className="font-bold text-slate-800 text-base">{language === 'zh' ? s.fullLabel : s.label}</h4>
+                            <h4 className="font-bold text-slate-800 text-base">{stageLabel}</h4>
                             <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">{t('p2_stage_diagnosis')}</p>
                         </div>
                         <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${s.breach > 50 ? 'bg-red-50 text-red-600 border-red-100' :
@@ -307,9 +315,9 @@ const ProcessLeadTimeWidget = () => {
                         <div className="bg-slate-50 border border-slate-100 p-2 rounded">
                             <span className="text-[10px] text-slate-500 block">{t('p2_avg_time')}</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="font-bold text-slate-800">{s.actual}d</span>
+                                <span className="font-bold text-slate-800">{s.actual}{dayUnit}</span>
                                 <span className={`text-[10px] font-bold ${gap > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                    {gap > 0 ? `+${parseFloat(gap.toFixed(1))}d` : `${parseFloat(gap.toFixed(1))}d`}
+                                    {gap > 0 ? `+${parseFloat(gap.toFixed(1))}${dayUnit}` : `${parseFloat(gap.toFixed(1))}${dayUnit}`}
                                 </span>
                             </div>
                         </div>
@@ -338,12 +346,16 @@ const ProcessLeadTimeWidget = () => {
                                                 <span className="w-4 h-4 rounded bg-slate-100 text-[9px] text-slate-500 flex items-center justify-center font-bold">{idx + 1}</span>
                                                 <div>
                                                     <div className="font-medium text-slate-700 font-mono group-hover:text-indigo-600 transition-colors">{item.id}</div>
-                                                    {item.days && <span className="text-[9px] text-slate-400">Planned: {item.days}d</span>}
+                                                    {item.days && (
+                                                        <span className="text-[9px] text-slate-400">
+                                                            {isZh ? '计划：' : 'Planned: '} {item.days}{dayUnit}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <span className="text-slate-500 mr-2">{item.time}d</span>
-                                                <span className="font-bold text-red-500">+{item.gap}d</span>
+                                                <span className="text-slate-500 mr-2">{item.time}{dayUnit}</span>
+                                                <span className="font-bold text-red-500">+{item.gap}{dayUnit}</span>
                                             </div>
                                         </div>
                                     ))}
@@ -357,7 +369,7 @@ const ProcessLeadTimeWidget = () => {
                                 <h5 className="font-bold text-emerald-800 text-sm">{t('p2_running_smoothly')}</h5>
                                 <p className="text-[10px] text-emerald-600 mt-1 max-w-[160px] leading-tight">
                                     {t('p2_running_smoothly_desc')
-                                        .replace('{stage}', language === 'zh' ? s.fullLabel.split(' ')[1] : s.label)
+                                        .replace('{stage}', stageLabel)
                                         .replace('{count}', `${s.breachCount}/${s.totalCount}`)
                                     }
                                 </p>
@@ -377,7 +389,7 @@ const ProcessLeadTimeWidget = () => {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                         <span className="text-xs text-slate-400 block mb-1">{t('p2_median_cycle_label')}</span>
-                        <span className="text-xl font-black text-slate-800">{metrics.median}<small className="text-xs text-slate-500 ml-1">Days</small></span>
+                        <span className="text-xl font-black text-slate-800">{metrics.median}<small className="text-xs text-slate-500 ml-1">{isZh ? '天' : 'Days'}</small></span>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                         <span className="text-xs text-slate-400 block mb-1">{t('p2_ontime_rate_label')}</span>
@@ -414,10 +426,10 @@ const ProcessLeadTimeWidget = () => {
             <div className="mb-6">
                 <div className="flex items-baseline gap-2">
                     <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">{t('p2_deep_dive_title')}</h2>
-                    {language === 'zh' && <span className="text-slate-400 text-sm font-medium">Lead Time Deep Dive</span>}
+                    {!isZh && <span className="text-slate-400 text-sm font-medium">Lead Time Deep Dive</span>}
                 </div>
                 <p className="text-slate-500 text-sm mt-1">
-                    {t('p2_median_cycle_label')}: <b className="text-slate-800">{metrics.median} {language === 'en' ? 'Days' : '天'}</b>
+                    {t('p2_median_cycle_label')}: <b className="text-slate-800">{metrics.median} {isZh ? '天' : 'Days'}</b>
                     <span className="mx-2 text-slate-300">|</span>
                     {t('p2_ontime_rate_label')}: <b className="text-emerald-600">{metrics.onTimeRate}%</b>
                 </p>
@@ -430,8 +442,8 @@ const ProcessLeadTimeWidget = () => {
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-6 bg-indigo-500 rounded-full"></div>
                             <div>
-                                <h3 className="font-bold text-slate-700 leading-none">P2-A. 阶段耗时监控</h3>
-                                <p className="text-[10px] text-slate-400 mt-1">颜色代表异常率 (Red=Unstable)</p>
+                                <h3 className="font-bold text-slate-700 leading-none">{isZh ? '阶段耗时监控' : 'P2-A. Stage Duration Tracking'}</h3>
+                                <p className="text-[10px] text-slate-400 mt-1">{isZh ? '颜色代表异常率（红色=不稳定）' : 'Color indicates breach rate (Red=Unstable)'}</p>
                             </div>
                         </div>
                         <div className="flex gap-3 text-[10px] font-medium text-slate-500">
@@ -457,8 +469,8 @@ const ProcessLeadTimeWidget = () => {
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-[10px] font-bold text-slate-500 uppercase">各阶段异常趋势 (对比上季)</span>
                                 <div className="flex gap-2 text-[9px] text-slate-400">
-                                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-slate-400 rounded-sm"></span>Current</span>
-                                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-slate-300 rounded-sm"></span>Last Q</span>
+                                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-slate-400 rounded-sm"></span>{isZh ? '本季' : 'Current'}</span>
+                                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-slate-300 rounded-sm"></span>{isZh ? '上季' : 'Last Q'}</span>
                                 </div>
                             </div>
                             <div className="flex-1 relative">
@@ -477,18 +489,23 @@ const ProcessLeadTimeWidget = () => {
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-6 bg-rose-500 rounded-full"></div>
                             <div>
-                                <h3 className="font-bold text-slate-700 leading-none uppercase">P2-B. PRODUCTION LINE EFFICIENCY <span className="text-slate-400 text-xs font-normal normal-case ml-1">(Sorted by Cumulative Delays)</span></h3>
-                                <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">Filter: Current Quarter</p>
+                                <h3 className="font-bold text-slate-700 leading-none uppercase">
+                                    {isZh ? '产线效率排行' : 'P2-B. Production Line Efficiency'}
+                                    <span className="text-slate-400 text-xs font-normal normal-case ml-1">
+                                        {isZh ? '（按累计延误排序）' : '(Sorted by Cumulative Delays)'}
+                                    </span>
+                                </h3>
+                                <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">{isZh ? '筛选：本季度' : 'Filter: Current Quarter'}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Ranking Table Header */}
                     <div className="grid grid-cols-12 gap-4 text-xs font-bold text-slate-400 border-b border-slate-100 pb-2 mb-2 px-2 uppercase">
-                        <div className="col-span-4">Line</div>
-                        <div className="col-span-4">On-time Adherence</div>
-                        <div className="col-span-3 text-right">Cumulative / Avg Delay</div>
-                        <div className="col-span-1 text-right">Status</div>
+                        <div className="col-span-4">{isZh ? '产线' : 'Line'}</div>
+                        <div className="col-span-4">{isZh ? '准时率' : 'On-time Adherence'}</div>
+                        <div className="col-span-3 text-right">{isZh ? '累计/平均延误' : 'Cumulative / Avg Delay'}</div>
+                        <div className="col-span-1 text-right">{isZh ? '状态' : 'Status'}</div>
                     </div>
 
                     {/* Ranking List Content */}
@@ -539,20 +556,20 @@ const ProcessLeadTimeWidget = () => {
                                         <div className="col-span-3 text-right">
                                             <div className="flex flex-col items-end">
                                                 <span className={`font-bold text-xs ${line.impactDays > 20 ? 'text-red-500' : 'text-orange-500'}`}>
-                                                    {line.impactDays}d <span className="text-[9px] text-slate-400 font-normal">Cumulative</span>
+                                                    {line.impactDays}{dayUnit} <span className="text-[9px] text-slate-400 font-normal">{isZh ? '累计' : 'Cumulative'}</span>
                                                 </span>
                                                 <span className="text-[10px] text-slate-400 font-mono">
-                                                    {line.avgDelay ? line.avgDelay.toFixed(1) : '0.0'}d Avg Delay
+                                                    {line.avgDelay ? line.avgDelay.toFixed(1) : '0.0'}{dayUnit} {isZh ? '平均延误' : 'Avg Delay'}
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Status Badge */}
                                         <div className="col-span-1 text-right flex justify-end items-center gap-2">
-                                            {line.status === 'CRITICAL' && <i className="fa-solid fa-triangle-exclamation text-red-500" title="Critical"></i>}
-                                            {line.status === 'WARNING' && <i className="fa-solid fa-circle-exclamation text-orange-400" title="Warning"></i>}
-                                            {line.status === 'STABLE' && <i className="fa-solid fa-check-circle text-emerald-400" title="Stable"></i>}
-                                            {line.status === 'GOOD' && <i className="fa-solid fa-face-smile text-emerald-300" title="Good"></i>}
+                                            {line.status === 'CRITICAL' && <i className="fa-solid fa-triangle-exclamation text-red-500" title={isZh ? "严重" : "Critical"}></i>}
+                                            {line.status === 'WARNING' && <i className="fa-solid fa-circle-exclamation text-orange-400" title={isZh ? "预警" : "Warning"}></i>}
+                                            {line.status === 'STABLE' && <i className="fa-solid fa-check-circle text-emerald-400" title={isZh ? "稳定" : "Stable"}></i>}
+                                            {line.status === 'GOOD' && <i className="fa-solid fa-face-smile text-emerald-300" title={isZh ? "良好" : "Good"}></i>}
 
                                             <i className={`fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-300 ${isSelected ? 'rotate-180 text-indigo-500' : ''}`}></i>
                                         </div>
@@ -565,7 +582,7 @@ const ProcessLeadTimeWidget = () => {
                                         <div className="min-h-0 bg-slate-50 rounded-lg border border-slate-100 p-3 ml-4">
                                             <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200/50">
                                                 <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
-                                                    Root Cause
+                                                    {isZh ? '原因' : 'Root Cause'}
                                                 </span>
                                             </div>
 
@@ -584,7 +601,7 @@ const ProcessLeadTimeWidget = () => {
                                                                 </div>
                                                                 <span className="text-[9px] font-bold text-slate-500 flex items-center gap-1">
                                                                     <i className="fa-solid fa-clock text-slate-300"></i>
-                                                                    Planned: <span className="text-slate-700">{c.days}d</span>
+                                                                    {isZh ? '计划：' : 'Planned: '} <span className="text-slate-700">{c.days}{dayUnit}</span>
                                                                     <span className="text-slate-300 mx-1">|</span>
                                                                     <span className="text-slate-500">
                                                                         {c.planDate} <i className="fa-solid fa-arrow-right text-[8px] mx-0.5"></i> {c.actDate}
@@ -593,14 +610,14 @@ const ProcessLeadTimeWidget = () => {
                                                             </div>
                                                             <div className="flex items-baseline gap-3 text-[10px]">
                                                                 <span className="px-1.5 py-0.5 bg-red-50 text-red-600 rounded font-bold border border-red-100">
-                                                                    Delay +{c.gap}d
+                                                                    {isZh ? '延误' : 'Delay'} +{c.gap}{dayUnit}
                                                                 </span>
                                                             </div>
                                                         </div>
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <div className="text-center py-2 text-xs text-slate-400 italic">No specific contracts identified.</div>
+                                                <div className="text-center py-2 text-xs text-slate-400 italic">{isZh ? '暂无具体合同' : 'No specific contracts identified.'}</div>
                                             )}
                                         </div>
                                     </div>

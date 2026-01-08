@@ -3,7 +3,8 @@ import KPICard from './KPICard';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const KPIGrid = ({ activeFilter, onKpiClick }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const isZh = language === 'zh';
 
     return (
         <section>
@@ -24,13 +25,13 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                     subtitle={t('kpi_lead_sub') || "Cycle > Target"}
                     value="18"
                     total="142"
-                    unit="Contracts"
+                    unit={isZh ? "合同" : "Contracts"}
                     colorClass="text-red-600"
                     bgClass="bg-red-100"
                     borderClass="border-red-500"
                     iconClass="fa-solid fa-clock"
-                    trend={<span><i className="fa-solid fa-arrow-up"></i> 5 vs last week</span>}
-                    subtext="Max Delay: +45d"
+                    trend={<span><i className="fa-solid fa-arrow-up"></i> {isZh ? "较上周 +5" : "5 vs last week"}</span>}
+                    subtext={isZh ? "最长延误：45天" : "Max Delay: +45d"}
                     isActive={activeFilter === 'delay'} // Maps to 'delay' (Severe Delay)
                     onClick={() => onKpiClick('delay')}
                 />
@@ -39,13 +40,13 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                     title={t('kpi_pay_title') || "Payment Blocked"}
                     subtitle={t('kpi_pay_sub') || "Process Blocked"}
                     value="8"
-                    unit="Contracts"
+                    unit={isZh ? "合同" : "Contracts"}
                     colorClass="text-orange-500"
                     bgClass="bg-orange-100"
                     borderClass="border-orange-400"
                     iconClass="fa-solid fa-hand-holding-dollar"
-                    trend="High Priority"
-                    subtext="Longest Pending: 12d"
+                    trend={isZh ? "高优先级" : "High Priority"}
+                    subtext={isZh ? "最长等待：12天" : "Longest Pending: 12d"}
                     isActive={activeFilter === 'blocker'} // Maps to 'blocker'
                     onClick={() => onKpiClick('blocker')}
                 />
@@ -54,13 +55,13 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                     title={t('kpi_mat_title') || "Material Risk"}
                     subtitle={t('kpi_mat_sub') || "Prep Risk"}
                     value="12"
-                    unit="Contracts"
+                    unit={isZh ? "合同" : "Contracts"}
                     colorClass="text-yellow-600"
                     bgClass="bg-yellow-100"
                     borderClass="border-yellow-400"
                     iconClass="fa-solid fa-boxes-stacked"
-                    trend="Requires Attention"
-                    subtext="Missing + Near Prod"
+                    trend={isZh ? "需要关注" : "Requires Attention"}
+                    subtext={isZh ? "缺料且临近排产" : "Missing + Near Prod"}
                     isActive={activeFilter === 'material'} // Not mapped in HTML but good to have
                     onClick={() => onKpiClick('material')}
                 />
@@ -69,12 +70,12 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                     title={t('kpi_data_title') || "Data Issues"}
                     subtitle={t('kpi_data_sub') || "INCOMPLETE DATA"}
                     value="15"
-                    unit="Contracts"
+                    unit={isZh ? "合同" : "Contracts"}
                     colorClass="text-gray-600"
                     bgClass="bg-gray-100"
                     borderClass="border-gray-400"
                     iconClass="fa-solid fa-database"
-                    trend={<span className="text-gray-600 font-medium">Main Reason: Missing Shipping Date</span>}
+                    trend={<span className="text-gray-600 font-medium">{isZh ? "主要原因：缺少发货日期" : "Main Reason: Missing Shipping Date"}</span>}
                     subtext=""
                     isActive={activeFilter === 'data_issue'} // Not mapped in HTML but good to have
                     onClick={() => onKpiClick('data_issue')}

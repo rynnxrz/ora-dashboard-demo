@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 import DataQualityWidget from './DataQualityWidget';
 import MaterialReadinessWidget from './MaterialReadinessWidget';
 
 const SidebarContainer = ({ onRiskClick }) => {
     const [activeTab, setActiveTab] = useState('dataQuality');
+    const { language } = useLanguage();
+    const isZh = language === 'zh';
 
     return (
         <div className="card bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
@@ -17,7 +20,7 @@ const SidebarContainer = ({ onRiskClick }) => {
                             : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
-                        Data Quality
+                        {isZh ? '数据完整度' : 'Data Quality'}
                     </button>
                     <button
                         onClick={() => setActiveTab('materialReadiness')}
@@ -26,7 +29,7 @@ const SidebarContainer = ({ onRiskClick }) => {
                             : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
-                        Material Readiness
+                        {isZh ? '物料准备' : 'Material Readiness'}
                     </button>
                 </div>
             </div>

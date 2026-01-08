@@ -8,7 +8,22 @@ ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const MaterialReadinessWidget = ({ onRiskClick }) => {
     const { language } = useLanguage();
+    const isZh = language === 'zh';
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const labels = {
+        ready: isZh ? '已准备' : 'Ready',
+        notReady: isZh ? '未准备' : 'Not Ready',
+        signed: isZh ? '签约' : 'Signed',
+        deadline: isZh ? '截止' : 'Deadline',
+        prodStart: isZh ? '开工' : 'Prod Start',
+        miss: isZh ? '缺料：' : 'Miss:',
+        buffer: isZh ? '缓冲：3天' : 'Buffer: 3 days',
+        missing: isZh ? '缺料：' : 'Missing:',
+        highRiskBatches: isZh ? '高风险批次' : 'High-Risk Batches',
+        items: isZh ? '个' : 'items',
+        drawerTitle: isZh ? '高风险批次明细' : 'High-Risk Batches Details',
+        drawerSubtitle: isZh ? '需要关注' : 'items requiring attention'
+    };
 
     // --- Mock Data Generation ---
     const mockMaterialsData = useMemo(() => {
@@ -23,9 +38,9 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     materialTargetDate: '2025-01-04',
                     prodStartDate: '2025-01-07',
                     overdueDays: 2, // 2 days past Jan 4
-                    status: 'Missing',
+                    status: isZh ? '缺失' : 'Missing',
                     progress: 3, totalItems: 5,
-                    missing: 'Main Fabric, Buttons, Care Labels'
+                    missing: isZh ? '主料、纽扣、护理标签' : 'Main Fabric, Buttons, Care Labels'
                 },
                 {
                     id: 'C2411-08',
@@ -33,9 +48,9 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     materialTargetDate: '2025-01-05',
                     prodStartDate: '2025-01-08',
                     overdueDays: 1,
-                    status: 'Partial',
+                    status: isZh ? '部分缺失' : 'Partial',
                     progress: 4, totalItems: 5,
-                    missing: 'Packaging Labels, Hangtags'
+                    missing: isZh ? '包装标签、吊牌' : 'Packaging Labels, Hangtags'
                 },
                 {
                     id: 'C2411-12',
@@ -43,9 +58,9 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     materialTargetDate: '2025-01-02',
                     prodStartDate: '2025-01-06',
                     overdueDays: 3, // Critical
-                    status: 'Critical',
+                    status: isZh ? '严重' : 'Critical',
                     progress: 1, totalItems: 6,
-                    missing: 'Raw Material A, B, Lining, Zippers, Thread'
+                    missing: isZh ? '原料一、原料二、里料、拉链、线' : 'Raw Material A, B, Lining, Zippers, Thread'
                 },
                 {
                     id: 'C2411-15',
@@ -53,9 +68,9 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     materialTargetDate: '2024-12-30',
                     prodStartDate: '2025-01-05',
                     overdueDays: 7, // Severe
-                    status: 'Critical',
+                    status: isZh ? '严重' : 'Critical',
                     progress: 0, totalItems: 4,
-                    missing: 'All Materials: Fabric, Trims, Accessories, Packaging'
+                    missing: isZh ? '全部物料：面料、辅料、配件、包装' : 'All Materials: Fabric, Trims, Accessories, Packaging'
                 },
                 {
                     id: 'C2411-18',
@@ -63,9 +78,9 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     materialTargetDate: '2025-01-01',
                     prodStartDate: '2025-01-04',
                     overdueDays: 5,
-                    status: 'Severe',
+                    status: isZh ? '严重' : 'Severe',
                     progress: 2, totalItems: 5,
-                    missing: 'Zippers, Thread, Elastic Bands'
+                    missing: isZh ? '拉链、线、松紧带' : 'Zippers, Thread, Elastic Bands'
                 }
             ]
         };
@@ -75,7 +90,7 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
 
     // Chart Data
     const chartData = {
-        labels: ['Ready', 'Not Ready'],
+        labels: [labels.ready, labels.notReady],
         datasets: [{
             data: [readinessPercentage, 100 - readinessPercentage],
             backgroundColor: ['#10B981', '#EF4444'],
@@ -98,11 +113,11 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
     // Helper for explicit status text
     const getDeadlineStatus = (overdueDays) => {
         if (overdueDays > 0) {
-            return { text: `Overdue by ${overdueDays} days`, color: 'text-red-500 font-bold' };
+            return { text: isZh ? `逾期 ${overdueDays} 天` : `Overdue by ${overdueDays} days`, color: 'text-red-500 font-bold' };
         } else if (overdueDays === 0) {
-            return { text: 'Due Today', color: 'text-orange-500 font-bold' };
+            return { text: isZh ? '今日到期' : 'Due Today', color: 'text-orange-500 font-bold' };
         } else {
-            return { text: `Due in ${Math.abs(overdueDays)} days`, color: 'text-slate-400' };
+            return { text: isZh ? `距到期 ${Math.abs(overdueDays)} 天` : `Due in ${Math.abs(overdueDays)} days`, color: 'text-slate-400' };
         }
     };
 
@@ -131,14 +146,14 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     {/* Node 1: Signed */}
                     <div className="relative z-10 flex flex-col items-center flex-1">
                         <div className={`rounded-full bg-slate-400 border border-white box-content ${isDrawer ? 'w-2.5 h-2.5 mb-1' : 'w-2 h-2 mb-0.5'}`}></div>
-                        <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider leading-none">Signed</span>
+                        <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider leading-none">{labels.signed}</span>
                         <span className="text-[9px] font-mono text-slate-600 font-medium leading-none">{batch.signedDate}</span>
                     </div>
 
                     {/* Node 2: Deadline */}
                     <div className="relative z-10 flex flex-col items-center flex-[2]">
                         <div className={`rounded-full border border-white box-content ${isOverdue ? 'bg-red-500' : 'bg-blue-500'} ${isDrawer ? 'w-2.5 h-2.5 mb-1' : 'w-2 h-2 mb-0.5'}`}></div>
-                        <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider leading-none">Deadline</span>
+                        <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider leading-none">{labels.deadline}</span>
                         <span className={`text-[9px] font-mono font-bold mb-0.5 leading-none ${isOverdue ? 'text-red-500' : 'text-slate-700'}`}>{batch.materialTargetDate}</span>
                         <span className={`text-[8px] ${overdueStatus.color} mb-1 whitespace-nowrap leading-none`}>
                             {overdueStatus.text}
@@ -148,7 +163,7 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                         {!isDrawer && (
                             <div className="bg-red-50 rounded px-1.5 py-0.5 mt-0.5 inline-block max-w-full">
                                 <span className="text-[9px] text-red-500 font-bold truncate block leading-tight">
-                                    Miss: {batch.missing}
+                                    {labels.miss} {batch.missing}
                                 </span>
                             </div>
                         )}
@@ -157,11 +172,11 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     {/* Node 3: Prod Start */}
                     <div className="relative z-10 flex flex-col items-center flex-1">
                         <div className={`rounded-full bg-blue-600 border border-white box-content ring-2 ring-blue-100 ${isDrawer ? 'w-2.5 h-2.5 mb-1' : 'w-2 h-2 mb-0.5'}`}></div>
-                        <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider leading-none">Prod Start</span>
+                        <span className="text-[8px] text-slate-400 mb-px uppercase tracking-wider leading-none">{labels.prodStart}</span>
                         <span className="text-[9px] font-mono text-slate-600 font-medium mb-0.5 leading-none">{batch.prodStartDate}</span>
                         {/* Drawer View: Buffer Info */}
                         {isDrawer && (
-                            <span className="text-[9px] text-slate-400 mt-0.5">Buffer: 3 days</span>
+                            <span className="text-[9px] text-slate-400 mt-0.5">{labels.buffer}</span>
                         )}
                     </div>
                 </div>
@@ -170,7 +185,7 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                 {isDrawer && batch.missing && (
                     <div className="mt-2 border-t border-slate-100 pt-2 text-left">
                         <div className="text-[13px] leading-snug text-[#E53E3E]">
-                            <span className="font-bold mr-1">Missing:</span>
+                            <span className="font-bold mr-1">{labels.missing}</span>
                             {batch.missing}
                         </div>
                     </div>
@@ -192,15 +207,15 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                         <Doughnut data={chartData} options={chartOptions} />
                         <div className="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
                             <span className="text-xl font-black text-slate-700">{readinessPercentage}%</span>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase">Ready</span>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase">{labels.ready}</span>
                         </div>
                     </div>
 
                     {/* Risk List (Widget View) */}
                     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                         <div className="flex items-center justify-between mb-2 shrink-0">
-                            <h4 className="text-[10px] font-bold text-slate-500 uppercase">High-Risk Batches</h4>
-                            <span className="text-[9px] text-slate-400">{mockMaterialsData.riskBatches.length} items</span>
+                            <h4 className="text-[10px] font-bold text-slate-500 uppercase">{labels.highRiskBatches}</h4>
+                            <span className="text-[9px] text-slate-400">{mockMaterialsData.riskBatches.length} {labels.items}</span>
                         </div>
 
                         <div className="space-y-2 overflow-hidden">
@@ -213,7 +228,7 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                                 onClick={() => setIsDrawerOpen(true)}
                                 className="w-full mt-auto py-2 text-[10px] font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 rounded border border-dashed border-slate-200 transition-colors shrink-0"
                             >
-                                +{hiddenCount} more high-risk batches
+                                {isZh ? `+${hiddenCount} 个高风险批次` : `+${hiddenCount} more high-risk batches`}
                             </button>
                         )}
                     </div>
@@ -230,8 +245,8 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                         {/* Drawer Header */}
                         <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">High-Risk Batches Details</h2>
-                                <p className="text-xs text-slate-500">Reviewing {mockMaterialsData.riskBatches.length} items requiring attention</p>
+                                <h2 className="text-lg font-bold text-slate-800">{labels.drawerTitle}</h2>
+                                <p className="text-xs text-slate-500">{isZh ? `共 ${mockMaterialsData.riskBatches.length} 个${labels.drawerSubtitle}` : `Reviewing ${mockMaterialsData.riskBatches.length} items requiring attention`}</p>
                             </div>
                             <button
                                 onClick={() => setIsDrawerOpen(false)}

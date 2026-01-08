@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const ZombieWidget = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const isZh = language === 'zh';
     const [view, setView] = useState('contracts'); // 'contracts' | 'inventory'
 
     return (
@@ -35,19 +36,19 @@ const ZombieWidget = () => {
                         <div className="space-y-2">
                             <div>
                                 <div className="flex justify-between text-xs mb-1">
-                                    <span className="font-bold text-gray-700">C2408-002 (Vitality)</span>
-                                    <span className="text-red-500 font-bold">120d</span>
+                                    <span className="font-bold text-gray-700">C2408-002 {isZh ? '（活力）' : '(Vitality)'}</span>
+                                    <span className="text-red-500 font-bold">{isZh ? '120天' : '120d'}</span>
                                 </div>
-                                <div className="w-full bg-gray-100 rounded-full h-2" title="120d (Inactive)">
+                                <div className="w-full bg-gray-100 rounded-full h-2" title={isZh ? "120天（停滞）" : "120d (Inactive)"}>
                                     <div className="bg-gray-400 h-2 rounded-full" style={{ width: '100%' }}></div>
                                 </div>
                             </div>
                             <div>
                                 <div className="flex justify-between text-xs mb-1">
-                                    <span className="font-bold text-gray-700">C2409-015 (Muscle)</span>
-                                    <span className="text-red-500 font-bold">95d</span>
+                                    <span className="font-bold text-gray-700">C2409-015 {isZh ? '（肌能）' : '(Muscle)'}</span>
+                                    <span className="text-red-500 font-bold">{isZh ? '95天' : '95d'}</span>
                                 </div>
-                                <div className="w-full bg-gray-100 rounded-full h-2" title="95d (Inactive)">
+                                <div className="w-full bg-gray-100 rounded-full h-2" title={isZh ? "95天（停滞）" : "95d (Inactive)"}>
                                     <div className="bg-gray-400 h-2 rounded-full" style={{ width: '80%' }}></div>
                                 </div>
                             </div>
@@ -60,18 +61,18 @@ const ZombieWidget = () => {
                     <div id="view-zombie-inventory" className="space-y-3">
                         <div className="text-xs text-gray-400 mb-2">{t('zombie_i_sub') || "Overdue > 7d"}</div>
                         <ul className="space-y-2">
-                            <li className="flex justify-between items-center p-2 bg-red-50 rounded border border-red-100" title="Produced: 5000, Shipped: 0, Stuck: 5000">
+                            <li className="flex justify-between items-center p-2 bg-red-50 rounded border border-red-100" title={isZh ? "已生产：5000，已发货：0，滞留：5000" : "Produced: 5000, Shipped: 0, Stuck: 5000"}>
                                 <div>
-                                    <div className="text-xs font-bold text-gray-800">C2410-001 (Gummies)</div>
-                                    <div className="text-[10px] text-red-500">Produced but not shipped (15d)</div>
+                                    <div className="text-xs font-bold text-gray-800">C2410-001 {isZh ? '（软糖）' : '(Gummies)'}</div>
+                                    <div className="text-[10px] text-red-500">{isZh ? '已生产未发货（15天）' : 'Produced but not shipped (15d)'}</div>
                                 </div>
-                                <div className="text-xs font-bold text-gray-800">5k Units</div>
+                                <div className="text-xs font-bold text-gray-800">{isZh ? '5千件' : '5k Units'}</div>
                             </li>
                         </ul>
                     </div>
                 )}
             </div>
-            <div className="card-footer">Showing Top 5 by Inactive/Overdue Days</div>
+            <div className="card-footer">{isZh ? '按停滞/逾期天数显示前5条' : 'Showing Top 5 by Inactive/Overdue Days'}</div>
         </div>
     );
 };

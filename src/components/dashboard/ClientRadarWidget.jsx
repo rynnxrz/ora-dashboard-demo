@@ -2,6 +2,7 @@ import React from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 ChartJS.register(
     CategoryScale,
@@ -63,26 +64,32 @@ const riskThresholdPlugin = {
 ChartJS.register(riskThresholdPlugin);
 
 const ClientRadarWidget = () => {
+    const { t, language } = useLanguage();
+    const isZh = language === 'zh';
+    const dayUnit = isZh ? '天' : 'd';
+    const coreLabel = isZh ? '核心' : 'Core';
+    const expLabel = isZh ? '拓展' : 'Exp';
+    const gapLabel = isZh ? '空白' : 'Gap';
     const [activeTab, setActiveTab] = React.useState('risks');
     const [highlightedClients, setHighlightedClients] = React.useState([]);
 
     // Mock Data Source - Expanded for Round 4 (Differentiation)
     const mockClients = [
         // Stable Giants (Chart Focus)
-        { name: 'AlphaNutrition', q3: 1500, q4: 1550 },
-        { name: 'BioLabs', q3: 1200, q4: 1200 },
-        { name: 'MegaHealth', q3: 1100, q4: 1050 },
-        { name: 'NutriCo', q3: 900, q4: 920 },
-        { name: 'WellnessInc', q3: 850, q4: 850 },
+        { name: isZh ? '阿尔法营养' : 'AlphaNutrition', q3: 1500, q4: 1550 },
+        { name: isZh ? '生物实验室' : 'BioLabs', q3: 1200, q4: 1200 },
+        { name: isZh ? '大健康' : 'MegaHealth', q3: 1100, q4: 1050 },
+        { name: isZh ? '营养公司' : 'NutriCo', q3: 900, q4: 920 },
+        { name: isZh ? '康养集团' : 'WellnessInc', q3: 850, q4: 850 },
 
         // Volatile Clients (List Focus)
-        { name: 'Vitality', q3: 450, q4: 0 },         // Stop (-100%)
-        { name: 'PowerGums', q3: 800, q4: 1200 },     // Big Growth (+50%)
-        { name: 'HydraTech', q3: 200, q4: 50 },       // Shrink (-75%)
-        { name: 'ZenFit', q3: 100, q4: 400 },         // Huge Growth (+300%)
-        { name: 'KetoLife', q3: 150, q4: 100 },       // Shrink (-33%)
-        { name: 'PureWhey', q3: 50, q4: 150 },        // Growth (+200%)
-        { name: 'Muscle', q3: 320, q4: 280 }          // Minor Shrink (might filter out if <10%)
+        { name: isZh ? '活力' : 'Vitality', q3: 450, q4: 0 },         // Stop (-100%)
+        { name: isZh ? '能量软糖' : 'PowerGums', q3: 800, q4: 1200 },     // Big Growth (+50%)
+        { name: isZh ? '海德科技' : 'HydraTech', q3: 200, q4: 50 },       // Shrink (-75%)
+        { name: isZh ? '禅健' : 'ZenFit', q3: 100, q4: 400 },         // Huge Growth (+300%)
+        { name: isZh ? '生酮生活' : 'KetoLife', q3: 150, q4: 100 },       // Shrink (-33%)
+        { name: isZh ? '纯乳清' : 'PureWhey', q3: 50, q4: 150 },        // Growth (+200%)
+        { name: isZh ? '肌能' : 'Muscle', q3: 320, q4: 280 }          // Minor Shrink (might filter out if <10%)
     ];
 
     // --- Logic Implementation ---
@@ -168,6 +175,9 @@ const ClientRadarWidget = () => {
         riskBg = 'bg-orange-50'; // Light Orange BG
         riskBorder = 'border-orange-500';
     }
+    const riskStatusText = isZh
+        ? (riskStatus === 'High' ? '高' : riskStatus === 'Moderate' ? '中' : '低')
+        : riskStatus;
 
     // Max Exposure Logic
     const maxExposureClient = topByVolume[0];
@@ -202,7 +212,7 @@ const ClientRadarWidget = () => {
         labels: chartClients.map(c => c.name),
         datasets: [
             {
-                label: 'Q3 Days',
+                label: isZh ? '第三季度' : 'Q3 Days',
                 data: chartClients.map(c => c.q3),
                 backgroundColor: (ctx) => {
                     const name = chartClients[ctx.dataIndex].name;
@@ -216,7 +226,7 @@ const ClientRadarWidget = () => {
                 datalabels: { display: false }
             },
             {
-                label: 'Q4 Days',
+                label: isZh ? '第四季度' : 'Q4 Days',
                 data: chartClients.map(c => c.q4),
                 backgroundColor: (ctx) => {
                     const client = chartClients[ctx.dataIndex];
@@ -258,7 +268,9 @@ const ClientRadarWidget = () => {
                         const idx = context[0].dataIndex;
                         const client = chartClients[idx];
                         const sign = client.delta > 0 ? '+' : '';
-                        return `Delta: ${sign}${client.delta} (${sign}${client.pct}%)`;
+                        return isZh
+                            ? `变化：${sign}${client.delta}${dayUnit}（${sign}${client.pct}%）`
+                            : `Delta: ${sign}${client.delta} (${sign}${client.pct}%)`;
                     }
                 }
             },
@@ -283,8 +295,8 @@ const ClientRadarWidget = () => {
 
         return (
             <div className="flex flex-col items-end">
-                <span className={`${colorClass} font-bold`}>{sign}{client.delta}d</span>
-                <span className="text-xxs text-gray-400">Impact</span>
+                <span className={`${colorClass} font-bold`}>{sign}{client.delta}{dayUnit}</span>
+                <span className="text-xxs text-gray-400">{isZh ? '影响' : 'Impact'}</span>
             </div>
         );
     };
@@ -293,7 +305,7 @@ const ClientRadarWidget = () => {
 
     // 3C Donut Data
     const donutData = {
-        labels: ['Top 3 Clients', 'Others'],
+        labels: isZh ? ['前三客户', '其他'] : ['Top 3 Clients', 'Others'],
         datasets: [
             {
                 data: [top3Q4Sum, totalQ4Days - top3Q4Sum],
@@ -315,7 +327,9 @@ const ClientRadarWidget = () => {
                     label: function (context) {
                         const val = context.raw;
                         const pct = Math.round((val / totalQ4Days) * 100);
-                        return `${context.label}: ${val} days (${pct}%)`;
+                        return isZh
+                            ? `${context.label}：${val}${dayUnit}（${pct}%）`
+                            : `${context.label}: ${val} days (${pct}%)`;
                     }
                 }
             },
@@ -328,9 +342,13 @@ const ClientRadarWidget = () => {
         <section className="pb-10 mt-8">
             <div className="flex items-center gap-2 mb-4">
                 <h2 className="text-base font-bold text-gray-800 uppercase tracking-wide border-l-4 border-secondary pl-3">
-                    PART 3. CLIENT & CAPACITY RADAR
+                    {t('p3_title')}
                 </h2>
-                <span className="text-xs text-gray-400">Quarter-over-Quarter Capacity Allocation (Total: {totalQ4Days.toLocaleString()}d)</span>
+                <span className="text-xs text-gray-400">
+                    {isZh
+                        ? `季度产能分布（总计：${totalQ4Days.toLocaleString()}天）`
+                        : `Quarter-over-Quarter Capacity Allocation (Total: ${totalQ4Days.toLocaleString()}d)`}
+                </span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -339,7 +357,7 @@ const ClientRadarWidget = () => {
                 <div className="card lg:col-span-2">
                     <div className="card-header">
                         <h3 className="card-title">
-                            <i className="fa-solid fa-user-shield text-ora-primary"></i> 3A. Client Risk Watch
+                            <i className="fa-solid fa-user-shield text-ora-primary"></i> {isZh ? '客户风险预警' : '3A. Client Risk Watch'}
                         </h3>
                     </div>
                     <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[350px]">
@@ -348,7 +366,7 @@ const ClientRadarWidget = () => {
                             <div className="flex-1 min-h-0 relative">
                                 <Bar data={riskData} options={riskOptions} />
                             </div>
-                            <div className="text-center text-xs text-gray-400 mt-2 shrink-0">Total Capacity Distribution</div>
+                            <div className="text-center text-xs text-gray-400 mt-2 shrink-0">{isZh ? '总产能分布' : 'Total Capacity Distribution'}</div>
                         </div>
 
                         {/* Interactive List: Tabbed (Narrower) */}
@@ -359,22 +377,22 @@ const ClientRadarWidget = () => {
                                     onClick={() => setActiveTab('risks')}
                                     className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-bold rounded-md transition-all ${activeTab === 'risks' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                 >
-                                    Risks
+                                    {isZh ? '风险' : 'Risks'}
                                     <span className={`inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full ${activeTab === 'risks' ? 'bg-red-100 text-red-700' : 'bg-slate-200 text-slate-500'}`}>{highRisk.length}</span>
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('opportunities')}
                                     className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-bold rounded-md transition-all ${activeTab === 'opportunities' ? 'bg-white text-green-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                 >
-                                    Growth
+                                    {isZh ? '增长' : 'Growth'}
                                     <span className={`inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full ${activeTab === 'opportunities' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-500'}`}>{topGrowing.length}</span>
                                 </button>
                             </div>
 
                             {/* Fixed Header */}
                             <div className="grid grid-cols-10 text-gray-400 bg-gray-50 uppercase text-xxs py-2 px-2 rounded-t font-medium mb-1">
-                                <div className="col-span-6">Brand / Share</div>
-                                <div className="col-span-4 text-right">Impact</div>
+                                <div className="col-span-6">{isZh ? '品牌/占比' : 'Brand / Share'}</div>
+                                <div className="col-span-4 text-right">{isZh ? '影响' : 'Impact'}</div>
                             </div>
 
                             {/* Scrollable List Content */}
@@ -394,7 +412,7 @@ const ClientRadarWidget = () => {
                                                 >
                                                     <td className="px-2 py-3 w-[60%]" title={client.name}>
                                                         <div className="font-bold text-gray-700 truncate">{client.name}</div>
-                                                        <div className="text-[10px] text-gray-400">({shareOfTotal}% of Total)</div>
+                                                        <div className="text-[10px] text-gray-400">{isZh ? `（占比 ${shareOfTotal}%）` : `(${shareOfTotal}% of Total)`}</div>
                                                     </td>
                                                     <td className="px-2 py-3 text-right w-[40%]">
                                                         {renderCombinedImpact(client)}
@@ -412,7 +430,7 @@ const ClientRadarWidget = () => {
                 {/* Widget 3C: Brand Capacity Concentration (Refactored) */}
                 <div className="card">
                     <div className="card-header">
-                        <h3 className="card-title text-sm"><i className="fa-solid fa-chart-pie text-secondary"></i> 3C. CLIENT DEPENDENCY ANALYSIS</h3>
+                        <h3 className="card-title text-sm"><i className="fa-solid fa-chart-pie text-secondary"></i> {isZh ? '客户集中度分析' : '3C. Client Dependency Analysis'}</h3>
                     </div>
                     <div className="p-4 flex flex-col h-full relative">
                         {/* Donut Chart Container */}
@@ -420,7 +438,7 @@ const ClientRadarWidget = () => {
                             <Doughnut data={donutData} options={donutOptions} plugins={[riskThresholdPlugin]} />
                             {/* Center Text Overlay */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <div className="text-secondary text-xs uppercase font-medium">Top 3 Share</div>
+                                <div className="text-secondary text-xs uppercase font-medium">{isZh ? '前三占比' : 'Top 3 Share'}</div>
                                 <div className="text-2xl font-bold text-gray-800">{top3Q4Share}%</div>
                             </div>
                         </div>
@@ -430,18 +448,18 @@ const ClientRadarWidget = () => {
                             {/* QoQ Metrics */}
                             <div className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded border border-gray-100">
                                 <div className="text-gray-500">
-                                    Q3 Comparison:<br />
+                                    {isZh ? '上季对比：' : 'Q3 Comparison:'}<br />
                                     <strong>{top3Q3Share}%</strong>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-gray-400 text-[10px] uppercase tracking-wide">Trend</div>
+                                    <div className="text-gray-400 text-[10px] uppercase tracking-wide">{isZh ? '趋势' : 'Trend'}</div>
                                     {isRiskIncreasing ? (
                                         <div className="text-orange-500 font-bold">
-                                            +{shareDelta}% Increase <i className="fa-solid fa-arrow-trend-up"></i>
+                                            +{shareDelta}% {isZh ? '上升' : 'Increase'} <i className="fa-solid fa-arrow-trend-up"></i>
                                         </div>
                                     ) : (
                                         <div className="text-green-600 font-bold">
-                                            {shareDelta}% Decrease <i className="fa-solid fa-arrow-trend-down"></i>
+                                            {shareDelta}% {isZh ? '下降' : 'Decrease'} <i className="fa-solid fa-arrow-trend-down"></i>
                                         </div>
                                     )}
                                 </div>
@@ -450,17 +468,21 @@ const ClientRadarWidget = () => {
                             <div className={`text-xs border-l-4 ${riskBorder} pl-3 py-2 ${riskBg} rounded-r relative`}>
                                 {/* Max Exposure Metric */}
                                 <div className="flex justify-between items-center mb-2 border-b border-gray-200 pb-1">
-                                    <span className="text-gray-500">Max Exposure:</span>
+                                    <span className="text-gray-500">{isZh ? '最大占比：' : 'Max Exposure:'}</span>
                                     <span className="font-bold text-gray-700">{maxExposureClient.name} ({maxExposurePct}%)</span>
                                 </div>
 
                                 <div className="mb-1 text-gray-600 leading-tight">
-                                    Top 3 Clients occupy <span className="font-bold">{top3Q4Share}%</span> of total capacity.
+                                    {isZh
+                                        ? `前三客户占用总产能的 `
+                                        : 'Top 3 Clients occupy '}
+                                    <span className="font-bold">{top3Q4Share}%</span>
+                                    {isZh ? '。' : ' of total capacity.'}
                                 </div>
                                 <div className="flex items-center gap-2 mt-2">
-                                    <span className="font-bold text-gray-500">Risk Status:</span>
+                                    <span className="font-bold text-gray-500">{isZh ? '风险等级：' : 'Risk Status:'}</span>
                                     <span className={`uppercase font-bold ${riskColor} px-2 py-0.5 bg-white border border-gray-100 rounded shadow-sm text-xxs`}>
-                                        {riskStatus}
+                                        {riskStatusText}
                                     </span>
                                 </div>
                             </div>
@@ -471,38 +493,38 @@ const ClientRadarWidget = () => {
                 {/* Widget 3D: White Space Matrix */}
                 <div className="card lg:col-span-3">
                     <div className="card-header flex justify-between items-center">
-                        <h3 className="card-title"><i className="fa-solid fa-border-all text-teal-600"></i> 3D. Format Capacity Matrix (White Space)</h3>
+                        <h3 className="card-title"><i className="fa-solid fa-border-all text-teal-600"></i> {isZh ? '剂型产能矩阵' : '3D. Format Capacity Matrix (White Space)'}</h3>
                         <div className="flex items-center gap-3 text-xxs">
-                            <div className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-600 rounded-sm"></span> Core (&gt;500d)</div>
-                            <div className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-100 rounded-sm border border-teal-200"></span> Exp (1-200d)</div>
-                            <div className="flex items-center gap-1"><span className="w-3 h-3 border border-gray-300 border-dashed rounded-sm"></span> Gap (0d)</div>
+                            <div className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-600 rounded-sm"></span> {coreLabel}（&gt;500{dayUnit}）</div>
+                            <div className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-100 rounded-sm border border-teal-200"></span> {expLabel}（1-200{dayUnit}）</div>
+                            <div className="flex items-center gap-1"><span className="w-3 h-3 border border-gray-300 border-dashed rounded-sm"></span> {gapLabel}（0{dayUnit}）</div>
                         </div>
                     </div>
                     <div className="p-4 overflow-x-auto">
                         <table className="w-full text-xs text-center border-collapse">
                             <thead>
                                 <tr>
-                                    <th className="px-3 py-2 text-left font-bold text-gray-600 bg-gray-50 w-40">Brand / Form</th>
-                                    <th className="px-1 py-2 font-medium text-gray-500 bg-gray-50">Gummies</th>
-                                    <th className="px-1 py-2 font-medium text-gray-500 bg-gray-50">Powder</th>
-                                    <th className="px-1 py-2 font-medium text-gray-500 bg-gray-50">Liquids</th>
-                                    <th className="px-1 py-2 font-medium text-gray-500 bg-gray-50">Capsules</th>
+                                    <th className="px-3 py-2 text-left font-bold text-gray-600 bg-gray-50 w-40">{isZh ? '品牌/剂型' : 'Brand / Form'}</th>
+                                    <th className="px-1 py-2 font-medium text-gray-500 bg-gray-50">{isZh ? '软糖' : 'Gummies'}</th>
+                                    <th className="px-1 py-2 font-medium text-gray-500 bg-gray-50">{isZh ? '粉剂' : 'Powder'}</th>
+                                    <th className="px-1 py-2 font-medium text-gray-500 bg-gray-50">{isZh ? '液体' : 'Liquids'}</th>
+                                    <th className="px-1 py-2 font-medium text-gray-500 bg-gray-50">{isZh ? '胶囊' : 'Capsules'}</th>
                                 </tr>
                             </thead>
                             <tbody className="text-gray-600">
                                 <tr className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                                    <td className="p-3 text-left font-bold text-teal-900">Little Umbrella</td>
-                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(1000)}`}>1,000d<br /><span className="text-[9px] opacity-75">Core</span></div></td>
-                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(400)}`}>400d<br /><span className="text-[9px] opacity-75">Exp</span></div></td>
+                                    <td className="p-3 text-left font-bold text-teal-900">{isZh ? '小雨伞' : 'Little Umbrella'}</td>
+                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(1000)}`}>1,000{dayUnit}<br /><span className="text-[9px] opacity-75">{coreLabel}</span></div></td>
+                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(400)}`}>400{dayUnit}<br /><span className="text-[9px] opacity-75">{expLabel}</span></div></td>
                                     <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(0)}`}>—</div></td>
-                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(200)}`}>200d<br /><span className="text-[9px] opacity-75">Exp</span></div></td>
+                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(200)}`}>200{dayUnit}<br /><span className="text-[9px] opacity-75">{expLabel}</span></div></td>
                                 </tr>
                                 <tr className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                                    <td className="p-3 text-left font-bold text-teal-900">PowerGums</td>
-                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(800)}`}>800d<br /><span className="text-[9px] opacity-75">Core</span></div></td>
+                                    <td className="p-3 text-left font-bold text-teal-900">{isZh ? '能量软糖' : 'PowerGums'}</td>
+                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(800)}`}>800{dayUnit}<br /><span className="text-[9px] opacity-75">{coreLabel}</span></div></td>
                                     <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(0)}`}>—</div></td>
                                     <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(0)}`}>—</div></td>
-                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(400)}`}>400d<br /><span className="text-[9px] opacity-75">Exp</span></div></td>
+                                    <td className="p-1"><div className={`w-full py-2 rounded-md font-medium ${getStatusColor(400)}`}>400{dayUnit}<br /><span className="text-[9px] opacity-75">{expLabel}</span></div></td>
                                 </tr>
                             </tbody>
                         </table>
