@@ -23,7 +23,7 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                     id="card-lead-time"
                     title={t('kpi_lead_title') || "Lead Time Breach"}
                     subtitle={t('kpi_lead_sub') || "Cycle > Target"}
-                    value="18"
+                    value="20"
                     total="142"
                     unit={isZh ? "合同" : "Contracts"}
                     colorClass="text-red-600"
