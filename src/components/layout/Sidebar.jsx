@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
-import slogo from '../../assets/images/ora-web/slogo.png';
+import slogo from '../../assets/images/ora-web/clear_logo.webp';
 import vector from '../../assets/images/ora-web/Vector.webp';
 import contractsIcon from '../../assets/images/ora-web/Contracts_icon.png';
 import reportIcon from '../../assets/images/ora-web/Vector Report.png';
