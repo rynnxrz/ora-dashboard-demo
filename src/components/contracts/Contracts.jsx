@@ -188,172 +188,147 @@ const Contracts = () => {
     const btnInactive = "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50";
 
     return (
-        <div id="page-contracts" className="flex-1 flex flex-col h-full bg-[#F5F7FA] overflow-hidden p-6 gap-6">
-            {/* 1. Page Header (Title & Date) */}
-            <div className="flex-shrink-0 flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                    <h1 className="text-2xl font-bold text-gray-900" data-i18n="ct_title">{t.ct_title}</h1>
+        <div id="page-contracts" className="flex-1 flex flex-col overflow-hidden relative h-full bg-white">
+            <div className="flex-1 overflow-auto bg-white relative p-4">
+                <div className="mb-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900" data-i18n="ct_title">{t.ct_title}</h1>
+                            <p className="text-xs text-gray-500" data-i18n="ct_date_range">{t.ct_date_range || '2024-06-01 ~ 2024-08-31'}</p>
+                        </div>
 
-                    {/* Date Picker styled as control */}
-                    <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-md px-3 py-1.5 shadow-sm cursor-pointer hover:border-gray-300 transition-colors">
-                        <i className="fa-regular fa-calendar text-gray-500 text-xs"></i>
-                        <span className="text-sm font-medium text-gray-700">{t.ct_date_range || '01/01/2025 - 28/02/2025'}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* 2. Unified Card (Controls + Table) */}
-            <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
-
-                {/* Card Toolbar */}
-                <div className="p-4 border-b border-gray-100 flex flex-col gap-4">
-                    <div className="flex justify-between items-center">
-
-                        {/* Left: Filters & Search */}
-                        <div className="flex items-center gap-4">
-                            {/* Status Filters */}
-                            <div className="flex items-center bg-gray-50 rounded-lg p-1 border border-gray-100">
-                                <button
-                                    onClick={() => setActiveFilter('all')}
-                                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${activeFilter === 'all' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-                                >
-                                    {t.ct_filter_all} <span className="ml-1 opacity-60">· {counts.all}</span>
-                                </button>
-                                <div className="w-px h-3 bg-gray-200 mx-1"></div>
-                                <button
-                                    onClick={() => setActiveFilter('pending')}
-                                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${activeFilter === 'pending' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-                                >
-                                    {t.ct_status_pending_2 || 'Pending'} <span className="ml-1 opacity-60">· {counts.pending}</span>
-                                </button>
-
-                                {/* More Dropdown */}
-                                <div className="relative flex">
-                                    <button
-                                        onClick={handleMoreClick}
-                                        className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 ${['ongoing', 'done'].includes(activeFilter) ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-                                    >
-                                        {getMoreLabel()} <i className="fa-solid fa-chevron-down text-[10px] ml-1 opacity-60"></i>
-                                    </button>
-                                    {isMoreOpen && (
-                                        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 shadow-xl rounded-lg z-20 py-1">
-                                            <button
-                                                onClick={() => selectMoreFilter('ongoing')}
-                                                className="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex justify-between items-center group"
-                                            >
-                                                <span>{t.ct_status_ongoing_2 || 'On-Going'}</span>
-                                                <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full group-hover:bg-white border border-transparent group-hover:border-gray-200 transition-colors">{counts.ongoing}</span>
-                                            </button>
-                                            <button
-                                                onClick={() => selectMoreFilter('done')}
-                                                className="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex justify-between items-center group"
-                                            >
-                                                <span>{t.ct_status_done || 'Done'}</span>
-                                                <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full group-hover:bg-white border border-transparent group-hover:border-gray-200 transition-colors">{counts.done}</span>
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Divider */}
-                            <div className="w-px h-6 bg-gray-200"></div>
-
-                            {/* Search Input */}
+                        <div className="flex flex-wrap gap-2 items-center">
                             <div className="relative">
-                                <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
                                 <input
                                     type="text"
                                     placeholder={t.ct_search}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9 pr-4 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[#066070] w-56 shadow-sm transition-all hover:border-gray-400"
+                                    className="text-sm border-gray-300 rounded-md shadow-sm pl-8 pr-3 py-1.5 focus:border-[#297A88] focus:ring focus:ring-[#297A88] focus:ring-opacity-20"
                                 />
+                                <i className="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-gray-400 text-xs"></i>
+                            </div>
+
+                            <button className="bg-[#297A88] text-white px-4 py-1.5 rounded text-sm hover:bg-[#066070] transition shadow-sm font-bold flex items-center gap-2">
+                                <i className="fa-solid fa-plus"></i> <span data-i18n="ct_import">{t.ct_import || 'Import New'}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="flex gap-2 w-full sm:w-auto relative z-30">
+                            <button
+                                onClick={() => setActiveFilter('all')}
+                                className={activeFilter === 'all'
+                                    ? 'bg-[#066070] text-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-colors'
+                                    : 'bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 font-bold transition-colors'}
+                            >
+                                {t.ct_filter_all} · {counts.all}
+                            </button>
+                            <button
+                                onClick={() => setActiveFilter('pending')}
+                                className={activeFilter === 'pending'
+                                    ? 'bg-[#066070] text-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-colors'
+                                    : 'bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 font-bold transition-colors'}
+                            >
+                                {t.ct_status_pending_2 || 'Pending'} · {counts.pending}
+                            </button>
+
+                            <div className="relative">
+                                <button
+                                    onClick={handleMoreClick}
+                                    className="bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 flex items-center gap-1 font-bold transition-colors"
+                                >
+                                    {getMoreLabel()} <i className="fa-solid fa-chevron-down text-[10px]"></i>
+                                </button>
+                                {isMoreOpen && (
+                                    <div className="absolute top-full left-0 mt-1 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 flex flex-col py-1">
+                                        <button
+                                            onClick={() => selectMoreFilter('ongoing')}
+                                            className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 font-bold"
+                                        >
+                                            {t.ct_status_ongoing_2 || 'On-Going'} · {counts.ongoing}
+                                        </button>
+                                        <button
+                                            onClick={() => selectMoreFilter('done')}
+                                            className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 font-bold"
+                                        >
+                                            {t.ct_status_done || 'Done'} · {counts.done}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        {/* Right: Tabs & Import */}
-                        <div className="flex gap-3 items-center">
-                            {/* Role Tabs */}
-                            <div className="flex gap-1 mr-2">
-                                {[
-                                    { id: 'reqs', label: t.ct_role_reqs },
-                                    { id: 'fin', label: t.ct_role_fin },
-                                    { id: 'pkg', label: t.ct_role_pkg },
-                                    { id: 'plan', label: t.ct_role_plan },
-                                ].map(tab => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`px-3 py-1.5 rounded-md text-xs transition-all ${activeTab === tab.id ? 'bg-[#E0F2F1] text-[#006064] font-bold' : 'text-gray-500 font-medium hover:text-gray-800 hover:bg-gray-50'}`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <button className="flex items-center gap-2 bg-[#066070] text-white px-4 py-1.5 rounded-md text-sm font-bold hover:bg-[#05505c] transition-colors shadow-sm active:scale-95">
-                                <i className="fa-solid fa-plus"></i>
-                                <span data-i18n="ct_import">{t.ct_import || 'Import New'}</span>
-                            </button>
-                            <button className="text-gray-400 hover:text-gray-600 px-2 transition-colors">
-                                <i className="fa-solid fa-gear"></i>
-                            </button>
+                        <div className="flex items-center p-1 bg-gray-100 rounded-lg">
+                            {[
+                                { id: 'reqs', label: t.ct_role_reqs },
+                                { id: 'fin', label: t.ct_role_fin },
+                                { id: 'pkg', label: t.ct_role_pkg },
+                                { id: 'plan', label: t.ct_role_plan },
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={activeTab === tab.id
+                                        ? 'px-4 py-1.5 rounded-md text-xs font-bold transition-all bg-white text-[#066070] shadow-sm'
+                                        : 'px-4 py-1.5 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700 transition-all'}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Table Area */}
-                <div className="flex-1 overflow-auto bg-white">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50 sticky top-0 z-[5] shadow-sm text-xs border-b border-gray-200">
+                <div className="relative overflow-x-auto border rounded-lg border-gray-200">
+                    <table className="w-full text-left border-collapse whitespace-nowrap">
+                        <thead className="bg-gray-50 text-gray-500 text-xs uppercase border-b border-gray-200">
                             <tr>
-                                <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-24">{t.ct_th_date}</th>
-                                <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-32">{t.ct_th_no}</th>
-                                <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-20">{t.ct_th_brand}</th>
-                                <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_prod}</th>
-                                <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-24">{t.ct_th_spec}</th>
-                                <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-24">{t.ct_th_qty}</th>
-                                <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider w-40">{t.ct_th_status}</th>
-                                <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider w-10"></th>
+                                <th className="px-3 py-3 font-semibold w-24">{t.ct_th_date}</th>
+                                <th className="px-3 py-3 font-semibold w-32">{t.ct_th_no}</th>
+                                <th className="px-3 py-3 font-semibold w-20">{t.ct_th_brand}</th>
+                                <th className="px-3 py-3 font-semibold w-40">{t.ct_th_prod}</th>
+                                <th className="px-3 py-3 font-semibold w-24">{t.ct_th_spec}</th>
+                                <th className="px-3 py-3 font-semibold w-24">{t.ct_th_qty}</th>
+                                <th className="px-3 py-3 font-semibold w-32">{t.ct_th_status}</th>
+                                <th className="px-3 py-3 font-semibold text-center w-10"></th>
 
-                                {/* Dynamic Headers */}
                                 {activeTab === 'reqs' && (
                                     <>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">{t.ct_th_reqs_gacc}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_reqs_code}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_reqs_ship}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_reqs_label}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_reqs_other}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t.ct_th_reqs_gacc}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_reqs_code}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_reqs_ship}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_reqs_label}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_reqs_other}</th>
                                     </>
                                 )}
                                 {activeTab === 'fin' && (
                                     <>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">{t.ct_th_fin_inv}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_fin_dep}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_fin_pre}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_fin_bal}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t.ct_th_fin_inv}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_fin_dep}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_fin_pre}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_fin_bal}</th>
                                     </>
                                 )}
                                 {activeTab === 'pkg' && (
                                     <>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200">{t.ct_th_pkg_inv}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_pkg_dep}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_pkg_pre}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_pkg_bal}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t.ct_th_pkg_inv}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_pkg_dep}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_pkg_pre}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_pkg_bal}</th>
                                     </>
                                 )}
                                 {activeTab === 'plan' && (
                                     <>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider border-l border-gray-200 w-32">{t.ct_th_plan_mat}</th>
-                                        <th className="px-4 py-3 font-semibold text-gray-500 uppercase tracking-wider">{t.ct_th_plan_sch}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t.ct_th_plan_mat}</th>
+                                        <th className="px-3 py-3 font-semibold">{t.ct_th_plan_sch}</th>
                                     </>
                                 )}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 bg-white text-[13px]">
+                        <tbody className="text-xs text-gray-700 divide-y divide-gray-100 bg-white">
                             {filteredContracts.map((row, index) => {
-                                // Status Cell Logic
                                 let statusDotColor = "bg-gray-400";
                                 let statusTitle = row.status;
                                 let statusSub = "";
@@ -377,15 +352,14 @@ const Contracts = () => {
                                 }
 
                                 return (
-                                    <tr key={index} className="hover:bg-gray-50 transition-colors group">
+                                    <tr key={index} className="hover:bg-gray-50 transition-colors border-b border-gray-100 group">
                                         <td className="px-3 py-2 text-gray-500 whitespace-nowrap">{row.date}</td>
-                                        <td className="px-3 py-2 font-medium text-gray-800 whitespace-nowrap">{row.no}</td>
-                                        <td className="px-3 py-2 whitespace-nowrap text-gray-700">{row.brand}</td>
-                                        <td className="px-3 py-2 text-gray-700 truncate max-w-[160px]" title={row.product}>{row.product}</td>
-                                        <td className="px-3 py-2 whitespace-nowrap text-gray-500">{row.spec}</td>
-                                        <td className="px-3 py-2 whitespace-nowrap text-right font-medium text-gray-700">{row.qty}</td>
+                                        <td className="px-3 py-2 font-medium whitespace-nowrap">{row.no}</td>
+                                        <td className="px-3 py-2 whitespace-nowrap">{row.brand}</td>
+                                        <td className="px-3 py-2 max-w-[160px] truncate" title={row.product}>{row.product}</td>
+                                        <td className="px-3 py-2 text-gray-500">{row.spec}</td>
+                                        <td className="px-3 py-2">{row.qty}</td>
 
-                                        {/* Complex Status Cell */}
                                         <td className="px-3 py-2">
                                             <div className="flex flex-row items-center gap-2">
                                                 <div className={`w-2 h-2 rounded-full ${statusDotColor} flex-shrink-0`}></div>
@@ -395,25 +369,24 @@ const Contracts = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-3 py-2 text-center text-gray-400">
+                                        <td className="px-3 py-2 text-center text-gray-500">
                                             <button className="hover:text-[#297A88] transition-colors p-1">
                                                 <i className="fa-solid fa-ellipsis"></i>
                                             </button>
                                         </td>
 
-                                        {/* Dynamic Cells */}
                                         {activeTab === 'reqs' && (
                                             <>
-                                                <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100">{renderCellWithCheck(row.reqs.gacc, "text-gray-400")}</td>
+                                                <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100 text-gray-400">{renderCellWithCheck(row.reqs.gacc, "text-gray-400")}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap text-gray-400">{row.reqs.coding}</td>
-                                                <td className="px-3 py-2 whitespace-nowrap font-medium text-gray-700">{row.reqs.ship}</td>
-                                                <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.reqs.label, "text-gray-400")}</td>
+                                                <td className="px-3 py-2 whitespace-nowrap font-medium">{row.reqs.ship}</td>
+                                                <td className="px-3 py-2 whitespace-nowrap text-gray-400">{renderCellWithCheck(row.reqs.label, "text-gray-400")}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap text-gray-400">{row.reqs.other}</td>
                                             </>
                                         )}
                                         {activeTab === 'fin' && (
                                             <>
-                                                <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100 font-mono text-xs text-gray-600">{row.fin.inv}</td>
+                                                <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100 font-mono">{row.fin.inv}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.fin.dep, "text-gray-600")}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.fin.pre, "text-gray-600")}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.fin.bal, "text-gray-600")}</td>
@@ -454,12 +427,13 @@ const Contracts = () => {
                             })}
                         </tbody>
                     </table>
-                    {filteredContracts.length === 0 && (
-                        <div className="p-10 text-center text-gray-400">
-                            {isZh ? '未找到合同。' : 'No contracts found.'}
-                        </div>
-                    )}
                 </div>
+
+                {filteredContracts.length === 0 && (
+                    <div className="p-10 text-center text-gray-400">
+                        {isZh ? '未找到合同。' : 'No contracts found.'}
+                    </div>
+                )}
             </div>
         </div>
     );
