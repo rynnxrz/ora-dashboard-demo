@@ -1,16 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-    Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement,
-    Title, Tooltip, Legend
+    Chart as ChartJS, registerables
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useLanguage } from '../../contexts/LanguageContext';
 
-ChartJS.register(
-    CategoryScale, LinearScale, BarElement, LineElement, PointElement,
-    Title, Tooltip, Legend, ChartDataLabels
-);
+ChartJS.register(...registerables, ChartDataLabels);
 
 // --- Data Constants ---
 const getProductionLines = (isZh) => [

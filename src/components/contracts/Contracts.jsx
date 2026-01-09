@@ -178,9 +178,9 @@ const Contracts = () => {
 
     // Helper for "More" button label
     const getMoreLabel = () => {
-        if (activeFilter === 'ongoing') return `${t.ct_status_ongoing_2 || 'On-Going'} · ${counts.ongoing}`;
-        if (activeFilter === 'done') return `${t.ct_status_done || 'Done'} · ${counts.done}`;
-        return t.ct_filter_more || 'More';
+        if (activeFilter === 'ongoing') return `${t('ct_status_ongoing_2') || 'On-Going'} · ${counts.ongoing}`;
+        if (activeFilter === 'done') return `${t('ct_status_done') || 'Done'} · ${counts.done}`;
+        return t('ct_filter_more') || 'More';
     };
 
     // Common Button Style
@@ -193,15 +193,15 @@ const Contracts = () => {
                 <div className="mb-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                         <div>
-                            <h1 className="text-xl font-bold text-gray-900" data-i18n="ct_title">{t.ct_title}</h1>
-                            <p className="text-xs text-gray-500" data-i18n="ct_date_range">{t.ct_date_range || '2024-06-01 ~ 2024-08-31'}</p>
+                            <h1 className="text-xl font-bold text-gray-900" data-i18n="ct_title">{t('ct_title')}</h1>
+                            <p className="text-xs text-gray-500" data-i18n="ct_date_range">{t('ct_date_range') || '2024-06-01 ~ 2024-08-31'}</p>
                         </div>
 
                         <div className="flex flex-wrap gap-2 items-center">
                             <div className="relative">
                                 <input
                                     type="text"
-                                    placeholder={t.ct_search}
+                                    placeholder={t('ct_search')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="text-sm border-gray-300 rounded-md shadow-sm pl-8 pr-3 py-1.5 focus:border-[#297A88] focus:ring focus:ring-[#297A88] focus:ring-opacity-20"
@@ -210,7 +210,7 @@ const Contracts = () => {
                             </div>
 
                             <button className="bg-[#297A88] text-white px-4 py-1.5 rounded text-sm hover:bg-[#066070] transition shadow-sm font-bold flex items-center gap-2">
-                                <i className="fa-solid fa-plus"></i> <span data-i18n="ct_import">{t.ct_import || 'Import New'}</span>
+                                <i className="fa-solid fa-plus"></i> <span data-i18n="ct_import">{t('ct_import') || 'Import New'}</span>
                             </button>
                         </div>
                     </div>
@@ -223,7 +223,7 @@ const Contracts = () => {
                                     ? 'bg-[#066070] text-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-colors'
                                     : 'bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 font-bold transition-colors'}
                             >
-                                {t.ct_filter_all} · {counts.all}
+                                {t('ct_filter_all')} · {counts.all}
                             </button>
                             <button
                                 onClick={() => setActiveFilter('pending')}
@@ -231,7 +231,7 @@ const Contracts = () => {
                                     ? 'bg-[#066070] text-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-colors'
                                     : 'bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 font-bold transition-colors'}
                             >
-                                {t.ct_status_pending_2 || 'Pending'} · {counts.pending}
+                                {t('ct_status_pending_2') || 'Pending'} · {counts.pending}
                             </button>
 
                             <div className="relative">
@@ -247,13 +247,13 @@ const Contracts = () => {
                                             onClick={() => selectMoreFilter('ongoing')}
                                             className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 font-bold"
                                         >
-                                            {t.ct_status_ongoing_2 || 'On-Going'} · {counts.ongoing}
+                                            {t('ct_status_ongoing_2') || 'On-Going'} · {counts.ongoing}
                                         </button>
                                         <button
                                             onClick={() => selectMoreFilter('done')}
                                             className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 font-bold"
                                         >
-                                            {t.ct_status_done || 'Done'} · {counts.done}
+                                            {t('ct_status_done') || 'Done'} · {counts.done}
                                         </button>
                                     </div>
                                 )}
@@ -262,10 +262,10 @@ const Contracts = () => {
 
                         <div className="flex items-center p-1 bg-gray-100 rounded-lg">
                             {[
-                                { id: 'reqs', label: t.ct_role_reqs },
-                                { id: 'fin', label: t.ct_role_fin },
-                                { id: 'pkg', label: t.ct_role_pkg },
-                                { id: 'plan', label: t.ct_role_plan },
+                                { id: 'reqs', label: t('ct_role_reqs') },
+                                { id: 'fin', label: t('ct_role_fin') },
+                                { id: 'pkg', label: t('ct_role_pkg') },
+                                { id: 'plan', label: t('ct_role_plan') },
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -285,44 +285,38 @@ const Contracts = () => {
                     <table className="w-full text-left border-collapse whitespace-nowrap">
                         <thead className="bg-gray-50 text-gray-500 text-xs uppercase border-b border-gray-200">
                             <tr>
-                                <th className="px-3 py-3 font-semibold w-24">{t.ct_th_date}</th>
-                                <th className="px-3 py-3 font-semibold w-32">{t.ct_th_no}</th>
-                                <th className="px-3 py-3 font-semibold w-20">{t.ct_th_brand}</th>
-                                <th className="px-3 py-3 font-semibold w-40">{t.ct_th_prod}</th>
-                                <th className="px-3 py-3 font-semibold w-24">{t.ct_th_spec}</th>
-                                <th className="px-3 py-3 font-semibold w-24">{t.ct_th_qty}</th>
-                                <th className="px-3 py-3 font-semibold w-32">{t.ct_th_status}</th>
+                                <th className="px-3 py-3 font-semibold w-32">{t('ct_th_status')}</th>
                                 <th className="px-3 py-3 font-semibold text-center w-10"></th>
 
                                 {activeTab === 'reqs' && (
                                     <>
-                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t.ct_th_reqs_gacc}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_reqs_code}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_reqs_ship}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_reqs_label}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_reqs_other}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t('ct_th_reqs_gacc')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_code')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_ship')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_label')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_other')}</th>
                                     </>
                                 )}
                                 {activeTab === 'fin' && (
                                     <>
-                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t.ct_th_fin_inv}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_fin_dep}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_fin_pre}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_fin_bal}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t('ct_th_fin_inv')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_fin_dep')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_fin_pre')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_fin_bal')}</th>
                                     </>
                                 )}
                                 {activeTab === 'pkg' && (
                                     <>
-                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t.ct_th_pkg_inv}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_pkg_dep}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_pkg_pre}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_pkg_bal}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t('ct_th_pkg_inv')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_pkg_dep')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_pkg_pre')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_pkg_bal')}</th>
                                     </>
                                 )}
                                 {activeTab === 'plan' && (
                                     <>
-                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t.ct_th_plan_mat}</th>
-                                        <th className="px-3 py-3 font-semibold">{t.ct_th_plan_sch}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t('ct_th_plan_mat')}</th>
+                                        <th className="px-3 py-3 font-semibold">{t('ct_th_plan_sch')}</th>
                                     </>
                                 )}
                             </tr>
@@ -335,19 +329,19 @@ const Contracts = () => {
 
                                 if (row.status === 'New') {
                                     statusDotColor = "bg-[#EF4444]";
-                                    statusTitle = t.ct_status_new_1 || "New";
-                                    statusSub = t.ct_status_new_2 || "Contract";
+                                    statusTitle = t('ct_status_new_1') || "New";
+                                    statusSub = t('ct_status_new_2') || "Contract";
                                 } else if (row.status === 'Pending') {
                                     statusDotColor = "bg-[#EF4444]";
-                                    statusTitle = t.ct_status_pending_1 || "Pending";
-                                    statusSub = t.ct_status_pending_2 || "Preparation";
+                                    statusTitle = t('ct_status_pending_1') || "Pending";
+                                    statusSub = t('ct_status_pending_2') || "Preparation";
                                 } else if (row.status === 'Production') {
                                     statusDotColor = "bg-[#F59E0B]";
-                                    statusTitle = t.ct_status_ongoing_1 || "Production";
-                                    statusSub = t.ct_status_ongoing_2 || "On-Going";
+                                    statusTitle = t('ct_status_ongoing_1') || "Production";
+                                    statusSub = t('ct_status_ongoing_2') || "On-Going";
                                 } else if (row.status === 'Done') {
                                     statusDotColor = "bg-[#10B981]";
-                                    statusTitle = t.ct_status_done || "Done";
+                                    statusTitle = t('ct_status_done') || "Done";
                                     statusSub = "";
                                 }
 

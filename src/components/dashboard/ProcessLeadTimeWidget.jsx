@@ -1,8 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import {
-    Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
-    LineElement, PointElement, ArcElement
+    Chart as ChartJS, registerables
 } from 'chart.js';
 import { Bar, Chart } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -10,8 +9,7 @@ import FactoryOutputWidget from './FactoryOutputWidget';
 import { LEAD_TIME_CONTRACTS } from '../../data/mockData';
 
 ChartJS.register(
-    CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement,
-    Title, Tooltip, Legend, ChartDataLabels
+    ...registerables, ChartDataLabels
 );
 
 const ProcessLeadTimeWidget = () => {
