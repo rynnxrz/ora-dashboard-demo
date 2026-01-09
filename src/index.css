@@ -32,6 +32,22 @@
     @apply font-bold text-gray-800 text-sm flex items-center gap-2;
   }
 
+  .title-with-icon {
+    @apply flex items-center gap-2;
+  }
+
+  .title-icon-symbol {
+    @apply text-ora-primary text-[12px];
+  }
+
+  .title-icon-symbol--sm {
+    @apply text-[11px];
+  }
+
+  .title-icon-symbol--lg {
+    @apply text-[13px];
+  }
+
   .btn-icon {
     @apply p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600;
   }

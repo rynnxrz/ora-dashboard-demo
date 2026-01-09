@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 const ContractStatusWidget = ({ externalFilter }) => {
     const { t, language } = useLanguage();
@@ -220,10 +221,9 @@ const ContractStatusWidget = ({ externalFilter }) => {
         <div className="card lg:col-span-2 h-full flex flex-col">
             <div className="card-header">
                 <div className="flex items-center gap-4">
-                    <h3 className="card-title flex items-center gap-2">
-                        <i className="fa-solid fa-list-check text-ora-primary"></i>
-                        <span>{t('p1b_title') || "1B. Key Order Overview"}</span>
-                    </h3>
+                    <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-list-check" className="card-title">
+                        {t('p1b_title') || "1B. Key Order Overview"}
+                    </TitleWithIcon>
                     <div className="flex items-center gap-3">
                         <div className="flex bg-gray-100 rounded p-0.5 space-x-1 ml-6">
                             <button

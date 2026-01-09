@@ -1,6 +1,7 @@
 import React from 'react';
 import KPICard from './KPICard';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 const KPIGrid = ({ activeFilter, onKpiClick }) => {
     const { t, language } = useLanguage();
@@ -9,9 +10,9 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
     return (
         <section>
             <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight border-l-4 border-ora-primary pl-3">
+                <TitleWithIcon as="h2" size="lg" className="text-2xl font-extrabold text-slate-800 tracking-tight">
                     {t('p1_title')}
-                </h2>
+                </TitleWithIcon>
                 <span className="text-xs text-gray-400 italic ml-2">
                     <i className="fa-solid fa-circle-info mr-1"></i>
                     <span>{t('p1_subtitle')}</span>

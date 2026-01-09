@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { CONTRACT_DATA } from '../../data/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 const Contracts = () => {
     // --- State ---
@@ -193,7 +194,9 @@ const Contracts = () => {
                 <div className="mb-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                         <div>
-                            <h1 className="text-xl font-bold text-gray-900" data-i18n="ct_title">{t('ct_title')}</h1>
+                            <TitleWithIcon as="h1" size="lg" className="text-xl font-bold text-gray-900" data-i18n="ct_title">
+                                {t('ct_title')}
+                            </TitleWithIcon>
                             <p className="text-xs text-gray-500" data-i18n="ct_date_range">{t('ct_date_range') || '2024-06-01 ~ 2024-08-31'}</p>
                         </div>
 

@@ -5,6 +5,7 @@ import {
 import { Chart } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 ChartJS.register(...registerables, ChartDataLabels);
 
@@ -283,13 +284,12 @@ const FactoryOutputWidget = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 shrink-0">
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-6 bg-purple-500 rounded-full"></div>
                     <div>
-                        <h3 className="font-bold text-slate-700 leading-none">
+                        <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-industry" className="font-bold text-slate-700 leading-none">
                             {viewMode === 'overall'
                                 ? (isZh ? '2D 季度产出与效率趋势' : '2D. Quarterly Output & Efficiency Trends')
                                 : (isZh ? '2D 当前产线负荷排行' : '2D. Current Production Load Ranking')}
-                        </h3>
+                        </TitleWithIcon>
                         <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">{isZh ? '工厂产出与效率趋势' : 'Factory Output & Efficiency Trends'}</p>
                     </div>
                 </div>

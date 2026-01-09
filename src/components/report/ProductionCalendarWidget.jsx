@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { MACHINE_DATA } from '../../data/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 const ProductionCalendarWidget = () => {
     const { language } = useLanguage();
@@ -97,7 +98,9 @@ const ProductionCalendarWidget = () => {
         <div className="flex-1 bg-white flex flex-col h-full rounded shadow-sm border border-gray-200 overflow-hidden">
             {/* Header */}
             <div className="px-4 py-3 border-b border-gray-200 bg-white flex justify-between items-center">
-                <h2 className="font-bold text-gray-800 text-sm">{isZh ? '生产日历' : 'Production Calendar'}</h2>
+                <TitleWithIcon as="h2" size="sm" iconClass="fa-solid fa-calendar-days" className="font-bold text-gray-800 text-sm">
+                    {isZh ? '生产日历' : 'Production Calendar'}
+                </TitleWithIcon>
             </div>
 
             {/* Toolbar */}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import DataQualityWidget from './DataQualityWidget';
 import MaterialReadinessWidget from './MaterialReadinessWidget';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 const SidebarContainer = ({ onRiskClick }) => {
     const [activeTab, setActiveTab] = useState('dataQuality');
@@ -12,7 +13,9 @@ const SidebarContainer = ({ onRiskClick }) => {
         <div className="card bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
             {/* Tabs Header - Segmented Pill Style */}
             <div className="p-3 border-b border-slate-100 shrink-0">
-                <h3 className="text-xs font-bold text-slate-600 mb-2">{t('p1c_panel_title')}</h3>
+                <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-layer-group" className="text-xs font-bold text-slate-600 mb-2">
+                    {t('p1c_panel_title')}
+                </TitleWithIcon>
                 <div className="flex bg-slate-100 p-1 rounded-lg">
                     <button
                         onClick={() => setActiveTab('dataQuality')}

@@ -3,6 +3,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 ChartJS.register(...registerables, ChartDataLabels);
 
@@ -214,7 +215,9 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     {/* Risk List (Widget View) */}
                     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
                         <div className="flex items-center justify-between mb-2 shrink-0">
-                            <h4 className="text-[10px] font-bold text-slate-500 uppercase">{labels.highRiskBatches}</h4>
+                            <TitleWithIcon as="h4" size="sm" iconClass="fa-solid fa-triangle-exclamation" className="text-[10px] font-bold text-slate-500 uppercase">
+                                {labels.highRiskBatches}
+                            </TitleWithIcon>
                             <span className="text-[9px] text-slate-400">{mockMaterialsData.riskBatches.length} {labels.items}</span>
                         </div>
 
@@ -245,7 +248,9 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                         {/* Drawer Header */}
                         <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">{labels.drawerTitle}</h2>
+                                <TitleWithIcon as="h2" size="md" iconClass="fa-solid fa-boxes-stacked" className="text-lg font-bold text-slate-800">
+                                    {labels.drawerTitle}
+                                </TitleWithIcon>
                                 <p className="text-xs text-slate-500">{isZh ? `共 ${mockMaterialsData.riskBatches.length} 个${labels.drawerSubtitle}` : `Reviewing ${mockMaterialsData.riskBatches.length} items requiring attention`}</p>
                             </div>
                             <button

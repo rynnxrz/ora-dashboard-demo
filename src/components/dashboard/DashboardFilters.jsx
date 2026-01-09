@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 const DashboardFilters = () => {
     const { t, toggleLanguage, language } = useLanguage();
@@ -8,7 +9,9 @@ const DashboardFilters = () => {
     return (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <div>
-                <h1 className="text-xl font-bold text-gray-800 tracking-tight">{t('header_title') || "OraNutrition Internal Process & Client Insights Overview"}</h1>
+                <TitleWithIcon as="h1" size="lg" iconClass="fa-solid fa-chart-line" className="text-xl font-bold text-gray-800 tracking-tight">
+                    {t('header_title') || "OraNutrition Internal Process & Client Insights Overview"}
+                </TitleWithIcon>
                 <p className="text-xs text-gray-400 mt-1 flex items-center gap-2">
                     <span>{t('header_update') || "Last Update: 2024-11-28 09:00 AM"}</span>
                     <span className="w-1 h-1 rounded-full bg-gray-300"></span>

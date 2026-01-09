@@ -3,6 +3,7 @@ import { Chart as ChartJS, registerables } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 ChartJS.register(...registerables, ChartDataLabels);
 
@@ -332,9 +333,9 @@ const ClientRadarWidget = () => {
     return (
         <section className="pb-10 mt-8">
             <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight border-l-4 border-secondary pl-3">
+                <TitleWithIcon as="h2" size="lg" className="text-2xl font-extrabold text-slate-800 tracking-tight">
                     {t('p3_title')}
-                </h2>
+                </TitleWithIcon>
                 <span className="text-xs text-gray-400">
                     {isZh
                         ? `季度产能分布（总计：${totalQ4Days.toLocaleString()}天）`
@@ -347,9 +348,9 @@ const ClientRadarWidget = () => {
                 {/* 3A: Client Risk & Growth */}
                 <div className="card lg:col-span-2">
                     <div className="card-header">
-                        <h3 className="card-title">
-                            <i className="fa-solid fa-user-shield text-ora-primary"></i> {t('p3a_title')}
-                        </h3>
+                        <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-user-shield" className="card-title">
+                            {t('p3a_title')}
+                        </TitleWithIcon>
                     </div>
                     <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[350px]">
                         {/* Visual: Bar Chart (Wider) */}
@@ -421,7 +422,9 @@ const ClientRadarWidget = () => {
                 {/* Widget 3B: Client Concentration (Refactored) */}
                 <div className="card">
                     <div className="card-header">
-                        <h3 className="card-title text-sm"><i className="fa-solid fa-chart-pie text-secondary"></i> {t('p3b_title')}</h3>
+                        <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-chart-pie" className="card-title text-sm">
+                            {t('p3b_title')}
+                        </TitleWithIcon>
                     </div>
                     <div className="p-4 flex flex-col h-full relative">
                         {/* Donut Chart Container */}
@@ -484,7 +487,9 @@ const ClientRadarWidget = () => {
                 {/* Widget 3C: Format Capacity Matrix */}
                 <div className="card lg:col-span-3">
                     <div className="card-header flex justify-between items-center">
-                        <h3 className="card-title"><i className="fa-solid fa-border-all text-teal-600"></i> {t('p3c_title')}</h3>
+                        <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-border-all" className="card-title">
+                            {t('p3c_title')}
+                        </TitleWithIcon>
                         <div className="flex items-center gap-3 text-xxs">
                             <div className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-600 rounded-sm"></span> {coreLabel}（&gt;500{dayUnit}）</div>
                             <div className="flex items-center gap-1"><span className="w-3 h-3 bg-teal-100 rounded-sm border border-teal-200"></span> {expLabel}（1-200{dayUnit}）</div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 const ZombieWidget = () => {
     const { t, language } = useLanguage();
@@ -9,10 +10,9 @@ const ZombieWidget = () => {
     return (
         <div className="card">
             <div className="card-header">
-                <h3 className="card-title">
-                    <i className="fa-solid fa-skull text-gray-500"></i>
-                    <span>{t('p1c_title') || "Inactive Contracts & Inventory"}</span>
-                </h3>
+                <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-skull" className="card-title">
+                    {t('p1c_title') || "Inactive Contracts & Inventory"}
+                </TitleWithIcon>
                 <div className="flex bg-gray-100 rounded p-0.5 space-x-1">
                     <button
                         onClick={() => setView('contracts')}

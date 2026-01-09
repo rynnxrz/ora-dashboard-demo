@@ -3,6 +3,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 ChartJS.register(...registerables, ChartDataLabels);
 
@@ -124,7 +125,9 @@ const DataQualityWidget = ({ isEmbedded }) => {
             {!isEmbedded && (
                 <div className="card-header">
                     <div>
-                        <h3 className="card-title"><i className="fa-solid fa-check-double text-gray-600"></i> {t('p1d_title') || "Data Quality"}</h3>
+                        <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-check-double" className="card-title">
+                            {t('p1d_title') || "Data Quality"}
+                        </TitleWithIcon>
                         <span className="text-xs text-gray-400">{t('p1d_update') || "Last Update: 10 mins ago"}</span>
                     </div>
                 </div>
@@ -143,7 +146,9 @@ const DataQualityWidget = ({ isEmbedded }) => {
                 {/* List Section */}
                 <div className="border-t pt-2">
                     <div className="flex justify-between items-center mb-2">
-                        <h4 className="text-xs font-bold text-gray-700">{t('p1d_list_title') || "Issue List"}</h4>
+                        <TitleWithIcon as="h4" size="sm" iconClass="fa-solid fa-triangle-exclamation" className="text-xs font-bold text-gray-700">
+                            {t('p1d_list_title') || "Issue List"}
+                        </TitleWithIcon>
                         <div className="text-[10px] text-gray-400">
                             {t('p1d_filter_label') || "Filter:"} <span className="font-bold text-ora-primary">{filter === 'all' ? t('dq_filter_all_bad') || 'All Issues' : t(`dq_issue_${filter}`) || filter}</span>
                         </div>

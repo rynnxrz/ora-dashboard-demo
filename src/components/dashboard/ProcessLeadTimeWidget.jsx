@@ -7,6 +7,7 @@ import { Bar, Chart } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import FactoryOutputWidget from './FactoryOutputWidget';
 import { LEAD_TIME_CONTRACTS } from '../../data/mockData';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 ChartJS.register(
     ...registerables, ChartDataLabels
@@ -297,7 +298,9 @@ const ProcessLeadTimeWidget = () => {
                 <div className="animate-in fade-in slide-in-from-right-2 duration-300 h-full flex flex-col">
                     <div className="flex justify-between items-start mb-2 flex-shrink-0">
                         <div>
-                            <h4 className="font-bold text-slate-800 text-base">{stageLabel}</h4>
+                            <TitleWithIcon as="h4" size="sm" iconClass="fa-solid fa-diagram-project" className="font-bold text-slate-800 text-base">
+                                {stageLabel}
+                            </TitleWithIcon>
                             <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">{t('p2_stage_diagnosis')}</p>
                         </div>
                         <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border ${s.breach > 50 ? 'bg-red-50 text-red-600 border-red-100' :
@@ -380,9 +383,9 @@ const ProcessLeadTimeWidget = () => {
 
         return (
             <div className="h-full flex flex-col">
-                <h4 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                    <i className="fa-solid fa-chart-pie text-indigo-500"></i> {t('p2_overall_overview_title')}
-                </h4>
+                <TitleWithIcon as="h4" size="sm" iconClass="fa-solid fa-chart-pie" className="font-bold text-slate-800 text-sm mb-4">
+                    {t('p2_overall_overview_title')}
+                </TitleWithIcon>
 
                 <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
@@ -423,7 +426,9 @@ const ProcessLeadTimeWidget = () => {
             {/* Header */}
             <div className="mb-6">
                 <div className="flex items-baseline gap-2">
-                    <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight">{t('p2_deep_dive_title')}</h2>
+                    <TitleWithIcon as="h2" size="lg" className="text-2xl font-extrabold text-slate-800 tracking-tight">
+                        {t('p2_deep_dive_title')}
+                    </TitleWithIcon>
                     {!isZh && <span className="text-slate-400 text-sm font-medium">Lead Time Analysis</span>}
                 </div>
                 <p className="text-slate-500 text-sm mt-1">
@@ -438,9 +443,10 @@ const ProcessLeadTimeWidget = () => {
                 <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                     <div className="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-white z-10">
                         <div className="flex items-center gap-2">
-                            <div className="w-2 h-6 bg-indigo-500 rounded-full"></div>
                             <div>
-                                <h3 className="font-bold text-slate-700 leading-none">{isZh ? '2A 阶段耗时监控' : '2A. Stage Duration Tracking'}</h3>
+                                <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-stopwatch" className="font-bold text-slate-700 leading-none">
+                                    {isZh ? '2A 阶段耗时监控' : '2A. Stage Duration Tracking'}
+                                </TitleWithIcon>
                                 <p className="text-[10px] text-slate-400 mt-1">{isZh ? '颜色代表异常率（红色=不稳定）' : 'Color indicates breach rate (Red=Unstable)'}</p>
                             </div>
                         </div>
@@ -465,7 +471,9 @@ const ProcessLeadTimeWidget = () => {
                         <div className="h-[1px] bg-slate-100 mb-4 w-full flex-shrink-0"></div>
                         <div className="h-[140px] flex-shrink-0 flex flex-col">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase">各阶段异常趋势 (对比上季)</span>
+                                <span className="text-[10px] font-bold text-slate-500 uppercase">
+                                    {isZh ? '各阶段异常趋势 (对比上季)' : 'Stage anomaly trends (vs last quarter)'}
+                                </span>
                                 <div className="flex gap-2 text-[9px] text-slate-400">
                                     <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-slate-400 rounded-sm"></span>{isZh ? '本季' : 'Current'}</span>
                                     <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-slate-300 rounded-sm"></span>{isZh ? '上季' : 'Last Q'}</span>
@@ -485,14 +493,13 @@ const ProcessLeadTimeWidget = () => {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col">
                     <div className="flex items-center justify-between mb-4 flex-shrink-0">
                         <div className="flex items-center gap-2">
-                            <div className="w-2 h-6 bg-rose-500 rounded-full"></div>
                             <div>
-                                <h3 className="font-bold text-slate-700 leading-none uppercase">
+                                <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-list-ol" className="font-bold text-slate-700 leading-none uppercase">
                                     {isZh ? '2C 产线效率排行' : '2C. Production Line Efficiency Ranking'}
                                     <span className="text-slate-400 text-xs font-normal normal-case ml-1">
                                         {isZh ? '（按累计延误排序）' : '(Sorted by Cumulative Delays)'}
                                     </span>
-                                </h3>
+                                </TitleWithIcon>
                                 <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wide">{isZh ? '筛选：本季度' : 'Filter: Current Quarter'}</p>
                             </div>
                         </div>

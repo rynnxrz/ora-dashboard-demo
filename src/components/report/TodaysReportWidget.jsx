@@ -1,6 +1,7 @@
 import React from 'react';
 import { REPORT_DATA, CONTRACT_DATA } from '../../data/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
+import TitleWithIcon from '../common/TitleWithIcon';
 
 const TodaysReportWidget = () => {
     const { language } = useLanguage();
@@ -75,7 +76,9 @@ const TodaysReportWidget = () => {
         <div className="w-80 flex bg-white flex-col rounded shadow-sm border border-gray-200 overflow-hidden h-full">
             <div className="px-5 py-4 border-b border-gray-100 bg-white flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <h2 className="font-bold text-sm text-gray-700">{isZh ? '今日汇总' : "Today's report"}</h2>
+                    <TitleWithIcon as="h2" size="sm" iconClass="fa-solid fa-clipboard-list" className="font-bold text-sm text-gray-700">
+                        {isZh ? '今日汇总' : "Today's report"}
+                    </TitleWithIcon>
                 </div>
                 <div className="flex gap-2">
                     <button className="px-3 py-1 text-xs border border-gray-300 rounded text-gray-600 hover:bg-gray-50">{isZh ? '回到今天' : 'Back Today'}</button>
@@ -93,7 +96,9 @@ const TodaysReportWidget = () => {
                             <div className="flex items-start gap-2">
                                 <div className={`w-2 h-2 rounded-full mt-1.5 ${task.dotColor}`}></div>
                                 <div>
-                                    <h3 className="font-bold text-gray-800 text-sm">{isZh ? `${task.brand} 10ml 70万` : `${task.brand} vc 10ml 700k`}</h3>
+                                    <TitleWithIcon as="h3" size="sm" iconClass="fa-solid fa-box-open" className="font-bold text-gray-800 text-sm">
+                                        {isZh ? `${task.brand} 10ml 70万` : `${task.brand} vc 10ml 700k`}
+                                    </TitleWithIcon>
                                     <div className="text-[10px] text-gray-400 mt-0.5">{isZh ? '合同：' : 'Contract: '} {task.contractNo}</div>
                                     <div className="text-[10px] text-gray-400">{isZh ? '任务：' : 'Task: '} {task.taskNo}</div>
                                 </div>

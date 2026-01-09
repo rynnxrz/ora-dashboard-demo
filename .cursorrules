@@ -1,0 +1,61 @@
+# Project Context
+You are building **OraNutrition Dashboard**, an Internal Process & Client Insight Board for managing contracts and order overviews.
+**Goal:** A high-performance, responsive dashboard prioritizing clear data visualization and localization support.
+
+# Tech Stack
+- **Framework:** Vite + React 19
+- **Language:** JavaScript (ESModules)
+- **Styling:** Tailwind CSS v3
+- **Icons:** FontAwesome (via CDN)
+- **Charts:** Chart.js + react-chartjs-2
+- **Deployment:** Vercel
+
+---
+
+# 1. Coding Standards
+
+## React & Components
+- **Functional Components:** Use concise functional components with hooks.
+- **Props:** Use destructuring for props.
+- **State Management:** Use `useState` for local state and `useContext` for global state (e.g., `LanguageContext`).
+- **Icons:** Use FontAwesome classes (e.g., `fa-solid fa-list-check`).
+
+## Styling (Tailwind CSS)
+- **Utility First:** Use Tailwind utility classes directly in `className`.
+- **Colors:** Use project-specific colors like `text-ora-primary`, `bg-[#297A88]`, `bg-[#066070]`.
+- **Responsive:** Ensure layouts work on desktop and mobile (`flex-col md:flex-row`).
+
+## Localization (i18n)
+- **Context:** Always use `useLanguage()` hook to access `t` function and `isZh` flag.
+- **Usage:**
+  - ✅ Correct: `t('key_name')`
+  - 🚫 Incorrect: `t.key_name`
+- **Fallbacks:** Provide English fallbacks `|| "English Text"`. 
+
+---
+
+# 2. Data & Business Logic
+
+## Mock Data
+- **Source:** `src/data/mockData.js` contains `CONTRACT_DATA`, `MACHINE_DATA`, etc.
+- **Modifications:** Updates to data structure should be reflected in `mockData.js`.
+
+## Contracts & Status
+- **Status Types:** `New`, `Pending`, `Production`, `Done`.
+- **Internal Filters:** `All`, `Blocker`, `Delay`.
+- **KPIs:** Tracked via `ContractStatusWidget` and `KPIGrid`.
+
+---
+
+# 3. Development Workflow
+
+## File Structure
+- `src/components/`: Reusable UI components.
+- `src/contexts/`: React contexts (e.g., `LanguageContext.jsx`).
+- `src/assets/`: Static assets (images, logos).
+- `public/`: Public assets (favicons).
+
+## Best Practices
+- **Linting:** Follow ESLint rules.
+- **Error Handling:** Graceful degradation for missing data (e.g., "No contracts found").
+- **Performance:** Use `useMemo` for expensive filtering operations.
