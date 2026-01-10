@@ -19,6 +19,8 @@ export const TRANSLATIONS = {
         "kpi_mat_sub": "Material Prep Risk",
         "kpi_data_title": "Data Issues",
         "kpi_data_sub": "Data Records Incomplete",
+        "kpi_prod_title": "Production Issues",
+        "kpi_prod_sub": "Volume Gap & Delay Risk",
 
         // Widget P1-B
         "p1b_title": "1B. Key Order Overview",
@@ -205,6 +207,8 @@ export const TRANSLATIONS = {
         "kpi_mat_sub": "物料未到+临近排产",
         "kpi_data_title": "数据记录需补充",
         "kpi_data_sub": "字段缺失/异常",
+        "kpi_prod_title": "生产异常",
+        "kpi_prod_sub": "产量缺口 & 延误风险",
 
         // Widget P1-B
         "p1b_title": "1B 关键订单概览",

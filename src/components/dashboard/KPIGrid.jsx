@@ -19,7 +19,7 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                 </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                 <KPICard
                     id="card-lead-time"
                     title={t('kpi_lead_title') || "Lead Time Breach"}
@@ -65,6 +65,21 @@ const KPIGrid = ({ activeFilter, onKpiClick }) => {
                     subtext={isZh ? "缺料且临近排产" : "Missing + Near Prod"}
                     isActive={activeFilter === 'material'} // Not mapped in HTML but good to have
                     onClick={() => onKpiClick('material')}
+                />
+                <KPICard
+                    id="card-production"
+                    title={t('kpi_prod_title') || "Production Issues"}
+                    subtitle={t('kpi_prod_sub') || "Lines Halted"}
+                    value="5"
+                    unit={isZh ? "合同" : "Contracts"}
+                    colorClass="text-purple-600"
+                    bgClass="bg-purple-100"
+                    borderClass="border-purple-400"
+                    iconClass="fa-solid fa-industry"
+                    trend={isZh ? "影响产出" : "Impacts Output"}
+                    subtext={isZh ? "产出与进度受影响" : "Output & Schedule Impacted"}
+                    isActive={activeFilter === 'production'}
+                    onClick={() => onKpiClick('production')}
                 />
                 <KPICard
                     id="card-data"
