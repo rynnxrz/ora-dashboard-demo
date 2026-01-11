@@ -451,9 +451,9 @@ const ProcessLeadTimeWidget = () => {
                             </div>
                         </div>
                         <div className="flex gap-3 text-[10px] font-medium text-slate-500">
-                            <div className="flex items-center gap-1"><div className="w-3 h-1 bg-slate-900"></div>目标线</div>
-                            <div className="flex items-center gap-1"><div className="w-2 h-2 bg-red-500 rounded-full"></div>极不稳定</div>
-                            <div className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500 rounded-full"></div>健康稳定</div>
+                            <div className="flex items-center gap-1"><div className="w-3 h-1 bg-slate-900"></div>{isZh ? '目标线' : 'Target Line'}</div>
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 bg-red-500 rounded-full"></div>{isZh ? '极不稳定' : 'Unstable'}</div>
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500 rounded-full"></div>{isZh ? '健康稳定' : 'Healthy'}</div>
                         </div>
                     </div>
 
