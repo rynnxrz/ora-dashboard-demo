@@ -52,3 +52,13 @@
     @apply p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600;
   }
 }
+
+@layer utilities {
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+}
