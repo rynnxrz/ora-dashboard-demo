@@ -331,7 +331,7 @@ const ClientRadarWidget = () => {
     };
 
     return (
-        <section className="pb-10 mt-8">
+        <section className="pb-10">
             <div className="flex items-center gap-2 mb-4">
                 <TitleWithIcon as="h2" size="lg" className="text-2xl font-extrabold text-slate-800 tracking-tight">
                     {t('p3_title')}

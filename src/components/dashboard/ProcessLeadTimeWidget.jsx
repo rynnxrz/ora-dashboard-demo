@@ -422,7 +422,7 @@ const ProcessLeadTimeWidget = () => {
 
 
     return (
-        <div className="p-6 bg-slate-50 font-sans">
+        <section className="font-sans">
             {/* Header */}
             <div className="mb-6">
                 <div className="flex items-baseline gap-2">
@@ -639,7 +639,7 @@ const ProcessLeadTimeWidget = () => {
             <div className="mt-6">
                 <FactoryOutputWidget />
             </div>
-        </div>
+        </section>
     );
 };
 
