@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { CONTRACT_DATA } from '../../data/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
 import TitleWithIcon from '../common/TitleWithIcon';
+import EditContractModal from './EditContractModal';
 
 const BRAND_MAP = {
     Little: '小雨伞',
@@ -84,6 +85,17 @@ const Contracts = () => {
     const [activeFilter, setActiveFilter] = useState('all'); // all, pending, ongoing, done
     const [activeTab, setActiveTab] = useState('reqs'); // reqs, fin, pkg, plan
     const [isMoreOpen, setIsMoreOpen] = useState(false);
+    const [activeMenuRow, setActiveMenuRow] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedContract, setSelectedContract] = useState(null);
+
+    useEffect(() => {
+        const handleClickOutside = () => setActiveMenuRow(null);
+        if (activeMenuRow !== null) {
+            document.addEventListener('click', handleClickOutside);
+        }
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [activeMenuRow]);
 
     // --- Localization ---
     const { language, t } = useLanguage();
@@ -266,10 +278,10 @@ const Contracts = () => {
 
                         <div className="flex items-center p-1 bg-gray-100 rounded-lg">
                             {[
-                                { id: 'reqs', label: t('ct_role_reqs') },
+                                { id: 'reqs', label: 'Reqs' },
                                 { id: 'fin', label: t('ct_role_fin') },
-                                { id: 'pkg', label: t('ct_role_pkg') },
-                                { id: 'plan', label: t('ct_role_plan') },
+                                { id: 'pkg', label: 'Pkg' },
+                                { id: 'plan', label: 'Plan & Report' },
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -293,19 +305,19 @@ const Contracts = () => {
                             <col style={{ width: '8%' }} />  {/* Contract No */}
                             <col style={{ width: '6%' }} />  {/* Brand */}
                             <col style={{ width: '14%' }} /> {/* Product - Significantly increased */}
-                            <col style={{ width: '6%' }} />  {/* Spec */}
-                            <col style={{ width: '4%' }} />  {/* Qty */}
+                            <col style={{ width: '8%' }} />  {/* Spec - Increased */}
+                            <col style={{ width: '6%' }} />  {/* Qty - Increased from 4% */}
                             <col style={{ width: '8%' }} />  {/* Status - Increased to prevent overlap */}
                             <col style={{ width: '3%' }} />  {/* Action */}
 
                             {/* Right Dynamic Group: Fixed widths + Spacer */}
                             {activeTab === 'reqs' && (
                                 <>
+                                    <col style={{ width: '4%' }} />
                                     <col style={{ width: '8%' }} />
-                                    <col style={{ width: '9%' }} />
-                                    <col style={{ width: '9%' }} />
+                                    <col style={{ width: '12%' }} />
                                     <col style={{ width: '7%' }} />
-                                    <col style={{ width: '9%' }} />
+                                    <col style={{ width: '5%' }} />
                                     <col style={{ width: 'auto' }} /> {/* Spacer */}
                                 </>
                             )}
@@ -320,18 +332,20 @@ const Contracts = () => {
                             )}
                             {activeTab === 'pkg' && (
                                 <>
-                                    <col style={{ width: '10%' }} />
-                                    <col style={{ width: '8%' }} />
-                                    <col style={{ width: '8%' }} />
-                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: '8%' }} /> {/* Materials */}
+                                    <col style={{ width: '8%' }} />  {/* Packaging */}
+                                    <col style={{ width: '10%' }} />  {/* Arrive */}
+                                    <col style={{ width: '6%' }} /> {/* Check */}
                                     <col style={{ width: 'auto' }} /> {/* Spacer */}
                                 </>
                             )}
                             {activeTab === 'plan' && (
                                 <>
-                                    <col style={{ width: '12%' }} />
-                                    <col style={{ width: '25%' }} />
-                                    <col style={{ width: 'auto' }} /> {/* Spacer to take up remaining width */}
+                                    <col style={{ width: '8%' }} /> {/* Line */}
+                                    <col style={{ width: '10%' }} /> {/* Schedule */}
+                                    <col style={{ width: '6%' }} />  {/* Actual Qty */}
+                                    <col style={{ width: '10%' }} /> {/* Log */}
+                                    <col style={{ width: 'auto' }} /> {/* Spacer */}
                                 </>
                             )}
                         </colgroup>
@@ -348,11 +362,11 @@ const Contracts = () => {
 
                                 {activeTab === 'reqs' && (
                                     <>
-                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t('ct_th_reqs_gacc')}</th>
-                                        <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_code')}</th>
-                                        <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_ship')}</th>
-                                        <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_label')}</th>
-                                        <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_other')}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">GACC</th>
+                                        <th className="px-3 py-3 font-semibold">Coding Format</th>
+                                        <th className="px-3 py-3 font-semibold">Shipping Method</th>
+                                        <th className="px-3 py-3 font-semibold">Labeling</th>
+                                        <th className="px-3 py-3 font-semibold">Notes</th>
                                         <th className="px-3 py-3 font-semibold"></th> {/* Spacer */}
                                     </>
                                 )}
@@ -367,17 +381,19 @@ const Contracts = () => {
                                 )}
                                 {activeTab === 'pkg' && (
                                     <>
-                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t('ct_th_pkg_inv')}</th>
-                                        <th className="px-3 py-3 font-semibold">{t('ct_th_pkg_dep')}</th>
-                                        <th className="px-3 py-3 font-semibold">{t('ct_th_pkg_pre')}</th>
-                                        <th className="px-3 py-3 font-semibold">{t('ct_th_pkg_bal')}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">Materials</th>
+                                        <th className="px-3 py-3 font-semibold">Packaging</th>
+                                        <th className="px-3 py-3 font-semibold">Arrive Date</th>
+                                        <th className="px-3 py-3 font-semibold">Check</th>
                                         <th className="px-3 py-3 font-semibold"></th> {/* Spacer */}
                                     </>
                                 )}
                                 {activeTab === 'plan' && (
                                     <>
-                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">{t('ct_th_plan_mat')}</th>
-                                        <th className="px-3 py-3 font-semibold">{t('ct_th_plan_sch')}</th>
+                                        <th className="px-3 py-3 font-semibold border-l border-gray-200">Prod Line</th>
+                                        <th className="px-3 py-3 font-semibold">Schedule</th>
+                                        <th className="px-3 py-3 font-semibold">Actual Qty</th>
+                                        <th className="px-3 py-3 font-semibold">Notes</th>
                                         <th className="px-3 py-3 font-semibold"></th> {/* Spacer Header */}
                                     </>
                                 )}
@@ -408,7 +424,7 @@ const Contracts = () => {
                                 }
 
                                 return (
-                                    <tr key={index} className="hover:bg-gray-50 transition-colors border-b border-gray-100 group">
+                                    <tr key={index} className="hover:bg-gray-50 transition-colors border-b border-gray-100 group h-16">
                                         <td className="px-3 py-2 text-gray-500 truncate" title={row.date}>{row.date}</td>
                                         <td className="px-3 py-2 font-medium truncate" title={row.no}>{row.no}</td>
                                         <td className="px-3 py-2 truncate" title={row.brand}>{row.brand}</td>
@@ -425,10 +441,37 @@ const Contracts = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-3 py-2 text-center text-gray-500">
-                                            <button className="hover:text-[#297A88] transition-colors p-1">
+                                        <td className="px-3 py-2 text-center text-gray-500 relative">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveMenuRow(activeMenuRow === index ? null : index);
+                                                }}
+                                                className={`hover:text-[#297A88] transition-colors p-1 ${activeMenuRow === index ? 'text-[#297A88]' : ''}`}
+                                            >
                                                 <i className="fa-solid fa-ellipsis"></i>
                                             </button>
+                                            {activeMenuRow === index && (
+                                                <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 flex flex-col py-1 text-left">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedContract(row);
+                                                            setIsEditModalOpen(true);
+                                                            setActiveMenuRow(null);
+                                                        }}
+                                                        className="px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left font-medium"
+                                                    >
+                                                        Edit Product
+                                                    </button>
+                                                    <button className="px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left font-medium">
+                                                        Start Scheduling
+                                                    </button>
+                                                    <button className="px-4 py-2 text-xs text-red-600 hover:bg-gray-50 w-full text-left font-medium">
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            )}
                                         </td>
 
                                         {activeTab === 'reqs' && (
@@ -444,39 +487,43 @@ const Contracts = () => {
                                         {activeTab === 'fin' && (
                                             <>
                                                 <td className="px-3 py-2 truncate border-l border-gray-100 font-mono" title={row.fin.inv}>{row.fin.inv}</td>
-                                                <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.fin.dep, "text-gray-600")}</td>
-                                                <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.fin.pre, "text-gray-600")}</td>
-                                                <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.fin.bal, "text-gray-600")}</td>
+                                                <td className="px-3 py-2 whitespace-nowrap">
+                                                    {renderCellWithCheck(row.fin.dep, "text-gray-600")}
+                                                    {row.fin.date_dep && row.fin.date_dep !== '—' && <div className="text-[10px] text-gray-400">{row.fin.date_dep}</div>}
+                                                </td>
+                                                <td className="px-3 py-2 whitespace-nowrap">
+                                                    {renderCellWithCheck(row.fin.pre, "text-gray-600")}
+                                                    {row.fin.date_pre && row.fin.date_pre !== '—' && <div className="text-[10px] text-gray-400">{row.fin.date_pre}</div>}
+                                                </td>
+                                                <td className="px-3 py-2 whitespace-nowrap">
+                                                    {renderCellWithCheck(row.fin.bal, "text-gray-600")}
+                                                    {row.fin.date_bal && row.fin.date_bal !== '—' && <div className="text-[10px] text-gray-400">{row.fin.date_bal}</div>}
+                                                </td>
                                                 <td className="px-3 py-2"></td> {/* Spacer */}
                                             </>
                                         )}
                                         {activeTab === 'pkg' && (
                                             <>
-                                                <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100 text-gray-400">—</td>
-                                                <td className="px-3 py-2 whitespace-nowrap text-gray-400">—</td>
-                                                <td className="px-3 py-2 whitespace-nowrap text-gray-400">—</td>
-                                                <td className="px-3 py-2 whitespace-nowrap text-gray-400">—</td>
+                                                <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100">{renderCellWithCheck(row.pkg.mat_status, "text-gray-500")}</td>
+                                                <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.pkg.pkg_status, "text-gray-500")}</td>
+                                                <td className="px-3 py-2 whitespace-nowrap text-gray-500">{row.pkg.arrive_date}</td>
+                                                <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.pkg.check_status, "text-gray-500")}</td>
                                                 <td className="px-3 py-2"></td> {/* Spacer */}
                                             </>
                                         )}
                                         {activeTab === 'plan' && (
                                             <>
-                                                <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100">
-                                                    {['Ready', '已就绪'].includes(row.plan.mat) && (
-                                                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-bold">
-                                                            {isZh ? '已就绪' : 'Ready'}
-                                                        </span>
-                                                    )}
-                                                    {['Partial', '部分到位'].includes(row.plan.mat) && (
-                                                        <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-bold">
-                                                            {isZh ? '部分到位' : 'Partial'}
-                                                        </span>
-                                                    )}
-                                                    {['Missing', '缺失'].includes(row.plan.mat) && (
-                                                        <span className="px-2 py-0.5 bg-red-50 text-red-600 rounded-full text-[10px] font-bold">
-                                                            {isZh ? '缺失' : 'Missing'}
-                                                        </span>
-                                                    )}
+                                                <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100 text-gray-600 font-medium">{row.plan.line}</td>
+                                                <td className="px-3 py-2 whitespace-nowrap text-gray-500">
+                                                    {row.plan.start_date !== '—' ? (
+                                                        <div className="flex flex-col">
+                                                            <span>{row.plan.start_date}</span>
+                                                            <span className="text-[10px] text-gray-400">to {row.plan.end_date}</span>
+                                                        </div>
+                                                    ) : '—'}
+                                                </td>
+                                                <td className="px-3 py-2 whitespace-nowrap text-gray-600 font-mono">
+                                                    {row.plan.qty_actual > 0 ? row.plan.qty_actual.toLocaleString() : '—'}
                                                 </td>
                                                 <td className="px-3 py-2 truncate text-gray-500" title={row.plan.log}>{row.plan.log}</td>
                                                 <td className="px-3 py-2"></td> {/* Spacer Cell */}
@@ -495,6 +542,12 @@ const Contracts = () => {
                     </div>
                 )}
             </div>
+
+            <EditContractModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                contract={selectedContract}
+            />
         </div>
     );
 };

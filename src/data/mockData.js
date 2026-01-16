@@ -1,93 +1,200 @@
 export const CONTRACT_DATA = [
-    // 1. New / Contract (Red)
+    // 1. New Contract / Data Entry (Flowchart Step 1)
     {
-        date: "07/01/2025",
-        no: "LTUM-202502001",
+        date: "07/10/2025",
+        no: "LTUM-202502010",
         brand: "Little",
         product: "Liquid Calcium (Xylitol verison 2)",
         spec: "10ml/sachet",
         qty: "900,000",
-        status: "New", // mapped to new_1/new_2
-        reqs: { gacc: "—", coding: "—", ship: "FOB Shanghai", label: "—", other: "—" },
-        fin: { inv: "INV-2024001", dep: "Paid", pre: "Pending", bal: "Pending" },
-        plan: { mat: "Partial", log: "Scheduled: 2025-02-10" }
+        status: "New",
+        reqs: {
+            gacc: "Check",
+            coding: "—",
+            ship: "FOB Shanghai",
+            label: "Draft",
+            other: "—"
+        },
+        fin: {
+            inv: "INV-2025NEW",
+            dep: "Pending", date_dep: "—",
+            pre: "Pending", date_pre: "—",
+            bal: "Pending", date_bal: "—",
+            final_payment_status: "Pending", final_payment_date: "—"
+        },
+        pkg: {
+            mat_status: "Pending",
+            pkg_status: "Pending",
+            arrive_date: "—",
+            check_status: "—"
+        },
+        plan: {
+            line: "—",
+            start_date: "—",
+            end_date: "—",
+            qty_actual: 0,
+            mat: "Missing",
+            log: "TBD"
+        }
     },
+
+    // 2. Pending Preparation / Deposit Paid (Flowchart Step 2)
     {
-        date: "07/05/2025",
-        no: "LTUM-202502005",
+        date: "07/08/2025",
+        no: "PG-202502011",
         brand: "PowerGums",
         product: "Energy Gels (Caffeine Boost)",
         spec: "30g/pack",
         qty: "50,000",
-        status: "New",
-        reqs: { gacc: "Check", coding: "—", ship: "FOB Shenzhen", label: "Draft", other: "—" },
-        fin: { inv: "INV-2024012", dep: "Pending", pre: "Pending", bal: "Pending" },
-        plan: { mat: "Missing", log: "TBD" }
+        status: "Pending",
+        reqs: {
+            gacc: "Done",
+            coding: "Inkjet",
+            ship: "FOB Shenzhen",
+            label: "Reviewing",
+            other: "—"
+        },
+        fin: {
+            inv: "INV-2025008",
+            dep: "Paid", date_dep: "2025-07-09",
+            pre: "Pending", date_pre: "—",
+            bal: "Pending", date_bal: "—",
+            final_payment_status: "Pending", final_payment_date: "—"
+        },
+        pkg: {
+            mat_status: "Arrived",
+            pkg_status: "Pending",
+            arrive_date: "2025-07-15 (Est)",
+            check_status: "Pending"
+        },
+        plan: {
+            line: "—",
+            start_date: "—",
+            end_date: "—",
+            qty_actual: 0,
+            mat: "Partial",
+            log: "Awaiting Materials"
+        }
     },
 
-    // 2. Pending / Preparation (Red/Pending)
+    // 3. Pending Scheduling / Material & Pkg Prep (Flowchart Step 3)
     {
         date: "07/01/2025",
-        no: "LTUM-202502002",
-        brand: "Little",
-        product: "Liquid Calcium (Xylitol verison 2)",
-        spec: "10ml/sachet",
-        qty: "900,000",
-        status: "Pending",
-        reqs: { gacc: "Done", coding: "Inkjet", ship: "CIF Melbourne", label: "Confirmed", other: "—" },
-        fin: { inv: "INV-2024002", dep: "Paid", pre: "Paid", bal: "Pending" },
-        plan: { mat: "Ready", log: "Batch-A start 2025/02/15" }
-    },
-    {
-        date: "06/28/2025",
-        no: "PG-2025-003",
-        brand: "PowerGums",
-        product: "Vitamin C Gummies (Lemon)",
-        spec: "60ct/bottle",
-        qty: "20,000",
-        status: "Pending",
-        reqs: { gacc: "Done", coding: "Laser", ship: "CIF LA", label: "Reviewing", other: "—" },
-        fin: { inv: "INV-2024009", dep: "Paid", pre: "Pending", bal: "Pending" },
-        plan: { mat: "Partial", log: "Awaiting Artwork" }
-    },
-    {
-        date: "06/30/2025",
-        no: "VT-2025-010",
+        no: "VT-202502012",
         brand: "Vitality",
         product: "Protein Powder (Vanilla)",
         spec: "1kg/tub",
         qty: "5,000",
         status: "Pending",
-        reqs: { gacc: "Start", coding: "Inkjet", ship: "EXW", label: "Confirmed", other: "Cert needed" },
-        fin: { inv: "INV-2024015", dep: "Pending", pre: "Pending", bal: "Pending" },
-        plan: { mat: "Ready", log: "Slot: Wk 35" }
+        reqs: {
+            gacc: "Done",
+            coding: "Inkjet",
+            ship: "EXW",
+            label: "Confirmed",
+            other: "Cert needed"
+        },
+        fin: {
+            inv: "INV-2025005",
+            dep: "Paid", date_dep: "2025-07-02",
+            pre: "Paid", date_pre: "2025-07-10",
+            bal: "Pending", date_bal: "—",
+            final_payment_status: "Pending", final_payment_date: "—"
+        },
+        pkg: {
+            mat_status: "Pending",
+            pkg_status: "Pending",
+            arrive_date: "—",
+            check_status: "Pending"
+        },
+        plan: {
+            line: "—",
+            start_date: "—",
+            end_date: "—",
+            qty_actual: 0,
+            mat: "Ready",
+            log: "Ready for Schedule"
+        }
     },
 
-    // 3. Production / Ongoing (Amber)
+    // 4. Production Schedule / Pending Production (Flowchart Step 4)
     {
-        date: "07/01/2025",
-        no: "LTUM-202502003",
+        date: "06/28/2025",
+        no: "LTUM-202502015",
         brand: "Little",
         product: "Liquid Calcium (Xylitol verison 2)",
         spec: "10ml/sachet",
         qty: "900,000",
         status: "Production",
-        reqs: { gacc: "Done", coding: "Inkjet", ship: "CIF Melbourne", label: "Confirmed", other: "Palletized" },
-        fin: { inv: "INV-2024003", dep: "Paid", pre: "Paid", bal: "Pending" },
-        plan: { mat: "Ready", log: "In Production (Stage 3)" }
+        reqs: {
+            gacc: "Done",
+            coding: "Inkjet",
+            ship: "CIF Melbourne",
+            label: "Confirmed",
+            other: "Palletized"
+        },
+        fin: {
+            inv: "INV-2025015",
+            dep: "Paid", date_dep: "2025-06-29",
+            pre: "Paid", date_pre: "2025-07-01",
+            bal: "Pending", date_bal: "—",
+            final_payment_status: "Pending", final_payment_date: "—"
+        },
+        pkg: {
+            mat_status: "Arrived",
+            pkg_status: "Arrived",
+            arrive_date: "2025-06-30",
+            check_status: "Checked"
+        },
+        plan: {
+            line: "Liquid Sachet",
+            start_date: "2025-07-12",
+            end_date: "2025-07-20",
+            qty_actual: 0,
+            mat: "Ready",
+            log: "Scheduled: 2025-07-12"
+        }
     },
+
+    // 5. Planned Production Schedule / Moving to Production (Flowchart Step 5)
     {
-        date: "06/15/2025",
-        no: "OR-2025-088",
+        date: "06/25/2025",
+        no: "OR-2025-090",
         brand: "OraNutrition",
         product: "Collagen Peptides",
         spec: "300g/tub",
         qty: "15,000",
         status: "Production",
-        reqs: { gacc: "Done", coding: "Inkjet", ship: "CIF NY", label: "Confirmed", other: "—" },
-        fin: { inv: "INV-2024005", dep: "Paid", pre: "Paid", bal: "Pending" },
-        plan: { mat: "Ready", log: "Packing Stage" }
+        reqs: {
+            gacc: "Done",
+            coding: "Laser",
+            ship: "CIF NY",
+            label: "Confirmed",
+            other: "—"
+        },
+        fin: {
+            inv: "INV-2025020",
+            dep: "Paid", date_dep: "2025-06-26",
+            pre: "Paid", date_pre: "2025-06-28",
+            bal: "Pending", date_bal: "—",
+            final_payment_status: "Pending", final_payment_date: "—"
+        },
+        pkg: {
+            mat_status: "Arrived",
+            pkg_status: "Arrived",
+            arrive_date: "2025-06-20",
+            check_status: "Checked"
+        },
+        plan: {
+            line: "Packing",
+            start_date: "2025-07-05",
+            end_date: "2025-07-10",
+            qty_actual: 5000,
+            mat: "Ready",
+            log: "In Production"
+        }
     },
+
+    // 6. Pending Production Complete / Finished (Flowchart Step 6)
     {
         date: "06/20/2025",
         no: "LTUM-202502006",
@@ -96,47 +203,73 @@ export const CONTRACT_DATA = [
         spec: "30ml/bottle",
         qty: "100,000",
         status: "Production",
-        reqs: { gacc: "Done", coding: "Laser", ship: "CIF Melbourne", label: "Confirmed", other: "—" },
-        fin: { inv: "INV-2024006", dep: "Paid", pre: "Paid", bal: "Pending" },
-        plan: { mat: "Ready", log: "Filling Stage" }
+        reqs: {
+            gacc: "Done",
+            coding: "Laser",
+            ship: "CIF Melbourne",
+            label: "Confirmed",
+            other: "—"
+        },
+        fin: {
+            inv: "INV-2025006",
+            dep: "Paid", date_dep: "2025-06-21",
+            pre: "Paid", date_pre: "2025-06-25",
+            bal: "Pending", date_bal: "—",
+            final_payment_status: "Pending", final_payment_date: "—"
+        },
+        pkg: {
+            mat_status: "Arrived",
+            pkg_status: "Arrived",
+            arrive_date: "2025-06-15",
+            check_status: "Checked"
+        },
+        plan: {
+            line: "Filling Stage",
+            start_date: "2025-06-28",
+            end_date: "2025-07-05",
+            qty_actual: 100000,
+            mat: "Ready",
+            log: "Production Complete"
+        }
     },
 
-    // 4. Done (Green)
+    // 7. Pending Shipping / Done (Flowchart Step 6->End)
     {
-        date: "07/01/2025",
-        no: "LTUM-202502004",
-        brand: "Little",
-        product: "Liquid Calcium (Xylitol verison 3)",
-        spec: "10ml/sachet",
-        qty: "900,000",
-        status: "Done",
-        reqs: { gacc: "Done", coding: "Inkjet", ship: "CIF Melbourne", label: "Confirmed", other: "—" },
-        fin: { inv: "INV-2024004", dep: "Paid", pre: "Paid", bal: "Paid" },
-        plan: { mat: "Ready", log: "Shipped 2025-01-20" }
-    },
-    {
-        date: "05/10/2025",
+        date: "06/10/2025",
         no: "PG-2025-001",
         brand: "PowerGums",
         product: "Caffeine Mints",
         spec: "50ct/tin",
         qty: "100,000",
         status: "Done",
-        reqs: { gacc: "Done", coding: "—", ship: "FOB Shenzhen", label: "Confirmed", other: "—" },
-        fin: { inv: "INV-2024001", dep: "Paid", pre: "Paid", bal: "Paid" },
-        plan: { mat: "Ready", log: "Delivered" }
-    },
-    {
-        date: "05/20/2025",
-        no: "VT-2025-005",
-        brand: "Vitality",
-        product: "Magnesium Tablets",
-        spec: "120ct/bottle",
-        qty: "10,000",
-        status: "Done",
-        reqs: { gacc: "Done", coding: "Inkjet", ship: "CIF LA", label: "Confirmed", other: "—" },
-        fin: { inv: "INV-2024000", dep: "Paid", pre: "Paid", bal: "Paid" },
-        plan: { mat: "Ready", log: "Delivered" }
+        reqs: {
+            gacc: "Done",
+            coding: "—",
+            ship: "FOB Shenzhen",
+            label: "Confirmed",
+            other: "—"
+        },
+        fin: {
+            inv: "INV-2025001",
+            dep: "Paid", date_dep: "2025-06-11",
+            pre: "Paid", date_pre: "2025-06-15",
+            bal: "Paid", date_bal: "2025-07-15",
+            final_payment_status: "Paid", final_payment_date: "2025-07-15"
+        },
+        pkg: {
+            mat_status: "Arrived",
+            pkg_status: "Arrived",
+            arrive_date: "2025-06-05",
+            check_status: "Checked"
+        },
+        plan: {
+            line: "Tablets",
+            start_date: "2025-06-20",
+            end_date: "2025-06-25",
+            qty_actual: 100000,
+            mat: "Ready",
+            log: "Shipped 2025-07-16"
+        }
     }
 ];
 
@@ -154,9 +287,9 @@ export const MACHINE_DATA = [
 
 export const REPORT_DATA = [
     {
-        contractNo: "LTUM-202502001", // Links to CONTRACT_DATA[0]
+        contractNo: "LTUM-202502010", // Links to CONTRACT_DATA[0]
         taskNo: "T-2025-001",
-        status: "Temporary", // Specific report status
+        status: "Temporary",
         color: "#297A88",
         bgColor: "bg-[#297A88]",
         badgeBg: "bg-[#E0F7FA]",
@@ -167,7 +300,7 @@ export const REPORT_DATA = [
         alert: "Remaining 200 units carried over to Jan 2"
     },
     {
-        contractNo: "LTUM-202502002", // Links to CONTRACT_DATA[2]
+        contractNo: "PG-202502011", // Links to CONTRACT_DATA[1]
         taskNo: "T-2025-002",
         status: "Pending",
         color: "#EF4444",
@@ -179,7 +312,7 @@ export const REPORT_DATA = [
         isSaved: false
     },
     {
-        contractNo: "LTUM-202502003", // Links to CONTRACT_DATA[5]
+        contractNo: "LTUM-202502015", // Links to CONTRACT_DATA[3]
         taskNo: "T-2025-003",
         status: "Production",
         color: "#F59E0B",
@@ -191,7 +324,7 @@ export const REPORT_DATA = [
         isSaved: false
     },
     {
-        contractNo: "OR-2025-088", // Links to CONTRACT_DATA[6]
+        contractNo: "PG-2025-001", // Links to CONTRACT_DATA[6]
         taskNo: "T-2025-004",
         status: "Done",
         color: "#10B981",
@@ -238,4 +371,3 @@ const generateLeadTimeContracts = () => {
 };
 
 export const LEAD_TIME_CONTRACTS = generateLeadTimeContracts();
-

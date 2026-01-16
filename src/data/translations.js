@@ -169,7 +169,7 @@ export const TRANSLATIONS = {
         "ct_th_fin_inv": "Invoice #",
         "ct_th_fin_dep": "Deposit",
         "ct_th_fin_pre": "Pre-Prod",
-        "ct_th_fin_bal": "Balance",
+        "ct_th_fin_bal": "Final",
 
         "ct_th_pkg_inv": "Invoice #",
         "ct_th_pkg_dep": "Deposit",
