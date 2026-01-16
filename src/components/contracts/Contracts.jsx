@@ -3,6 +3,81 @@ import { CONTRACT_DATA } from '../../data/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
 import TitleWithIcon from '../common/TitleWithIcon';
 
+const BRAND_MAP = {
+    Little: '小雨伞',
+    PowerGums: '能量软糖',
+    Vitality: '活力',
+    OraNutrition: '欧拉营养'
+};
+const PRODUCT_MAP = {
+    'Liquid Calcium (Xylitol verison 2)': '液体钙（木糖醇版2）',
+    'Energy Gels (Caffeine Boost)': '能量胶（咖啡因加强）',
+    'Vitamin C Gummies (Lemon)': '维C软糖（柠檬）',
+    'Protein Powder (Vanilla)': '蛋白粉（香草）',
+    'Collagen Peptides': '胶原蛋白肽',
+    'Zinc Drops': '锌滴剂',
+    'Liquid Calcium (Xylitol verison 3)': '液体钙（木糖醇版3）',
+    'Caffeine Mints': '咖啡因薄荷糖',
+    'Magnesium Tablets': '镁片'
+};
+const SPEC_MAP = {
+    '10ml/sachet': '10ml/条包',
+    '30g/pack': '30g/袋',
+    '60ct/bottle': '60粒/瓶',
+    '1kg/tub': '1kg/罐',
+    '300g/tub': '300g/罐',
+    '30ml/bottle': '30ml/瓶',
+    '50ct/tin': '50粒/罐',
+    '120ct/bottle': '120粒/瓶'
+};
+const GACC_MAP = {
+    Done: '完成',
+    Start: '开始',
+    Check: '待确认'
+};
+const CODING_MAP = {
+    Inkjet: '喷码',
+    Laser: '激光'
+};
+const SHIP_MAP = {
+    'FOB Shanghai': '离岸价 上海',
+    'FOB Shenzhen': '离岸价 深圳',
+    'CIF Melbourne': '到岸价 墨尔本',
+    'CIF LA': '到岸价 洛杉矶',
+    'EXW': '工厂交货',
+    'CIF NY': '到岸价 纽约'
+};
+const LABEL_MAP = {
+    Draft: '草稿',
+    Reviewing: '审核中',
+    Confirmed: '已确认'
+};
+const OTHER_MAP = {
+    'Cert needed': '需证书',
+    Palletized: '托盘化'
+};
+const FIN_MAP = {
+    Paid: '已付',
+    Pending: '待付'
+};
+const PLAN_MAT_MAP = {
+    Ready: '已就绪',
+    Partial: '部分到位',
+    Missing: '缺失'
+};
+const PLAN_LOG_MAP = {
+    'Scheduled: 2025-02-10': '已排期：2025-02-10',
+    'TBD': '待定',
+    'Batch-A start 2025/02/15': '批次A 开始 2025/02/15',
+    'Awaiting Artwork': '等待包装稿',
+    'Slot: Wk 35': '排期：第35周',
+    'In Production (Stage 3)': '生产中（阶段3）',
+    'Packing Stage': '包装阶段',
+    'Filling Stage': '灌装阶段',
+    'Shipped 2025-01-20': '已发货 2025-01-20',
+    'Delivered': '已交付'
+};
+
 const Contracts = () => {
     // --- State ---
     const [searchTerm, setSearchTerm] = useState('');
@@ -15,106 +90,32 @@ const Contracts = () => {
     const isZh = language === 'zh';
 
     const mapValue = (value, map) => (isZh ? (map[value] || value) : value);
-    const brandMap = {
-        Little: '小雨伞',
-        PowerGums: '能量软糖',
-        Vitality: '活力',
-        OraNutrition: '欧拉营养'
-    };
-    const productMap = {
-        'Liquid Calcium (Xylitol verison 2)': '液体钙（木糖醇版2）',
-        'Energy Gels (Caffeine Boost)': '能量胶（咖啡因加强）',
-        'Vitamin C Gummies (Lemon)': '维C软糖（柠檬）',
-        'Protein Powder (Vanilla)': '蛋白粉（香草）',
-        'Collagen Peptides': '胶原蛋白肽',
-        'Zinc Drops': '锌滴剂',
-        'Liquid Calcium (Xylitol verison 3)': '液体钙（木糖醇版3）',
-        'Caffeine Mints': '咖啡因薄荷糖',
-        'Magnesium Tablets': '镁片'
-    };
-    const specMap = {
-        '10ml/sachet': '10ml/条包',
-        '30g/pack': '30g/袋',
-        '60ct/bottle': '60粒/瓶',
-        '1kg/tub': '1kg/罐',
-        '300g/tub': '300g/罐',
-        '30ml/bottle': '30ml/瓶',
-        '50ct/tin': '50粒/罐',
-        '120ct/bottle': '120粒/瓶'
-    };
-    const gaccMap = {
-        Done: '完成',
-        Start: '开始',
-        Check: '待确认'
-    };
-    const codingMap = {
-        Inkjet: '喷码',
-        Laser: '激光'
-    };
-    const shipMap = {
-        'FOB Shanghai': '离岸价 上海',
-        'FOB Shenzhen': '离岸价 深圳',
-        'CIF Melbourne': '到岸价 墨尔本',
-        'CIF LA': '到岸价 洛杉矶',
-        'EXW': '工厂交货',
-        'CIF NY': '到岸价 纽约'
-    };
-    const labelMap = {
-        Draft: '草稿',
-        Reviewing: '审核中',
-        Confirmed: '已确认'
-    };
-    const otherMap = {
-        'Cert needed': '需证书',
-        Palletized: '托盘化'
-    };
-    const finMap = {
-        Paid: '已付',
-        Pending: '待付'
-    };
-    const planMatMap = {
-        Ready: '已就绪',
-        Partial: '部分到位',
-        Missing: '缺失'
-    };
-    const planLogMap = {
-        'Scheduled: 2025-02-10': '已排期：2025-02-10',
-        'TBD': '待定',
-        'Batch-A start 2025/02/15': '批次A 开始 2025/02/15',
-        'Awaiting Artwork': '等待包装稿',
-        'Slot: Wk 35': '排期：第35周',
-        'In Production (Stage 3)': '生产中（阶段3）',
-        'Packing Stage': '包装阶段',
-        'Filling Stage': '灌装阶段',
-        'Shipped 2025-01-20': '已发货 2025-01-20',
-        'Delivered': '已交付'
-    };
 
     const displayContracts = useMemo(() => {
         if (!isZh) return CONTRACT_DATA;
         return CONTRACT_DATA.map(c => ({
             ...c,
-            brand: mapValue(c.brand, brandMap),
-            product: mapValue(c.product, productMap),
-            spec: mapValue(c.spec, specMap),
+            brand: mapValue(c.brand, BRAND_MAP),
+            product: mapValue(c.product, PRODUCT_MAP),
+            spec: mapValue(c.spec, SPEC_MAP),
             reqs: {
                 ...c.reqs,
-                gacc: mapValue(c.reqs.gacc, gaccMap),
-                coding: mapValue(c.reqs.coding, codingMap),
-                ship: mapValue(c.reqs.ship, shipMap),
-                label: mapValue(c.reqs.label, labelMap),
-                other: mapValue(c.reqs.other, otherMap)
+                gacc: mapValue(c.reqs.gacc, GACC_MAP),
+                coding: mapValue(c.reqs.coding, CODING_MAP),
+                ship: mapValue(c.reqs.ship, SHIP_MAP),
+                label: mapValue(c.reqs.label, LABEL_MAP),
+                other: mapValue(c.reqs.other, OTHER_MAP)
             },
             fin: {
                 ...c.fin,
-                dep: mapValue(c.fin.dep, finMap),
-                pre: mapValue(c.fin.pre, finMap),
-                bal: mapValue(c.fin.bal, finMap)
+                dep: mapValue(c.fin.dep, FIN_MAP),
+                pre: mapValue(c.fin.pre, FIN_MAP),
+                bal: mapValue(c.fin.bal, FIN_MAP)
             },
             plan: {
                 ...c.plan,
-                mat: mapValue(c.plan.mat, planMatMap),
-                log: mapValue(c.plan.log, planLogMap)
+                mat: mapValue(c.plan.mat, PLAN_MAT_MAP),
+                log: mapValue(c.plan.log, PLAN_LOG_MAP)
             }
         }));
     }, [isZh]);
@@ -285,9 +286,63 @@ const Contracts = () => {
                 </div>
 
                 <div className="relative overflow-x-auto border rounded-lg border-gray-200">
-                    <table className="w-full text-left border-collapse whitespace-nowrap">
+                    <table className="w-full text-left border-collapse whitespace-nowrap table-fixed">
+                        <colgroup>
+                            {/* Left Fixed Group: Increased to ~55% Total to show more content */}
+                            <col style={{ width: '6%' }} />  {/* Date */}
+                            <col style={{ width: '8%' }} />  {/* Contract No */}
+                            <col style={{ width: '6%' }} />  {/* Brand */}
+                            <col style={{ width: '14%' }} /> {/* Product - Significantly increased */}
+                            <col style={{ width: '6%' }} />  {/* Spec */}
+                            <col style={{ width: '4%' }} />  {/* Qty */}
+                            <col style={{ width: '8%' }} />  {/* Status - Increased to prevent overlap */}
+                            <col style={{ width: '3%' }} />  {/* Action */}
+
+                            {/* Right Dynamic Group: Fixed widths + Spacer */}
+                            {activeTab === 'reqs' && (
+                                <>
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: '9%' }} />
+                                    <col style={{ width: '9%' }} />
+                                    <col style={{ width: '7%' }} />
+                                    <col style={{ width: '9%' }} />
+                                    <col style={{ width: 'auto' }} /> {/* Spacer */}
+                                </>
+                            )}
+                            {activeTab === 'fin' && (
+                                <>
+                                    <col style={{ width: '10%' }} />
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: 'auto' }} /> {/* Spacer */}
+                                </>
+                            )}
+                            {activeTab === 'pkg' && (
+                                <>
+                                    <col style={{ width: '10%' }} />
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: 'auto' }} /> {/* Spacer */}
+                                </>
+                            )}
+                            {activeTab === 'plan' && (
+                                <>
+                                    <col style={{ width: '12%' }} />
+                                    <col style={{ width: '25%' }} />
+                                    <col style={{ width: 'auto' }} /> {/* Spacer to take up remaining width */}
+                                </>
+                            )}
+                        </colgroup>
                         <thead className="bg-gray-50 text-gray-500 text-xs uppercase border-b border-gray-200">
                             <tr>
+                                <th className="px-3 py-3 font-semibold">{t('ct_th_date')}</th>
+                                <th className="px-3 py-3 font-semibold">{t('ct_th_no')}</th>
+                                <th className="px-3 py-3 font-semibold">{t('ct_th_brand')}</th>
+                                <th className="px-3 py-3 font-semibold">{t('ct_th_prod')}</th>
+                                <th className="px-3 py-3 font-semibold">{t('ct_th_spec')}</th>
+                                <th className="px-3 py-3 font-semibold">{t('ct_th_qty')}</th>
                                 <th className="px-3 py-3 font-semibold w-32">{t('ct_th_status')}</th>
                                 <th className="px-3 py-3 font-semibold text-center w-10"></th>
 
@@ -298,6 +353,7 @@ const Contracts = () => {
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_ship')}</th>
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_label')}</th>
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_reqs_other')}</th>
+                                        <th className="px-3 py-3 font-semibold"></th> {/* Spacer */}
                                     </>
                                 )}
                                 {activeTab === 'fin' && (
@@ -306,6 +362,7 @@ const Contracts = () => {
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_fin_dep')}</th>
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_fin_pre')}</th>
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_fin_bal')}</th>
+                                        <th className="px-3 py-3 font-semibold"></th> {/* Spacer */}
                                     </>
                                 )}
                                 {activeTab === 'pkg' && (
@@ -314,12 +371,14 @@ const Contracts = () => {
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_pkg_dep')}</th>
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_pkg_pre')}</th>
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_pkg_bal')}</th>
+                                        <th className="px-3 py-3 font-semibold"></th> {/* Spacer */}
                                     </>
                                 )}
                                 {activeTab === 'plan' && (
                                     <>
                                         <th className="px-3 py-3 font-semibold border-l border-gray-200">{t('ct_th_plan_mat')}</th>
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_plan_sch')}</th>
+                                        <th className="px-3 py-3 font-semibold"></th> {/* Spacer Header */}
                                     </>
                                 )}
                             </tr>
@@ -350,12 +409,12 @@ const Contracts = () => {
 
                                 return (
                                     <tr key={index} className="hover:bg-gray-50 transition-colors border-b border-gray-100 group">
-                                        <td className="px-3 py-2 text-gray-500 whitespace-nowrap">{row.date}</td>
-                                        <td className="px-3 py-2 font-medium whitespace-nowrap">{row.no}</td>
-                                        <td className="px-3 py-2 whitespace-nowrap">{row.brand}</td>
-                                        <td className="px-3 py-2 max-w-[160px] truncate" title={row.product}>{row.product}</td>
-                                        <td className="px-3 py-2 text-gray-500">{row.spec}</td>
-                                        <td className="px-3 py-2">{row.qty}</td>
+                                        <td className="px-3 py-2 text-gray-500 truncate" title={row.date}>{row.date}</td>
+                                        <td className="px-3 py-2 font-medium truncate" title={row.no}>{row.no}</td>
+                                        <td className="px-3 py-2 truncate" title={row.brand}>{row.brand}</td>
+                                        <td className="px-3 py-2 truncate" title={row.product}>{row.product}</td>
+                                        <td className="px-3 py-2 text-gray-500 truncate" title={row.spec}>{row.spec}</td>
+                                        <td className="px-3 py-2 truncate" title={row.qty}>{row.qty}</td>
 
                                         <td className="px-3 py-2">
                                             <div className="flex flex-row items-center gap-2">
@@ -375,18 +434,20 @@ const Contracts = () => {
                                         {activeTab === 'reqs' && (
                                             <>
                                                 <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100 text-gray-400">{renderCellWithCheck(row.reqs.gacc, "text-gray-400")}</td>
-                                                <td className="px-3 py-2 whitespace-nowrap text-gray-400">{row.reqs.coding}</td>
-                                                <td className="px-3 py-2 whitespace-nowrap font-medium">{row.reqs.ship}</td>
+                                                <td className="px-3 py-2 truncate text-gray-400" title={row.reqs.coding}>{row.reqs.coding}</td>
+                                                <td className="px-3 py-2 truncate font-medium" title={row.reqs.ship}>{row.reqs.ship}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap text-gray-400">{renderCellWithCheck(row.reqs.label, "text-gray-400")}</td>
-                                                <td className="px-3 py-2 whitespace-nowrap text-gray-400">{row.reqs.other}</td>
+                                                <td className="px-3 py-2 truncate text-gray-400" title={row.reqs.other}>{row.reqs.other}</td>
+                                                <td className="px-3 py-2"></td> {/* Spacer */}
                                             </>
                                         )}
                                         {activeTab === 'fin' && (
                                             <>
-                                                <td className="px-3 py-2 whitespace-nowrap border-l border-gray-100 font-mono">{row.fin.inv}</td>
+                                                <td className="px-3 py-2 truncate border-l border-gray-100 font-mono" title={row.fin.inv}>{row.fin.inv}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.fin.dep, "text-gray-600")}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.fin.pre, "text-gray-600")}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.fin.bal, "text-gray-600")}</td>
+                                                <td className="px-3 py-2"></td> {/* Spacer */}
                                             </>
                                         )}
                                         {activeTab === 'pkg' && (
@@ -395,6 +456,7 @@ const Contracts = () => {
                                                 <td className="px-3 py-2 whitespace-nowrap text-gray-400">—</td>
                                                 <td className="px-3 py-2 whitespace-nowrap text-gray-400">—</td>
                                                 <td className="px-3 py-2 whitespace-nowrap text-gray-400">—</td>
+                                                <td className="px-3 py-2"></td> {/* Spacer */}
                                             </>
                                         )}
                                         {activeTab === 'plan' && (
@@ -416,7 +478,8 @@ const Contracts = () => {
                                                         </span>
                                                     )}
                                                 </td>
-                                                <td className="px-3 py-2 whitespace-nowrap text-gray-500">{row.plan.log}</td>
+                                                <td className="px-3 py-2 truncate text-gray-500" title={row.plan.log}>{row.plan.log}</td>
+                                                <td className="px-3 py-2"></td> {/* Spacer Cell */}
                                             </>
                                         )}
                                     </tr>

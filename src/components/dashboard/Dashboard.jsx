@@ -70,7 +70,7 @@ const Dashboard = () => {
                 <div className="min-h-[500px]"> {/* Min height to reduce layout shift */}
 
                     {/* PART 1: OVERVIEW */}
-                    {activeTab === 'overview' && (
+                    {activeTab === 'overview' ? (
                         <div className="space-y-8 animate-fadeIn">
                             <KPIGrid activeFilter={kpiFilter} onKpiClick={handleKpiClick} />
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -78,21 +78,21 @@ const Dashboard = () => {
                                 <SidebarContainer onRiskClick={(id) => handleKpiClick && handleKpiClick('material')} />
                             </div>
                         </div>
-                    )}
+                    ) : null}
 
                     {/* PART 2: PROCESS */}
-                    {activeTab === 'process' && (
+                    {activeTab === 'process' ? (
                         <div className="animate-fadeIn">
                             <ProcessLeadTimeWidget />
                         </div>
-                    )}
+                    ) : null}
 
                     {/* PART 3: CLIENTS */}
-                    {activeTab === 'clients' && (
+                    {activeTab === 'clients' ? (
                         <div className="animate-fadeIn">
                             <ClientRadarWidget />
                         </div>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </div>

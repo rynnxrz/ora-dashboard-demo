@@ -26,6 +26,37 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
         drawerSubtitle: isZh ? '需要关注' : 'items requiring attention'
     };
 
+    // --- Focus Management ---
+    const closeButtonRef = React.useRef(null);
+    const drawerRef = React.useRef(null);
+
+    React.useEffect(() => {
+        if (isDrawerOpen) {
+            // Focus drawer/close button on open
+            setTimeout(() => closeButtonRef.current?.focus(), 100);
+
+            // Basic Focus Trap
+            const handleKeyDown = (e) => {
+                if (e.key === 'Escape') setIsDrawerOpen(false);
+                if (e.key === 'Tab' && drawerRef.current) {
+                    const focusables = drawerRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                    const first = focusables[0];
+                    const last = focusables[focusables.length - 1];
+
+                    if (e.shiftKey && document.activeElement === first) {
+                        e.preventDefault();
+                        last.focus();
+                    } else if (!e.shiftKey && document.activeElement === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                }
+            };
+            window.addEventListener('keydown', handleKeyDown);
+            return () => window.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [isDrawerOpen]);
+
     // --- Mock Data Generation ---
     const mockMaterialsData = useMemo(() => {
         // Mock Reference "Today": 2026-01-06
@@ -244,17 +275,25 @@ const MaterialReadinessWidget = ({ onRiskClick }) => {
                     {/* No Backdrop (Per Request to keep left side interactive) */}
 
                     {/* Drawer Panel */}
-                    <div className="w-[550px] bg-white h-full shadow-2xl border-l border-slate-200 pointer-events-auto flex flex-col animate-slide-in-right">
+                    <div
+                        ref={drawerRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="material-drawer-title"
+                        className="w-[550px] bg-white h-full shadow-2xl border-l border-slate-200 pointer-events-auto flex flex-col animate-slide-in-right"
+                    >
                         {/* Drawer Header */}
                         <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div>
-                                <TitleWithIcon as="h2" size="md" iconClass="fa-solid fa-boxes-stacked" className="text-lg font-bold text-slate-800">
+                                <TitleWithIcon id="material-drawer-title" as="h2" size="md" iconClass="fa-solid fa-boxes-stacked" className="text-lg font-bold text-slate-800">
                                     {labels.drawerTitle}
                                 </TitleWithIcon>
                                 <p className="text-xs text-slate-500">{isZh ? `共 ${mockMaterialsData.riskBatches.length} 个${labels.drawerSubtitle}` : `Reviewing ${mockMaterialsData.riskBatches.length} items requiring attention`}</p>
                             </div>
                             <button
+                                ref={closeButtonRef}
                                 onClick={() => setIsDrawerOpen(false)}
+                                aria-label={isZh ? '关闭' : 'Close'}
                                 className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
                             >
                                 <i className="fa-solid fa-times text-lg"></i>

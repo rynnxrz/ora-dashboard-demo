@@ -55,6 +55,25 @@ const riskThresholdPlugin = {
 
 ChartJS.register(riskThresholdPlugin);
 
+// Mock Data Source - Expanded for Round 4 (Differentiation)
+const getMockClients = (isZh) => [
+    // Stable Giants (Chart Focus)
+    { name: isZh ? '阿尔法营养' : 'AlphaNutrition', q3: 1500, q4: 1550 },
+    { name: isZh ? '生物实验室' : 'BioLabs', q3: 1200, q4: 1200 },
+    { name: isZh ? '大健康' : 'MegaHealth', q3: 1100, q4: 1050 },
+    { name: isZh ? '营养公司' : 'NutriCo', q3: 900, q4: 920 },
+    { name: isZh ? '康养集团' : 'WellnessInc', q3: 850, q4: 850 },
+
+    // Volatile Clients (List Focus)
+    { name: isZh ? '活力' : 'Vitality', q3: 450, q4: 0 },         // Stop (-100%)
+    { name: isZh ? '能量软糖' : 'PowerGums', q3: 800, q4: 1200 },     // Big Growth (+50%)
+    { name: isZh ? '海德科技' : 'HydraTech', q3: 200, q4: 50 },       // Shrink (-75%)
+    { name: isZh ? '禅健' : 'ZenFit', q3: 100, q4: 400 },         // Huge Growth (+300%)
+    { name: isZh ? '生酮生活' : 'KetoLife', q3: 150, q4: 100 },       // Shrink (-33%)
+    { name: isZh ? '纯乳清' : 'PureWhey', q3: 50, q4: 150 },        // Growth (+200%)
+    { name: isZh ? '肌能' : 'Muscle', q3: 320, q4: 280 }          // Minor Shrink (might filter out if <10%)
+];
+
 const ClientRadarWidget = () => {
     const { t, language } = useLanguage();
     const isZh = language === 'zh';
@@ -65,24 +84,7 @@ const ClientRadarWidget = () => {
     const [activeTab, setActiveTab] = React.useState('risks');
     const [highlightedClients, setHighlightedClients] = React.useState([]);
 
-    // Mock Data Source - Expanded for Round 4 (Differentiation)
-    const mockClients = [
-        // Stable Giants (Chart Focus)
-        { name: isZh ? '阿尔法营养' : 'AlphaNutrition', q3: 1500, q4: 1550 },
-        { name: isZh ? '生物实验室' : 'BioLabs', q3: 1200, q4: 1200 },
-        { name: isZh ? '大健康' : 'MegaHealth', q3: 1100, q4: 1050 },
-        { name: isZh ? '营养公司' : 'NutriCo', q3: 900, q4: 920 },
-        { name: isZh ? '康养集团' : 'WellnessInc', q3: 850, q4: 850 },
-
-        // Volatile Clients (List Focus)
-        { name: isZh ? '活力' : 'Vitality', q3: 450, q4: 0 },         // Stop (-100%)
-        { name: isZh ? '能量软糖' : 'PowerGums', q3: 800, q4: 1200 },     // Big Growth (+50%)
-        { name: isZh ? '海德科技' : 'HydraTech', q3: 200, q4: 50 },       // Shrink (-75%)
-        { name: isZh ? '禅健' : 'ZenFit', q3: 100, q4: 400 },         // Huge Growth (+300%)
-        { name: isZh ? '生酮生活' : 'KetoLife', q3: 150, q4: 100 },       // Shrink (-33%)
-        { name: isZh ? '纯乳清' : 'PureWhey', q3: 50, q4: 150 },        // Growth (+200%)
-        { name: isZh ? '肌能' : 'Muscle', q3: 320, q4: 280 }          // Minor Shrink (might filter out if <10%)
-    ];
+    const mockClients = React.useMemo(() => getMockClients(isZh), [isZh]);
 
     // --- Logic Implementation ---
 
@@ -399,15 +401,22 @@ const ClientRadarWidget = () => {
                                             return (
                                                 <tr
                                                     key={idx}
-                                                    onClick={() => handleClientClick(client.name)}
-                                                    className={`cursor-pointer transition-colors ${isSelected ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-gray-50'}`}
+                                                    className={`transition-colors ${isSelected ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-gray-50'}`}
                                                 >
-                                                    <td className="px-2 py-3 w-[60%]" title={client.name}>
-                                                        <div className="font-bold text-gray-700 truncate">{client.name}</div>
-                                                        <div className="text-[10px] text-gray-400">{isZh ? `（占比 ${shareOfTotal}%）` : `(${shareOfTotal}% of Total)`}</div>
-                                                    </td>
-                                                    <td className="px-2 py-3 text-right w-[40%]">
-                                                        {renderCombinedImpact(client)}
+                                                    <td className="px-0 py-0 w-full col-span-10" colSpan={10}>
+                                                        <button
+                                                            onClick={() => handleClientClick(client.name)}
+                                                            className="w-full text-left flex items-center justify-between px-2 py-3"
+                                                            aria-pressed={isSelected}
+                                                        >
+                                                            <div className="w-[60%] overflow-hidden" title={client.name}>
+                                                                <div className="font-bold text-gray-700 truncate">{client.name}</div>
+                                                                <div className="text-[10px] text-gray-400">{isZh ? `（占比 ${shareOfTotal}%）` : `(${shareOfTotal}% of Total)`}</div>
+                                                            </div>
+                                                            <div className="w-[40%] text-right">
+                                                                {renderCombinedImpact(client)}
+                                                            </div>
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             );

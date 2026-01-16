@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Dashboard from './components/dashboard/Dashboard';
 import Contracts from './components/contracts/Contracts';
@@ -7,26 +7,20 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import './index.css';
 
 function App() {
-  const [activePage, setActivePage] = useState('dashboard');
-
-  const renderPage = () => {
-    switch (activePage) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'contracts':
-        return <Contracts />;
-      case 'report':
-        return <Report />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
   return (
     <LanguageProvider>
-      <Layout activePage={activePage} onSwitchPage={setActivePage}>
-        {renderPage()}
-      </Layout>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Navigate to="/" replace />} />
+            <Route path="/contracts" element={<Contracts />} />
+            <Route path="/report" element={<Report />} />
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Layout>
+      </Router>
     </LanguageProvider>
   );
 }

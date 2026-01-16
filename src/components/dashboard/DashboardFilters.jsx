@@ -21,11 +21,13 @@ const DashboardFilters = ({ activeTab, onSwitchTab, tabs }) => {
                 </div>
 
                 {/* INTEGRATED TABS */}
-                {tabs && (
-                    <div className="flex space-x-1 bg-gray-100 p-0.5 rounded-md w-fit mt-1 border border-gray-200">
+                {tabs ? (
+                    <div role="tablist" className="flex space-x-1 bg-gray-100 p-0.5 rounded-md w-fit mt-1 border border-gray-200">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
+                                role="tab"
+                                aria-selected={activeTab === tab.id}
                                 onClick={() => onSwitchTab(tab.id)}
                                 className={`
                                     px-3 py-1 text-xs font-bold rounded-sm transition-all duration-200
@@ -39,7 +41,7 @@ const DashboardFilters = ({ activeTab, onSwitchTab, tabs }) => {
                             </button>
                         ))}
                     </div>
-                )}
+                ) : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
