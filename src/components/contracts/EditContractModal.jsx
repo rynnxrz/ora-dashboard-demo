@@ -6,7 +6,7 @@ import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { Select } from '../ui/select';
 
-const EditContractModal = ({ isOpen, onClose, contract }) => {
+const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
     // Return null immediately if not open to keep DOM clean.
     // For simple implementation, we'll rely on CSS animation on mount.
     if (!isOpen) return null;
@@ -34,6 +34,7 @@ const EditContractModal = ({ isOpen, onClose, contract }) => {
         notes: '',
 
         // Finance
+        invoiceNo: '',
         depStatus: 'Pending',
         depDate: '',
         preStatus: 'Pending',
@@ -49,7 +50,9 @@ const EditContractModal = ({ isOpen, onClose, contract }) => {
         machine: '',
         startDate: '',
         endDate: '',
-        qtyDetail: []
+        endDate: '',
+        qtyDetail: [],
+        packages: []
     });
 
     // --- Bind Data when contract changes ---
@@ -75,22 +78,31 @@ const EditContractModal = ({ isOpen, onClose, contract }) => {
                 notes: contract.reqs?.other || '',
 
                 // Finance
-                depStatus: contract.fin?.dep || 'Pending',
+                // Finance - Normalize 'Paid' to 'Received' to match options
+                invoiceNo: contract.fin?.inv || '',
+                depStatus: (contract.fin?.dep === 'Paid' ? 'Received' : contract.fin?.dep) || 'Pending',
                 depDate: contract.fin?.date_dep || '',
-                preStatus: contract.fin?.pre || 'Pending',
+                preStatus: (contract.fin?.pre === 'Paid' ? 'Received' : contract.fin?.pre) || 'Pending',
                 preDate: contract.fin?.date_pre || '',
-                finalStatus: contract.fin?.bal || contract.fin?.final_payment_status || 'Pending',
+                finalStatus: (contract.fin?.bal === 'Paid' || contract.fin?.final_payment_status === 'Paid' ? 'Received' : (contract.fin?.bal || contract.fin?.final_payment_status)) || 'Pending',
                 finalDate: contract.fin?.date_bal || contract.fin?.final_payment_date || '',
 
-                matStatus: contract.pkg?.mat_status || 'Pending',
-                pkgStatus: contract.pkg?.pkg_status || 'Pending',
+                matStatus: (contract.pkg?.mat_status === 'Arrived' ? 'Received' : contract.pkg?.mat_status) || 'Pending',
+                pkgStatus: (contract.pkg?.pkg_status === 'Arrived' ? 'Received' : contract.pkg?.pkg_status) || 'Pending',
                 arriveDate: contract.pkg?.arrive_date || '',
                 checkStatus: contract.pkg?.check_status || 'Pending',
                 scheduleNotes: contract.plan?.log || '',
                 machine: contract.plan?.mat || '', // Using 'mat' as proxy
                 startDate: contract.date || '',
                 endDate: '',
-                qtyDetail: []
+                qtyDetail: [],
+                packages: [
+                    {
+                        name: 'Main Package', // Default name or derive if possible
+                        date: contract.pkg?.arrive_date || '',
+                        status: (contract.pkg?.check_status === 'Arrived' || contract.pkg?.check_status === 'Checked' ? 'Received' : contract.pkg?.check_status) || 'Pending'
+                    }
+                ]
             });
         }
     }, [contract]);
@@ -274,64 +286,76 @@ const EditContractModal = ({ isOpen, onClose, contract }) => {
                         {/* 2.5 Finance */}
                         <div ref={finRef} className="px-6 mb-8 scroll-mt-32">
                             <h4 className="text-gray-800 font-bold mb-4">Finance</h4>
-                            <div className="grid grid-cols-1 gap-4 mb-5">
-                                {/* Deposit */}
-                                <div className="grid grid-cols-2 gap-4 items-end">
-                                    <div>
-                                        <Label className="mb-1.5 uppercase text-gray-500 text-xs">Deposit</Label>
-                                        <StatusSelect
-                                            value={formData.depStatus}
-                                            onChange={(val) => handleChange('depStatus', val)}
-                                            options={['Received', 'In-Transit', 'Pending', 'Overdue']}
-                                        />
-                                    </div>
-                                    <div className="relative">
-                                        <Input
-                                            value={formData.depDate}
-                                            onChange={(e) => handleChange('depDate', e.target.value)}
-                                            placeholder="Date (YYYY-MM-DD)"
-                                        />
-                                        <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                            <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+                                {/* Row 1: Invoice & Deposit */}
+                                <div>
+                                    <Label className="mb-1.5 uppercase text-gray-500 text-xs">Invoice Number</Label>
+                                    <Input
+                                        value={formData.invoiceNo}
+                                        onChange={(e) => handleChange('invoiceNo', e.target.value)}
+                                        placeholder="Enter invoice no."
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="mb-1.5 uppercase text-gray-500 text-xs">Deposit Date</Label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Input
+                                                value={formData.depDate}
+                                                onChange={(e) => handleChange('depDate', e.target.value)}
+                                                placeholder="DD/MM/YYYY"
+                                            />
+                                            <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                        </div>
+                                        <div className="w-32 shrink-0">
+                                            <StatusSelect
+                                                value={formData.depStatus}
+                                                onChange={(val) => handleChange('depStatus', val)}
+                                                options={['Received', 'In-Transit', 'Pending', 'Overdue']}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Pre-payment */}
-                                <div className="grid grid-cols-2 gap-4 items-end">
-                                    <div>
-                                        <Label className="mb-1.5 uppercase text-gray-500 text-xs">Pre-payment</Label>
-                                        <StatusSelect
-                                            value={formData.preStatus}
-                                            onChange={(val) => handleChange('preStatus', val)}
-                                            options={['Received', 'In-Transit', 'Pending', 'Overdue']}
-                                        />
-                                    </div>
-                                    <div className="relative">
-                                        <Input
-                                            value={formData.preDate}
-                                            onChange={(e) => handleChange('preDate', e.target.value)}
-                                            placeholder="Date (YYYY-MM-DD)"
-                                        />
-                                        <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                {/* Row 2: Pre-production & Final */}
+                                <div>
+                                    <Label className="mb-1.5 uppercase text-gray-500 text-xs">Pre-production Payment</Label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Input
+                                                value={formData.preDate}
+                                                onChange={(e) => handleChange('preDate', e.target.value)}
+                                                placeholder="DD/MM/YYYY"
+                                            />
+                                            <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                        </div>
+                                        <div className="w-32 shrink-0">
+                                            <StatusSelect
+                                                value={formData.preStatus}
+                                                onChange={(val) => handleChange('preStatus', val)}
+                                                options={['Received', 'In-Transit', 'Pending', 'Overdue']}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* Final Payment */}
-                                <div className="grid grid-cols-2 gap-4 items-end">
-                                    <div>
-                                        <Label className="mb-1.5 uppercase text-gray-500 text-xs">Final Payment</Label>
-                                        <StatusSelect
-                                            value={formData.finalStatus}
-                                            onChange={(val) => handleChange('finalStatus', val)}
-                                            options={['Received', 'In-Transit', 'Pending', 'Overdue']}
-                                        />
-                                    </div>
-                                    <div className="relative">
-                                        <Input
-                                            value={formData.finalDate}
-                                            onChange={(e) => handleChange('finalDate', e.target.value)}
-                                            placeholder="Date (YYYY-MM-DD)"
-                                        />
-                                        <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                <div>
+                                    <Label className="mb-1.5 uppercase text-gray-500 text-xs">Final Payment Date</Label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Input
+                                                value={formData.finalDate}
+                                                onChange={(e) => handleChange('finalDate', e.target.value)}
+                                                placeholder="DD/MM/YYYY"
+                                            />
+                                            <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                        </div>
+                                        <div className="w-32 shrink-0">
+                                            <StatusSelect
+                                                value={formData.finalStatus}
+                                                onChange={(val) => handleChange('finalStatus', val)}
+                                                options={['Received', 'In-Transit', 'Pending', 'Overdue']}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -341,46 +365,71 @@ const EditContractModal = ({ isOpen, onClose, contract }) => {
                         <div ref={pkgRef} className="px-6 mb-8 scroll-mt-32">
                             <h4 className="text-gray-800 font-bold mb-4">Packaging Materials Storage</h4>
 
-                            <div className="grid grid-cols-2 gap-5 mb-5">
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">Materials Status</label>
-                                    <StatusSelect
-                                        value={formData.matStatus}
-                                        onChange={(val) => handleChange('matStatus', val)}
-                                        options={['Pending', 'Partial', 'Arrived']}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">Packaging Status</label>
-                                    <StatusSelect
-                                        value={formData.pkgStatus}
-                                        onChange={(val) => handleChange('pkgStatus', val)}
-                                        options={['Pending', 'Partial', 'Arrived']}
-                                    />
+                            <div className="mb-4">
+                                <Label className="mb-2 uppercase text-gray-500 text-xs text-left block">Arrive Date/ Check</Label>
+                                <div className="space-y-3">
+                                    {(formData.packages || []).map((pkg, index) => (
+                                        <div key={index} className="flex gap-2 items-center">
+                                            <Input
+                                                value={pkg.name}
+                                                onChange={(e) => {
+                                                    const newPkgs = [...formData.packages];
+                                                    newPkgs[index].name = e.target.value;
+                                                    handleChange('packages', newPkgs);
+                                                }}
+                                                placeholder="Package Name"
+                                                className="flex-1 min-w-0"
+                                            />
+                                            <Button variant="outline" size="icon" className="shrink-0 w-8 h-9 text-gray-500">
+                                                <i className="fa-solid fa-ellipsis"></i>
+                                            </Button>
+                                            <div className="relative w-32 shrink-0">
+                                                <Input
+                                                    value={pkg.date}
+                                                    onChange={(e) => {
+                                                        const newPkgs = [...formData.packages];
+                                                        newPkgs[index].date = e.target.value;
+                                                        handleChange('packages', newPkgs);
+                                                    }}
+                                                    placeholder="DD/MM/YYYY"
+                                                    className="pr-8"
+                                                />
+                                                <Calendar className="absolute right-2 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                            </div>
+                                            <div className="w-28 shrink-0">
+                                                <StatusSelect
+                                                    value={pkg.status}
+                                                    onChange={(val) => {
+                                                        const newPkgs = [...formData.packages];
+                                                        newPkgs[index].status = val;
+                                                        handleChange('packages', newPkgs);
+                                                    }}
+                                                    options={['Received', 'In-Transit', 'Pending', 'Overdue']}
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    const newPkgs = formData.packages.filter((_, i) => i !== index);
+                                                    handleChange('packages', newPkgs);
+                                                }}
+                                                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-5 mb-5">
-                                <div>
-                                    <Label className="mb-1.5 uppercase text-gray-500 text-xs">Arrive Date</Label>
-                                    <div className="relative">
-                                        <Input
-                                            value={formData.arriveDate}
-                                            onChange={(e) => handleChange('arriveDate', e.target.value)}
-                                            placeholder="yyyy-mm-dd"
-                                        />
-                                        <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">Check Status</label>
-                                    <StatusSelect
-                                        value={formData.checkStatus}
-                                        onChange={(val) => handleChange('checkStatus', val)}
-                                        options={['Pending', 'Checking', 'Checked']}
-                                    />
-                                </div>
-                            </div>
+                            <button
+                                onClick={() => {
+                                    const newPkgs = [...(formData.packages || []), { name: '', date: '', status: 'Pending' }];
+                                    handleChange('packages', newPkgs);
+                                }}
+                                className="text-[#297A88] text-xs font-bold hover:underline flex items-center gap-1"
+                            >
+                                <Plus className="h-3 w-3" /> Add Package
+                            </button>
                         </div>
 
                         {/* 4. Plan & Report */}
@@ -461,9 +510,43 @@ const EditContractModal = ({ isOpen, onClose, contract }) => {
 
                     </div>
 
-                    {/* Footer - Fixed at bottom of panel */}
                     <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-row-reverse gap-3 shrink-0">
-                        <Button variant="brand" onClick={onClose} className="px-6 font-bold">
+                        <Button variant="brand" onClick={() => {
+                            // Construct updated contract object to pass back
+                            const updatedContract = {
+                                ...contract,
+                                // Map Finance Fields
+                                fin: {
+                                    ...contract.fin,
+                                    inv: formData.invoiceNo,
+                                    dep: formData.depStatus,
+                                    date_dep: formData.depDate,
+                                    pre: formData.preStatus,
+                                    date_pre: formData.preDate,
+                                    bal: formData.finalStatus,
+                                    date_bal: formData.finalDate
+                                },
+                                // Map Packaging Fields
+                                pkg: {
+                                    ...contract.pkg,
+                                    mat_status: formData.matStatus,
+                                    pkg_status: formData.pkgStatus,
+                                    arrive_date: formData.arriveDate,
+                                    check_status: formData.checkStatus
+                                },
+                                // Map Plan Fields
+                                plan: {
+                                    ...contract.plan,
+                                    mat: formData.machine,
+                                    log: formData.scheduleNotes
+                                },
+                                // Top Level / New Fields
+                                date: formData.startDate,
+                                packages: formData.packages,
+                                qtyDetail: formData.qtyDetail
+                            };
+                            onSave(updatedContract);
+                        }} className="px-6 font-bold">
                             Save Changes
                         </Button>
                         <Button variant="outline" onClick={onClose} className="px-6 font-bold text-gray-700">

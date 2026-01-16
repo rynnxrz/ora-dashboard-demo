@@ -3,7 +3,9 @@ import { CONTRACT_DATA } from '../../data/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
 import TitleWithIcon from '../common/TitleWithIcon';
 import EditContractModal from './EditContractModal';
-
+import { Input } from "../ui/input";
+import { Select } from "../ui/select";
+import { Search } from "lucide-react";
 const BRAND_MAP = {
     Little: '小雨伞',
     PowerGums: '能量软糖',
@@ -82,12 +84,61 @@ const PLAN_LOG_MAP = {
 const Contracts = () => {
     // --- State ---
     const [searchTerm, setSearchTerm] = useState('');
+    const [brandFilter, setBrandFilter] = useState('all');
     const [activeFilter, setActiveFilter] = useState('all'); // all, pending, ongoing, done
     const [activeTab, setActiveTab] = useState('reqs'); // reqs, fin, pkg, plan
     const [isMoreOpen, setIsMoreOpen] = useState(false);
     const [activeMenuRow, setActiveMenuRow] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedContract, setSelectedContract] = useState(null);
+    const [contracts, setContracts] = useState(CONTRACT_DATA);
+
+    // --- Logic to update contract from Modal ---
+    const handleContractUpdate = (updatedData) => {
+        setContracts(prev => prev.map(c => {
+            if (c.no === updatedData.no) {
+                // Apply specific logic:
+                // If Finance (Deposit, Pre) are 'Paid' AND Pkg (Mat, Pkg) are 'Arrived'
+                // Then Status -> 'Scheduling' (Pending Scheduling)
+
+                // Map fields from formData structure back to contract structure if needed
+                // OR assume updatedData is already formatted or we do it here. 
+                // The modal returns formData structure which is flat. We need to merge it back.
+
+                const newContract = { ...c, ...updatedData };
+
+                // Logic Check
+                // We need to map the flat formData back to the nested structure first if we want to save it properly,
+                // but for this specific status logic check, we can check the flat values passed or the merged result.
+
+                // However, updatedData coming from Modal might be the flat formData. 
+                // Let's assume onSave in Modal constructs a proper contract-like object or we interpret formData here.
+                // To be clean, let's make Modal return the flat formData and we merge it here.
+
+                const finDep = updatedData.fin?.dep || updatedData.depStatus;
+                const finPre = updatedData.fin?.pre || updatedData.preStatus;
+
+                const pkgMat = updatedData.pkg?.mat_status || updatedData.matStatus;
+                const pkgPkg = updatedData.pkg?.pkg_status || updatedData.pkgStatus;
+
+                // Check if "Paid" (which might be 'Received' in some selects) and "Arrived" / "Received"
+                const isFinanceReady = (finDep === 'Paid' || finDep === 'Received') && (finPre === 'Paid' || finPre === 'Received');
+
+                // Pkg Logic: Check if all packages are 'Received' (or 'Checked'/'Arrived')
+                // Use updatedData.packages if available, otherwise fallback or default false if not present
+                const pkgs = updatedData.packages || c.packages || [];
+                const isPkgReady = pkgs.length > 0 && pkgs.every(p => ['Received', 'Arrived', 'Checked'].includes(p.status));
+
+                if (isFinanceReady && isPkgReady && (c.status === 'Pending' || c.status === 'New')) {
+                    newContract.status = 'Scheduling';
+                }
+
+                return newContract;
+            }
+            return c;
+        }));
+        setIsEditModalOpen(false);
+    };
 
     useEffect(() => {
         const handleClickOutside = () => setActiveMenuRow(null);
@@ -104,8 +155,8 @@ const Contracts = () => {
     const mapValue = (value, map) => (isZh ? (map[value] || value) : value);
 
     const displayContracts = useMemo(() => {
-        if (!isZh) return CONTRACT_DATA;
-        return CONTRACT_DATA.map(c => ({
+        if (!isZh) return contracts;
+        return contracts.map(c => ({
             ...c,
             brand: mapValue(c.brand, BRAND_MAP),
             product: mapValue(c.product, PRODUCT_MAP),
@@ -115,7 +166,7 @@ const Contracts = () => {
                 gacc: mapValue(c.reqs.gacc, GACC_MAP),
                 coding: mapValue(c.reqs.coding, CODING_MAP),
                 ship: mapValue(c.reqs.ship, SHIP_MAP),
-                label: mapValue(c.reqs.label, LABEL_MAP),
+                labeling: mapValue(c.reqs.label, LABEL_MAP),
                 other: mapValue(c.reqs.other, OTHER_MAP)
             },
             fin: {
@@ -130,7 +181,12 @@ const Contracts = () => {
                 log: mapValue(c.plan.log, PLAN_LOG_MAP)
             }
         }));
-    }, [isZh]);
+    }, [isZh, contracts]);
+
+    const brandOptions = useMemo(() => {
+        const brands = new Set(displayContracts.map(c => c.brand).filter(Boolean));
+        return Array.from(brands);
+    }, [displayContracts]);
 
     // --- Filtering Logic ---
     const filteredContracts = useMemo(() => {
@@ -144,32 +200,45 @@ const Contracts = () => {
 
             if (!matchesSearch) return false;
 
+            if (brandFilter !== 'all' && c.brand !== brandFilter) return false;
+
             // Status Filter
             // status in data: New, Pending, Production, Done
             // filter keys: all, pending (mapped to New/Pending), ongoing (Production), done (Done)
             if (activeFilter === 'all') return true;
-            if (activeFilter === 'pending') return ['New', 'Pending'].includes(c.status);
+            if (activeFilter === 'pending') return ['New', 'Pending', 'Scheduling'].includes(c.status);
             if (activeFilter === 'ongoing') return c.status === 'Production';
             if (activeFilter === 'done') return c.status === 'Done';
 
             return true;
+        }).sort((a, b) => {
+            const statusOrder = {
+                'New': 1,
+                'Pending': 2,
+                'Scheduling': 3,
+                'Production': 4,
+                'Done': 5
+            };
+            const orderA = statusOrder[a.status] || 99;
+            const orderB = statusOrder[b.status] || 99;
+            return orderA - orderB;
         });
-    }, [searchTerm, activeFilter, displayContracts]);
+    }, [searchTerm, brandFilter, activeFilter, displayContracts]);
 
     // Counts for filters
     const counts = useMemo(() => {
         return {
-            all: CONTRACT_DATA.length,
-            pending: CONTRACT_DATA.filter(c => ['New', 'Pending'].includes(c.status)).length,
-            ongoing: CONTRACT_DATA.filter(c => c.status === 'Production').length,
-            done: CONTRACT_DATA.filter(c => c.status === 'Done').length
+            all: contracts.length,
+            pending: contracts.filter(c => ['New', 'Pending', 'Scheduling'].includes(c.status)).length,
+            ongoing: contracts.filter(c => c.status === 'Production').length,
+            done: contracts.filter(c => c.status === 'Done').length
         };
-    }, []);
+    }, [contracts]);
 
     // --- Helpers ---
     // Helper for Reqs/Fin cells (Check mark logic)
     const renderCellWithCheck = (text, className = "") => {
-        const doneValues = ['Done', 'Confirmed', 'Paid', 'Check', '完成', '已确认', '已付', '待确认'];
+        const doneValues = ['Done', 'Confirmed', 'Paid', 'Check', '完成', '已确认', '已付', '待确认', 'Received', 'Arrived', 'Checked'];
         const pendingValues = ['Pending', '待处理', '待付'];
         if (doneValues.includes(text)) {
             return (
@@ -214,18 +283,33 @@ const Contracts = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-2 items-center">
-                            <div className="relative">
-                                <input
+                            <div className="relative w-full md:w-64">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                                <Input
                                     type="text"
                                     placeholder={t('ct_search')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="text-sm border-gray-300 rounded-md shadow-sm pl-8 pr-3 py-1.5 focus:border-[#297A88] focus:ring focus:ring-[#297A88] focus:ring-opacity-20"
+                                    className="pl-9 bg-white"
                                 />
-                                <i className="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-gray-400 text-xs"></i>
                             </div>
 
-                            <button className="bg-[#297A88] text-white px-4 py-1.5 rounded text-sm hover:bg-[#066070] transition shadow-sm font-bold flex items-center gap-2">
+                            <div className="w-full md:w-auto">
+                                <label className="sr-only" htmlFor="contract-brand-filter">
+                                    {isZh ? '按品牌筛选' : 'Filter by brand'}
+                                </label>
+                                <Select
+                                    value={brandFilter}
+                                    onChange={setBrandFilter}
+                                    options={[
+                                        { value: 'all', label: isZh ? '全部品牌' : 'All brands' },
+                                        ...brandOptions.map(b => ({ value: b, label: b }))
+                                    ]}
+                                    className="w-full md:w-40"
+                                />
+                            </div>
+
+                            <button className="bg-[#297A88] text-white px-4 py-2.5 md:py-1.5 rounded text-base md:text-sm hover:bg-[#066070] transition shadow-sm font-bold flex items-center gap-2">
                                 <i className="fa-solid fa-plus"></i> <span data-i18n="ct_import">{t('ct_import') || 'Import New'}</span>
                             </button>
                         </div>
@@ -413,6 +497,10 @@ const Contracts = () => {
                                     statusDotColor = "bg-[#EF4444]";
                                     statusTitle = t('ct_status_pending_1') || "Pending";
                                     statusSub = t('ct_status_pending_2') || "Preparation";
+                                } else if (row.status === 'Scheduling') {
+                                    statusDotColor = "bg-[#EF4444]"; // Keep red as it's still pending actions
+                                    statusTitle = "Pending";
+                                    statusSub = "Scheduling";
                                 } else if (row.status === 'Production') {
                                     statusDotColor = "bg-[#F59E0B]";
                                     statusTitle = t('ct_status_ongoing_1') || "Production";
@@ -546,6 +634,7 @@ const Contracts = () => {
             <EditContractModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
+                onSave={handleContractUpdate}
                 contract={selectedContract}
             />
         </div>
