@@ -6,7 +6,7 @@ import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { Select } from '../ui/select';
 
-const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
+const EditContractModal = ({ isOpen, onClose, onSave, contract, hideFinance = false, zIndex = 50 }) => {
     // Return null immediately if not open to keep DOM clean.
     // For simple implementation, we'll rely on CSS animation on mount.
     if (!isOpen) return null;
@@ -39,7 +39,7 @@ const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
         depDate: '',
         preStatus: 'Pending',
         preDate: '',
-        finalStatus: 'Pending', // Rename from bal
+        finalStatus: 'Pending',
         finalDate: '',
 
         matStatus: 'Pending',
@@ -49,7 +49,6 @@ const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
         scheduleNotes: '',
         machine: '',
         startDate: '',
-        endDate: '',
         endDate: '',
         qtyDetail: [],
         packages: []
@@ -108,7 +107,6 @@ const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
     }, [contract]);
 
     // Simple handler to update state
-    // Simple handler to update state
     const handleChange = (field, value) => {
         setFormData(prev => {
             const newData = { ...prev, [field]: value };
@@ -128,8 +126,11 @@ const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
         ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
+    const tabs = ['reqs', 'pkg', 'plan'];
+    if (!hideFinance) tabs.splice(1, 0, 'fin');
+
     return (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className={`fixed inset-0 overflow-hidden`} style={{ zIndex }}>
             {/* Background Overlay */}
             <div
                 className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
@@ -146,7 +147,7 @@ const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
                             <h3 className="text-xl font-bold text-gray-900">
                                 Edit Product
                             </h3>
-                            <p className="text-xs text-gray-400 mt-1">{contract?.no} - {contract?.brand}</p>
+                            <p className="text-xs text-gray-400 mt-1">{contract?.no} {contract?.brand ? `- ${contract.brand}` : ''}</p>
                         </div>
                         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
                             <X className="h-6 w-6" />
@@ -211,7 +212,7 @@ const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
                         {/* Tabs Navigation - Sticky & Pill Style */}
                         <div className="sticky top-0 z-20 bg-white px-6 py-3 mb-6 border-b border-gray-100 shadow-sm">
                             <div className="flex items-center p-1 bg-gray-100/80 rounded-lg w-fit">
-                                {['reqs', 'fin', 'pkg', 'plan'].map((tab) => (
+                                {tabs.map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => scrollToSection({ reqs: reqsRef, pkg: pkgRef, fin: finRef, plan: planRef }[tab], tab)}
@@ -284,82 +285,84 @@ const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
                         </div>
 
                         {/* 2.5 Finance */}
-                        <div ref={finRef} className="px-6 mb-8 scroll-mt-32">
-                            <h4 className="text-gray-800 font-bold mb-4">Finance</h4>
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-                                {/* Row 1: Invoice & Deposit */}
-                                <div>
-                                    <Label className="mb-1.5 uppercase text-gray-500 text-xs">Invoice Number</Label>
-                                    <Input
-                                        value={formData.invoiceNo}
-                                        onChange={(e) => handleChange('invoiceNo', e.target.value)}
-                                        placeholder="Enter invoice no."
-                                    />
-                                </div>
-                                <div>
-                                    <Label className="mb-1.5 uppercase text-gray-500 text-xs">Deposit Date</Label>
-                                    <div className="flex gap-2">
-                                        <div className="relative flex-1">
-                                            <Input
-                                                value={formData.depDate}
-                                                onChange={(e) => handleChange('depDate', e.target.value)}
-                                                placeholder="DD/MM/YYYY"
-                                            />
-                                            <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
-                                        </div>
-                                        <div className="w-32 shrink-0">
-                                            <StatusSelect
-                                                value={formData.depStatus}
-                                                onChange={(val) => handleChange('depStatus', val)}
-                                                options={['Received', 'In-Transit', 'Pending', 'Overdue']}
-                                            />
+                        {!hideFinance && (
+                            <div ref={finRef} className="px-6 mb-8 scroll-mt-32">
+                                <h4 className="text-gray-800 font-bold mb-4">Finance</h4>
+                                <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+                                    {/* Row 1: Invoice & Deposit */}
+                                    <div>
+                                        <Label className="mb-1.5 uppercase text-gray-500 text-xs">Invoice Number</Label>
+                                        <Input
+                                            value={formData.invoiceNo}
+                                            onChange={(e) => handleChange('invoiceNo', e.target.value)}
+                                            placeholder="Enter invoice no."
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="mb-1.5 uppercase text-gray-500 text-xs">Deposit Date</Label>
+                                        <div className="flex gap-2">
+                                            <div className="relative flex-1">
+                                                <Input
+                                                    value={formData.depDate}
+                                                    onChange={(e) => handleChange('depDate', e.target.value)}
+                                                    placeholder="DD/MM/YYYY"
+                                                />
+                                                <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                            </div>
+                                            <div className="w-32 shrink-0">
+                                                <StatusSelect
+                                                    value={formData.depStatus}
+                                                    onChange={(val) => handleChange('depStatus', val)}
+                                                    options={['Received', 'In-Transit', 'Pending', 'Overdue']}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Row 2: Pre-production & Final */}
-                                <div>
-                                    <Label className="mb-1.5 uppercase text-gray-500 text-xs">Pre-production Payment</Label>
-                                    <div className="flex gap-2">
-                                        <div className="relative flex-1">
-                                            <Input
-                                                value={formData.preDate}
-                                                onChange={(e) => handleChange('preDate', e.target.value)}
-                                                placeholder="DD/MM/YYYY"
-                                            />
-                                            <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
-                                        </div>
-                                        <div className="w-32 shrink-0">
-                                            <StatusSelect
-                                                value={formData.preStatus}
-                                                onChange={(val) => handleChange('preStatus', val)}
-                                                options={['Received', 'In-Transit', 'Pending', 'Overdue']}
-                                            />
+                                    {/* Row 2: Pre-production & Final */}
+                                    <div>
+                                        <Label className="mb-1.5 uppercase text-gray-500 text-xs">Pre-production Payment</Label>
+                                        <div className="flex gap-2">
+                                            <div className="relative flex-1">
+                                                <Input
+                                                    value={formData.preDate}
+                                                    onChange={(e) => handleChange('preDate', e.target.value)}
+                                                    placeholder="DD/MM/YYYY"
+                                                />
+                                                <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                            </div>
+                                            <div className="w-32 shrink-0">
+                                                <StatusSelect
+                                                    value={formData.preStatus}
+                                                    onChange={(val) => handleChange('preStatus', val)}
+                                                    options={['Received', 'In-Transit', 'Pending', 'Overdue']}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <Label className="mb-1.5 uppercase text-gray-500 text-xs">Final Payment Date</Label>
-                                    <div className="flex gap-2">
-                                        <div className="relative flex-1">
-                                            <Input
-                                                value={formData.finalDate}
-                                                onChange={(e) => handleChange('finalDate', e.target.value)}
-                                                placeholder="DD/MM/YYYY"
-                                            />
-                                            <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
-                                        </div>
-                                        <div className="w-32 shrink-0">
-                                            <StatusSelect
-                                                value={formData.finalStatus}
-                                                onChange={(val) => handleChange('finalStatus', val)}
-                                                options={['Received', 'In-Transit', 'Pending', 'Overdue']}
-                                            />
+                                    <div>
+                                        <Label className="mb-1.5 uppercase text-gray-500 text-xs">Final Payment Date</Label>
+                                        <div className="flex gap-2">
+                                            <div className="relative flex-1">
+                                                <Input
+                                                    value={formData.finalDate}
+                                                    onChange={(e) => handleChange('finalDate', e.target.value)}
+                                                    placeholder="DD/MM/YYYY"
+                                                />
+                                                <Calendar className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                                            </div>
+                                            <div className="w-32 shrink-0">
+                                                <StatusSelect
+                                                    value={formData.finalStatus}
+                                                    onChange={(val) => handleChange('finalStatus', val)}
+                                                    options={['Received', 'In-Transit', 'Pending', 'Overdue']}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* 3. Packaging Materials Storage */}
                         <div ref={pkgRef} className="px-6 mb-8 scroll-mt-32">
@@ -513,8 +516,15 @@ const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
                     <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-row-reverse gap-3 shrink-0">
                         <Button variant="brand" onClick={() => {
                             // Construct updated contract object to pass back
+                            const primaryPkg = (formData.packages || [])[0] || {};
+                            const arriveDate = primaryPkg.date || formData.arriveDate;
+                            const checkStatus = primaryPkg.status || formData.checkStatus;
+
                             const updatedContract = {
                                 ...contract,
+                                product: formData.productName,
+                                qty: formData.totalQty,
+                                spec: `${formData.pkgQty}/${formData.pkgQtyUnit}`,
                                 // Map Finance Fields
                                 fin: {
                                     ...contract.fin,
@@ -531,14 +541,15 @@ const EditContractModal = ({ isOpen, onClose, onSave, contract }) => {
                                     ...contract.pkg,
                                     mat_status: formData.matStatus,
                                     pkg_status: formData.pkgStatus,
-                                    arrive_date: formData.arriveDate,
-                                    check_status: formData.checkStatus
+                                    arrive_date: arriveDate,
+                                    check_status: checkStatus
                                 },
                                 // Map Plan Fields
                                 plan: {
                                     ...contract.plan,
                                     mat: formData.machine,
-                                    log: formData.scheduleNotes
+                                    log: formData.scheduleNotes,
+                                    qty_actual: contract.plan?.qty_actual // Preserve actual qty from plan tab if needed, or mapped from somewhere else?
                                 },
                                 // Top Level / New Fields
                                 date: formData.startDate,

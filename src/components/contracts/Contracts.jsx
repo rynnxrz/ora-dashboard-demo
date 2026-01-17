@@ -2,10 +2,15 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { CONTRACT_DATA } from '../../data/mockData';
 import { useLanguage } from '../../contexts/LanguageContext';
 import TitleWithIcon from '../common/TitleWithIcon';
+import ImportContractModal from './ImportContractModal';
 import EditContractModal from './EditContractModal';
 import { Input } from "../ui/input";
 import { Select } from "../ui/select";
+import { Button } from "../ui/button";
 import { Search } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "../../lib/utils";
+
 const BRAND_MAP = {
     Little: '小雨伞',
     PowerGums: '能量软糖',
@@ -87,34 +92,26 @@ const Contracts = () => {
     const [brandFilter, setBrandFilter] = useState('all');
     const [activeFilter, setActiveFilter] = useState('all'); // all, pending, ongoing, done
     const [activeTab, setActiveTab] = useState('reqs'); // reqs, fin, pkg, plan
-    const [isMoreOpen, setIsMoreOpen] = useState(false);
+    const [date, setDate] = useState({
+        from: new Date(2024, 5, 1),
+        to: new Date(2024, 7, 31),
+    });
+
     const [activeMenuRow, setActiveMenuRow] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [selectedContract, setSelectedContract] = useState(null);
+    const [importDraft, setImportDraft] = useState(null);
+    const [isImportEditMode, setIsImportEditMode] = useState(false);
     const [contracts, setContracts] = useState(CONTRACT_DATA);
 
-    // --- Logic to update contract from Modal ---
+    // --- Updated Logic to handle Update from Modal ---
     const handleContractUpdate = (updatedData) => {
         setContracts(prev => prev.map(c => {
             if (c.no === updatedData.no) {
-                // Apply specific logic:
-                // If Finance (Deposit, Pre) are 'Paid' AND Pkg (Mat, Pkg) are 'Arrived'
-                // Then Status -> 'Scheduling' (Pending Scheduling)
-
-                // Map fields from formData structure back to contract structure if needed
-                // OR assume updatedData is already formatted or we do it here. 
-                // The modal returns formData structure which is flat. We need to merge it back.
-
                 const newContract = { ...c, ...updatedData };
 
-                // Logic Check
-                // We need to map the flat formData back to the nested structure first if we want to save it properly,
-                // but for this specific status logic check, we can check the flat values passed or the merged result.
-
-                // However, updatedData coming from Modal might be the flat formData. 
-                // Let's assume onSave in Modal constructs a proper contract-like object or we interpret formData here.
-                // To be clean, let's make Modal return the flat formData and we merge it here.
-
+                // Auto Logic Check for status
                 const finDep = updatedData.fin?.dep || updatedData.depStatus;
                 const finPre = updatedData.fin?.pre || updatedData.preStatus;
 
@@ -125,7 +122,6 @@ const Contracts = () => {
                 const isFinanceReady = (finDep === 'Paid' || finDep === 'Received') && (finPre === 'Paid' || finPre === 'Received');
 
                 // Pkg Logic: Check if all packages are 'Received' (or 'Checked'/'Arrived')
-                // Use updatedData.packages if available, otherwise fallback or default false if not present
                 const pkgs = updatedData.packages || c.packages || [];
                 const isPkgReady = pkgs.length > 0 && pkgs.every(p => ['Received', 'Arrived', 'Checked'].includes(p.status));
 
@@ -138,6 +134,40 @@ const Contracts = () => {
             return c;
         }));
         setIsEditModalOpen(false);
+    };
+
+    const getSchedulingStatus = (contractData, previousStatus) => {
+        const depStatus = contractData.fin?.dep;
+        const preStatus = contractData.fin?.pre;
+        const checkStatus = contractData.pkg?.check_status;
+        const arriveDate = contractData.pkg?.arrive_date;
+
+        const isFinanceReady = depStatus === 'Paid' && preStatus === 'Paid';
+        const isPkgReady = ['Received', 'Arrived', 'Checked'].includes(checkStatus) && arriveDate && arriveDate !== '—';
+
+        if (isFinanceReady && isPkgReady) {
+            return 'Scheduling';
+        }
+        return previousStatus || contractData.status || 'Pending';
+    };
+
+    // --- Logic to handle Create/Edit from Import Modal ---
+    const handleContractSave = (newContract) => {
+        if (isImportEditMode && importDraft) {
+            setContracts(prev => prev.map(c => {
+                if (c.no === importDraft.no) {
+                    const nextStatus = getSchedulingStatus(newContract, c.status);
+                    return { ...c, ...newContract, id: c.id || newContract.id, status: nextStatus };
+                }
+                return c;
+            }));
+            setIsImportModalOpen(false);
+            setImportDraft(null);
+            setIsImportEditMode(false);
+            return;
+        }
+        setContracts(prev => [newContract, ...prev]);
+        setIsImportModalOpen(false);
     };
 
     useEffect(() => {
@@ -203,8 +233,6 @@ const Contracts = () => {
             if (brandFilter !== 'all' && c.brand !== brandFilter) return false;
 
             // Status Filter
-            // status in data: New, Pending, Production, Done
-            // filter keys: all, pending (mapped to New/Pending), ongoing (Production), done (Done)
             if (activeFilter === 'all') return true;
             if (activeFilter === 'pending') return ['New', 'Pending', 'Scheduling'].includes(c.status);
             if (activeFilter === 'ongoing') return c.status === 'Production';
@@ -236,7 +264,6 @@ const Contracts = () => {
     }, [contracts]);
 
     // --- Helpers ---
-    // Helper for Reqs/Fin cells (Check mark logic)
     const renderCellWithCheck = (text, className = "") => {
         const doneValues = ['Done', 'Confirmed', 'Paid', 'Check', '完成', '已确认', '已付', '待确认', 'Received', 'Arrived', 'Checked'];
         const pendingValues = ['Pending', '待处理', '待付'];
@@ -252,149 +279,125 @@ const Contracts = () => {
         return <span className={className}>{text}</span>;
     };
 
-    // --- Handlers ---
-    const handleMoreClick = () => setIsMoreOpen(!isMoreOpen);
-    const selectMoreFilter = (filter) => {
-        setActiveFilter(filter);
-        setIsMoreOpen(false);
-    };
-
-    // Helper for "More" button label
-    const getMoreLabel = () => {
-        if (activeFilter === 'ongoing') return `${t('ct_status_ongoing_2') || 'On-Going'} · ${counts.ongoing}`;
-        if (activeFilter === 'done') return `${t('ct_status_done') || 'Done'} · ${counts.done}`;
-        return t('ct_filter_more') || 'More';
-    };
-
-    // Common Button Style
-    const btnActive = "bg-[#066070] text-white shadow-sm";
-    const btnInactive = "bg-white border border-gray-300 text-gray-600 hover:bg-gray-50";
+    // --- Options ---
+    const statusOptions = useMemo(() => [
+        { value: 'all', label: `${t('ct_filter_all') || 'All Status'} (${counts.all})` },
+        { value: 'pending', label: `${t('ct_status_pending_2') || 'Pending'} (${counts.pending})` },
+        { value: 'ongoing', label: `${t('ct_status_ongoing_2') || 'On-Going'} (${counts.ongoing})` },
+        { value: 'done', label: `${t('ct_status_done') || 'Done'} (${counts.done})` }
+    ], [counts, t]);
 
     return (
         <div id="page-contracts" className="flex-1 flex flex-col overflow-hidden relative h-full bg-white">
-            <div className="flex-1 overflow-auto bg-white relative p-4">
-                <div className="mb-4">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-                        <div>
-                            <TitleWithIcon as="h1" size="lg" className="text-xl font-bold text-gray-900" data-i18n="ct_title">
-                                {t('ct_title')}
-                            </TitleWithIcon>
-                            <p className="text-xs text-gray-500" data-i18n="ct_date_range">{t('ct_date_range') || '2024-06-01 ~ 2024-08-31'}</p>
-                        </div>
+            <div className="flex-1 overflow-auto bg-white relative p-6">
 
-                        <div className="flex flex-wrap gap-2 items-center">
-                            <div className="relative w-full md:w-64">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                {/* Header & Toolbar */}
+                <div className="flex flex-col gap-6 mb-6">
+                    {/* Title Row */}
+                    <div className="flex justify-between items-end">
+                        <TitleWithIcon as="h1" size="lg" className="text-2xl font-bold text-gray-900 tracking-tight" data-i18n="ct_title">
+                            {t('ct_title')}
+                            <span className="ml-4 inline-flex items-center px-3 py-2 border border-gray-200 rounded-md bg-white text-sm text-gray-700 shadow-sm font-normal">
+                                <i className="fa-regular fa-calendar mr-2 text-gray-400"></i>
+                                <span>
+                                    {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
+                                </span>
+                            </span>
+                        </TitleWithIcon>
+
+                        <div className="flex items-center gap-3">
+                            <div className="relative w-64">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 <Input
                                     type="text"
-                                    placeholder={t('ct_search')}
+                                    placeholder={t('ct_search') || "Search contracts..."}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-9 bg-white"
+                                    className="pl-9 h-10 w-full bg-white border-gray-200 focus:border-[#066070] focus:ring-[#066070]/20 rounded-lg transition-all"
+                                />
+                            </div>
+                            <Button
+                                onClick={() => {
+                                    setImportDraft(null);
+                                    setIsImportEditMode(false);
+                                    setIsImportModalOpen(true);
+                                }}
+                                className="bg-[#0f172a] text-white hover:bg-[#1e293b] gap-2 shadow-sm"
+                            >
+                                <i className="fa-solid fa-plus text-xs"></i>
+                                <span data-i18n="ct_import">{t('ct_import') || 'Import New'}</span>
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Filter Toolbar */}
+                    <div className="flex flex-wrap justify-between items-center gap-4 w-full">
+                        {/* Left Side: Filters */}
+                        <div className="flex items-center gap-3">
+                            {/* Status Filter */}
+                            <div className="w-56">
+                                <Select
+                                    value={activeFilter}
+                                    onChange={setActiveFilter}
+                                    options={statusOptions}
+                                    className="w-full h-10 border-gray-200 rounded-lg"
                                 />
                             </div>
 
-                            <div className="w-full md:w-auto">
-                                <label className="sr-only" htmlFor="contract-brand-filter">
-                                    {isZh ? '按品牌筛选' : 'Filter by brand'}
-                                </label>
+                            {/* Brand Filter */}
+                            <div className="w-48">
                                 <Select
                                     value={brandFilter}
                                     onChange={setBrandFilter}
                                     options={[
-                                        { value: 'all', label: isZh ? '全部品牌' : 'All brands' },
+                                        { value: 'all', label: isZh ? '全部品牌' : 'All Brands' },
                                         ...brandOptions.map(b => ({ value: b, label: b }))
                                     ]}
-                                    className="w-full md:w-40"
+                                    className="w-full h-10 border-gray-200 rounded-lg"
                                 />
                             </div>
-
-                            <button className="bg-[#297A88] text-white px-4 py-2.5 md:py-1.5 rounded text-base md:text-sm hover:bg-[#066070] transition shadow-sm font-bold flex items-center gap-2">
-                                <i className="fa-solid fa-plus"></i> <span data-i18n="ct_import">{t('ct_import') || 'Import New'}</span>
-                            </button>
                         </div>
-                    </div>
 
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <div className="flex gap-2 w-full sm:w-auto relative z-30">
-                            <button
-                                onClick={() => setActiveFilter('all')}
-                                className={activeFilter === 'all'
-                                    ? 'bg-[#066070] text-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-colors'
-                                    : 'bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 font-bold transition-colors'}
-                            >
-                                {t('ct_filter_all')} · {counts.all}
-                            </button>
-                            <button
-                                onClick={() => setActiveFilter('pending')}
-                                className={activeFilter === 'pending'
-                                    ? 'bg-[#066070] text-white px-3 py-1.5 rounded-md text-xs font-bold shadow-sm transition-colors'
-                                    : 'bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 font-bold transition-colors'}
-                            >
-                                {t('ct_status_pending_2') || 'Pending'} · {counts.pending}
-                            </button>
-
-                            <div className="relative">
-                                <button
-                                    onClick={handleMoreClick}
-                                    className="bg-white border border-gray-300 text-gray-600 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 flex items-center gap-1 font-bold transition-colors"
-                                >
-                                    {getMoreLabel()} <i className="fa-solid fa-chevron-down text-[10px]"></i>
-                                </button>
-                                {isMoreOpen && (
-                                    <div className="absolute top-full left-0 mt-1 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 flex flex-col py-1">
-                                        <button
-                                            onClick={() => selectMoreFilter('ongoing')}
-                                            className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 font-bold"
-                                        >
-                                            {t('ct_status_ongoing_2') || 'On-Going'} · {counts.ongoing}
-                                        </button>
-                                        <button
-                                            onClick={() => selectMoreFilter('done')}
-                                            className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 font-bold"
-                                        >
-                                            {t('ct_status_done') || 'Done'} · {counts.done}
-                                        </button>
-                                    </div>
-                                )}
+                        {/* Right Side: Views */}
+                        <div className="flex items-center gap-3">
+                            {/* View Tabs */}
+                            <div className="flex items-center p-1 bg-gray-100/80 rounded-lg border border-gray-200/50 h-10">
+                                {[
+                                    { id: 'reqs', label: 'Reqs' },
+                                    { id: 'fin', label: t('ct_role_fin') || 'Finance' },
+                                    { id: 'pkg', label: 'Pkg' },
+                                    { id: 'plan', label: 'Plan & Report' },
+                                ].map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={activeTab === tab.id
+                                            ? 'px-4 h-full rounded-md text-sm font-semibold transition-all bg-white text-[#066070] shadow-sm ring-1 ring-black/5 flex items-center justify-center'
+                                            : 'px-4 h-full rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-200/50 transition-all flex items-center justify-center'}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
                             </div>
-                        </div>
-
-                        <div className="flex items-center p-1 bg-gray-100 rounded-lg">
-                            {[
-                                { id: 'reqs', label: 'Reqs' },
-                                { id: 'fin', label: t('ct_role_fin') },
-                                { id: 'pkg', label: 'Pkg' },
-                                { id: 'plan', label: 'Plan & Report' },
-                            ].map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={activeTab === tab.id
-                                        ? 'px-4 py-1.5 rounded-md text-xs font-bold transition-all bg-white text-[#066070] shadow-sm'
-                                        : 'px-4 py-1.5 rounded-md text-xs font-medium text-gray-500 hover:text-gray-700 transition-all'}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
                         </div>
                     </div>
                 </div>
 
+                {/* Table */}
                 <div className="relative overflow-x-auto border rounded-lg border-gray-200">
                     <table className="w-full text-left border-collapse whitespace-nowrap table-fixed">
                         <colgroup>
-                            {/* Left Fixed Group: Increased to ~55% Total to show more content */}
+                            {/* Left Fixed Group */}
                             <col style={{ width: '6%' }} />  {/* Date */}
                             <col style={{ width: '8%' }} />  {/* Contract No */}
                             <col style={{ width: '6%' }} />  {/* Brand */}
-                            <col style={{ width: '14%' }} /> {/* Product - Significantly increased */}
-                            <col style={{ width: '8%' }} />  {/* Spec - Increased */}
-                            <col style={{ width: '6%' }} />  {/* Qty - Increased from 4% */}
-                            <col style={{ width: '8%' }} />  {/* Status - Increased to prevent overlap */}
+                            <col style={{ width: '14%' }} /> {/* Product */}
+                            <col style={{ width: '8%' }} />  {/* Spec */}
+                            <col style={{ width: '6%' }} />  {/* Qty */}
+                            <col style={{ width: '8%' }} />  {/* Status */}
                             <col style={{ width: '3%' }} />  {/* Action */}
 
-                            {/* Right Dynamic Group: Fixed widths + Spacer */}
+                            {/* Right Dynamic Group */}
                             {activeTab === 'reqs' && (
                                 <>
                                     <col style={{ width: '4%' }} />
@@ -402,7 +405,7 @@ const Contracts = () => {
                                     <col style={{ width: '12%' }} />
                                     <col style={{ width: '7%' }} />
                                     <col style={{ width: '5%' }} />
-                                    <col style={{ width: 'auto' }} /> {/* Spacer */}
+                                    <col style={{ width: 'auto' }} />
                                 </>
                             )}
                             {activeTab === 'fin' && (
@@ -411,25 +414,25 @@ const Contracts = () => {
                                     <col style={{ width: '8%' }} />
                                     <col style={{ width: '8%' }} />
                                     <col style={{ width: '8%' }} />
-                                    <col style={{ width: 'auto' }} /> {/* Spacer */}
+                                    <col style={{ width: 'auto' }} />
                                 </>
                             )}
                             {activeTab === 'pkg' && (
                                 <>
-                                    <col style={{ width: '8%' }} /> {/* Materials */}
-                                    <col style={{ width: '8%' }} />  {/* Packaging */}
-                                    <col style={{ width: '10%' }} />  {/* Arrive */}
-                                    <col style={{ width: '6%' }} /> {/* Check */}
-                                    <col style={{ width: 'auto' }} /> {/* Spacer */}
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: '10%' }} />
+                                    <col style={{ width: '6%' }} />
+                                    <col style={{ width: 'auto' }} />
                                 </>
                             )}
                             {activeTab === 'plan' && (
                                 <>
-                                    <col style={{ width: '8%' }} /> {/* Line */}
-                                    <col style={{ width: '10%' }} /> {/* Schedule */}
-                                    <col style={{ width: '6%' }} />  {/* Actual Qty */}
-                                    <col style={{ width: '10%' }} /> {/* Log */}
-                                    <col style={{ width: 'auto' }} /> {/* Spacer */}
+                                    <col style={{ width: '8%' }} />
+                                    <col style={{ width: '10%' }} />
+                                    <col style={{ width: '6%' }} />
+                                    <col style={{ width: '10%' }} />
+                                    <col style={{ width: 'auto' }} />
                                 </>
                             )}
                         </colgroup>
@@ -451,7 +454,7 @@ const Contracts = () => {
                                         <th className="px-3 py-3 font-semibold">Shipping Method</th>
                                         <th className="px-3 py-3 font-semibold">Labeling</th>
                                         <th className="px-3 py-3 font-semibold">Notes</th>
-                                        <th className="px-3 py-3 font-semibold"></th> {/* Spacer */}
+                                        <th className="px-3 py-3 font-semibold"></th>
                                     </>
                                 )}
                                 {activeTab === 'fin' && (
@@ -460,7 +463,7 @@ const Contracts = () => {
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_fin_dep')}</th>
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_fin_pre')}</th>
                                         <th className="px-3 py-3 font-semibold">{t('ct_th_fin_bal')}</th>
-                                        <th className="px-3 py-3 font-semibold"></th> {/* Spacer */}
+                                        <th className="px-3 py-3 font-semibold"></th>
                                     </>
                                 )}
                                 {activeTab === 'pkg' && (
@@ -469,7 +472,7 @@ const Contracts = () => {
                                         <th className="px-3 py-3 font-semibold">Packaging</th>
                                         <th className="px-3 py-3 font-semibold">Arrive Date</th>
                                         <th className="px-3 py-3 font-semibold">Check</th>
-                                        <th className="px-3 py-3 font-semibold"></th> {/* Spacer */}
+                                        <th className="px-3 py-3 font-semibold"></th>
                                     </>
                                 )}
                                 {activeTab === 'plan' && (
@@ -478,7 +481,7 @@ const Contracts = () => {
                                         <th className="px-3 py-3 font-semibold">Schedule</th>
                                         <th className="px-3 py-3 font-semibold">Actual Qty</th>
                                         <th className="px-3 py-3 font-semibold">Notes</th>
-                                        <th className="px-3 py-3 font-semibold"></th> {/* Spacer Header */}
+                                        <th className="px-3 py-3 font-semibold"></th>
                                     </>
                                 )}
                             </tr>
@@ -498,7 +501,7 @@ const Contracts = () => {
                                     statusTitle = t('ct_status_pending_1') || "Pending";
                                     statusSub = t('ct_status_pending_2') || "Preparation";
                                 } else if (row.status === 'Scheduling') {
-                                    statusDotColor = "bg-[#EF4444]"; // Keep red as it's still pending actions
+                                    statusDotColor = "bg-[#EF4444]";
                                     statusTitle = "Pending";
                                     statusSub = "Scheduling";
                                 } else if (row.status === 'Production') {
@@ -544,8 +547,11 @@ const Contracts = () => {
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            const originalContract = contracts.find(c => c.no === row.no) || row;
                                                             setSelectedContract(row);
-                                                            setIsEditModalOpen(true);
+                                                            setImportDraft(originalContract);
+                                                            setIsImportEditMode(true);
+                                                            setIsImportModalOpen(true);
                                                             setActiveMenuRow(null);
                                                         }}
                                                         className="px-4 py-2 text-xs text-gray-700 hover:bg-gray-100 w-full text-left font-medium"
@@ -569,7 +575,7 @@ const Contracts = () => {
                                                 <td className="px-3 py-2 truncate font-medium" title={row.reqs.ship}>{row.reqs.ship}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap text-gray-400">{renderCellWithCheck(row.reqs.label, "text-gray-400")}</td>
                                                 <td className="px-3 py-2 truncate text-gray-400" title={row.reqs.other}>{row.reqs.other}</td>
-                                                <td className="px-3 py-2"></td> {/* Spacer */}
+                                                <td className="px-3 py-2"></td>
                                             </>
                                         )}
                                         {activeTab === 'fin' && (
@@ -587,7 +593,7 @@ const Contracts = () => {
                                                     {renderCellWithCheck(row.fin.bal, "text-gray-600")}
                                                     {row.fin.date_bal && row.fin.date_bal !== '—' && <div className="text-[10px] text-gray-400">{row.fin.date_bal}</div>}
                                                 </td>
-                                                <td className="px-3 py-2"></td> {/* Spacer */}
+                                                <td className="px-3 py-2"></td>
                                             </>
                                         )}
                                         {activeTab === 'pkg' && (
@@ -596,7 +602,7 @@ const Contracts = () => {
                                                 <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.pkg.pkg_status, "text-gray-500")}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap text-gray-500">{row.pkg.arrive_date}</td>
                                                 <td className="px-3 py-2 whitespace-nowrap">{renderCellWithCheck(row.pkg.check_status, "text-gray-500")}</td>
-                                                <td className="px-3 py-2"></td> {/* Spacer */}
+                                                <td className="px-3 py-2"></td>
                                             </>
                                         )}
                                         {activeTab === 'plan' && (
@@ -614,7 +620,7 @@ const Contracts = () => {
                                                     {row.plan.qty_actual > 0 ? row.plan.qty_actual.toLocaleString() : '—'}
                                                 </td>
                                                 <td className="px-3 py-2 truncate text-gray-500" title={row.plan.log}>{row.plan.log}</td>
-                                                <td className="px-3 py-2"></td> {/* Spacer Cell */}
+                                                <td className="px-3 py-2"></td>
                                             </>
                                         )}
                                     </tr>
@@ -630,6 +636,19 @@ const Contracts = () => {
                     </div>
                 )}
             </div>
+
+            {/* Render Both Modals */}
+            <ImportContractModal
+                isOpen={isImportModalOpen}
+                onClose={() => {
+                    setIsImportModalOpen(false);
+                    setImportDraft(null);
+                    setIsImportEditMode(false);
+                }}
+                onSave={handleContractSave}
+                initialData={importDraft}
+                isEditMode={isImportEditMode}
+            />
 
             <EditContractModal
                 isOpen={isEditModalOpen}

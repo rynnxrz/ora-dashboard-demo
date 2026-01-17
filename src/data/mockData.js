@@ -77,45 +77,6 @@ export const CONTRACT_DATA = [
         }
     },
 
-    // 3. Pending Scheduling / Material & Pkg Prep (Flowchart Step 3)
-    {
-        date: "07/01/2025",
-        no: "VT-202502012",
-        brand: "Vitality",
-        product: "Protein Powder (Vanilla)",
-        spec: "1kg/tub",
-        qty: "5,000",
-        status: "Pending",
-        reqs: {
-            gacc: "Done",
-            coding: "Inkjet",
-            ship: "EXW",
-            label: "Confirmed",
-            other: "Cert needed"
-        },
-        fin: {
-            inv: "INV-2025005",
-            dep: "Paid", date_dep: "2025-07-02",
-            pre: "Paid", date_pre: "2025-07-10",
-            bal: "Pending", date_bal: "—",
-            final_payment_status: "Pending", final_payment_date: "—"
-        },
-        pkg: {
-            mat_status: "Pending",
-            pkg_status: "Pending",
-            arrive_date: "—",
-            check_status: "Pending"
-        },
-        plan: {
-            line: "—",
-            start_date: "—",
-            end_date: "—",
-            qty_actual: 0,
-            mat: "Ready",
-            log: "Ready for Schedule"
-        }
-    },
-
     // 4. Production Schedule / Pending Production (Flowchart Step 4)
     {
         date: "06/28/2025",

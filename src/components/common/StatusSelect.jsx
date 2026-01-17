@@ -9,6 +9,7 @@ export const STATUS_CONFIG = {
 
     // Finance / Packaging Specifics
     'Paid': { color: 'bg-green-500', label: 'Paid' },
+    'Unpaid': { color: 'bg-gray-400', label: 'Unpaid' },
     'Received': { color: 'bg-green-500', label: 'Received' },
     'Arrived': { color: 'bg-green-500', label: 'Arrived' },
     'Checked': { color: 'bg-green-500', label: 'Checked' },
